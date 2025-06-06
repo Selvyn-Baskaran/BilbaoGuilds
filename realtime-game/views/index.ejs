@@ -8,7 +8,7 @@
 </head>
 <body class="<%= guild %>">
 
-  <%- include('partials/navbar', { points, user }) %>
+  <%- include('partials/navbar', { points, user , online}) %>
 
   <main>
     <h2>Join a Room</h2>
@@ -23,30 +23,39 @@
     </div>
   </main>
 
-  <script src="/socket.io/socket.io.js"></script>
-  <script>
-    const socket = io();
-    let currentRoom = "";
+<script src="/socket.io/socket.io.js"></script>
+<script>
+  const socket = io();
+  let currentRoom = "";
 
-    function joinRoom() {
-      const room = document.getElementById("roomInput").value;
-      if (!room) return;
-      currentRoom = room;
-      socket.emit("joinRoom", room);
-      document.getElementById("chat").style.display = "block";
+  function joinRoom() {
+    const room = document.getElementById("roomInput").value;
+    if (!room) return;
+    currentRoom = room;
+    socket.emit("joinRoom", room);
+    document.getElementById("chat").style.display = "block";
+  }
+
+  function sendMessage() {
+    const msg = document.getElementById("msgInput").value;
+    socket.emit("sendMessage", { room: currentRoom, message: msg });
+    document.getElementById("msgInput").value = "";
+  }
+
+  socket.on("message", (data) => {
+    const el = document.createElement("div");
+    el.textContent = data;
+    document.getElementById("messages").appendChild(el);
+  });
+
+  // 🔁 Live update of online user count
+  socket.on("updateOnline", (count) => {
+    const onlineEl = document.getElementById("onlineCount");
+    if (onlineEl) {
+      onlineEl.textContent = count;
     }
+  });
+</script>
 
-    function sendMessage() {
-      const msg = document.getElementById("msgInput").value;
-      socket.emit("sendMessage", { room: currentRoom, message: msg });
-      document.getElementById("msgInput").value = "";
-    }
-
-    socket.on("message", (data) => {
-      const el = document.createElement("div");
-      el.textContent = data;
-      document.getElementById("messages").appendChild(el);
-    });
-  </script>
 </body>
 </html>

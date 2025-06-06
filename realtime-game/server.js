@@ -11,10 +11,10 @@ const server = http.createServer(app);
 const { Server } = require("socket.io");
 const io = new Server(server);
 
+// Set EJS as templating engine
 app.set("view engine", "ejs");
 
-
-// JSON user storage
+// Load users from file
 const USERS_FILE = "./users.json";
 let users = {};
 if (fs.existsSync(USERS_FILE)) {
@@ -25,7 +25,7 @@ function saveUsers() {
   fs.writeFileSync(USERS_FILE, JSON.stringify(users, null, 2));
 }
 
-// Session middleware
+// Session setup
 const sessionMiddleware = session({
   secret: "replace-this-with-a-strong-secret",
   resave: false,
@@ -37,7 +37,10 @@ app.use(express.urlencoded({ extended: true }));
 app.use(sessionMiddleware);
 io.use(sharedSession(sessionMiddleware, { autoSave: true }));
 
-// Redirect root to signup or index
+// Track total online users
+let totalOnline = 0;
+
+// Routes
 app.get("/", (req, res) => {
   if (req.session.user) {
     res.redirect("/index");
@@ -46,16 +49,14 @@ app.get("/", (req, res) => {
   }
 });
 
-// Check if session exists
 app.get("/session-check", (req, res) => {
   if (req.session.user) res.sendStatus(200);
   else res.sendStatus(401);
 });
 
-// Signup route (with guild)
 app.post("/signup", async (req, res) => {
-  const { username, password} = req.body;
-  if (!username || !password ) return res.send("All fields are required.");
+  const { username, password } = req.body;
+  if (!username || !password) return res.send("All fields are required.");
   if (users[username]) return res.send("Username already exists.");
 
   const hashedPassword = await bcrypt.hash(password, 10);
@@ -63,16 +64,14 @@ app.post("/signup", async (req, res) => {
   saveUsers();
 
   req.session.user = username;
-  //req.session.guild = guild;
   res.redirect("/index");
 });
 
-// Login route
 app.post("/login", async (req, res) => {
   const { username, password } = req.body;
   const user = users[username];
   if (!user) return res.send("Invalid username or password.");
-  
+
   const valid = await bcrypt.compare(password, user.password);
   if (!valid) return res.send("Invalid username or password.");
 
@@ -85,18 +84,17 @@ app.get("/index", (req, res) => {
   if (!req.session.user) return res.redirect("/login.html");
 
   const userData = users[req.session.user];
-  const guild = userData?.guild || "Fire"; // fallback to Fire
-  points = userData?.points || 0; // fall back points to 0
+  const guild = userData?.guild || "Fire";
+  const points = userData?.points || 0;
 
   res.render("index", {
-  guild,
-  points,
-  user: req.session.user
-});
- 
+    guild,
+    points,
+    user: req.session.user,
+    online: totalOnline,
+  });
 });
 
-// Leaderboard Route
 app.get("/leaderboard", (req, res) => {
   const guildsFile = "./guilds.json";
   let guilds = { Fire: 0, Water: 0, Earth: 0 };
@@ -105,31 +103,28 @@ app.get("/leaderboard", (req, res) => {
     guilds = JSON.parse(fs.readFileSync(guildsFile, "utf-8"));
   }
 
-  // Sort guilds by points descending
   const sortedGuilds = Object.entries(guilds)
     .sort((a, b) => b[1] - a[1])
     .map(([name, points]) => ({ name, points }));
 
   const userData = users[req.session.user] || {};
-  const guild = userData.guild || "Fire"; // 🔥 get user guild
+  const guild = userData.guild || "Fire";
 
   res.render("leaderboard", {
     sortedGuilds,
     user: req.session.user,
-    guild // 🟢 pass it to the template
+    guild,
+    online: totalOnline,
   });
 });
 
-
-
-// Logout
 app.get("/logout", (req, res) => {
   req.session.destroy(() => {
     res.redirect("/login.html");
   });
 });
 
-// Socket.IO events
+// Socket.IO logic
 io.on("connection", (socket) => {
   const username = socket.handshake.session.user;
   if (!username) {
@@ -138,6 +133,8 @@ io.on("connection", (socket) => {
   }
 
   console.log(`User connected: ${username}`);
+  totalOnline++;
+  io.emit("updateOnline", totalOnline);
 
   socket.on("joinRoom", (room) => {
     socket.join(room);
@@ -150,6 +147,8 @@ io.on("connection", (socket) => {
 
   socket.on("disconnect", () => {
     console.log(`${username} disconnected`);
+    totalOnline = Math.max(0, totalOnline - 1);
+    io.emit("updateOnline", totalOnline);
   });
 });
 

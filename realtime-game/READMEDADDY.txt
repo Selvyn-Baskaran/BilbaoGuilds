@@ -9,7 +9,7 @@ create a system admin portal to post challenge, manage points, users,  etc
 event calendar
 mobile compatability
 create a shop where users can buy avataror, inons etc with xp points to be cool
-be able to see how many people are online 
+be able to see how many people are online ✅
 contact us / suggestion page 
 help page
 create a profile page
