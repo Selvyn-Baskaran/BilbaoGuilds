@@ -1,0 +1,20 @@
+<nav class="navbar">
+  <div class="navbar-logo"><%= typeof points !== 'undefined' ? `Points: ${points}` : 'MyApp' %></div>
+  <button class="navbar-toggle" id="burger">&#9776;</button>
+  <ul class="navbar-links" id="nav-links">
+    <li><a href="/index">Home</a></li>
+    <% if (user) { %>
+      <li><a href="/leaderboard">Leaderboard</a></li>
+      <li><a href="/logout">Logout</a></li>
+    <% } else { %>
+      <li><a href="/signup.html">Sign Up</a></li>
+      <li><a href="/login.html">Log In</a></li>
+    <% } %>
+  </ul>
+</nav>
+
+<script>
+  document.getElementById("burger")?.addEventListener("click", () => {
+    document.getElementById("nav-links")?.classList.toggle("show");
+  });
+</script>

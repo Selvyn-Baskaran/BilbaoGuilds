@@ -87,8 +87,12 @@ app.get("/index", (req, res) => {
   const userData = users[req.session.user];
   const guild = userData?.guild || "Fire"; // fallback to Fire
   points = userData?.points || 0; // fall back points to 0
-  
-  res.render("index", { guild , points });
+
+  res.render("index", {
+  guild,
+  points,
+  user: req.session.user
+});
  
 });
 
@@ -106,7 +110,14 @@ app.get("/leaderboard", (req, res) => {
     .sort((a, b) => b[1] - a[1])
     .map(([name, points]) => ({ name, points }));
 
-  res.render("leaderboard", { sortedGuilds });
+  const userData = users[req.session.user] || {};
+  const guild = userData.guild || "Fire"; // 🔥 get user guild
+
+  res.render("leaderboard", {
+    sortedGuilds,
+    user: req.session.user,
+    guild // 🟢 pass it to the template
+  });
 });
 
 

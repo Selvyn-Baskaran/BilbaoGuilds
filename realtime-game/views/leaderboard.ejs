@@ -4,103 +4,11 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Leaderboard</title>
-  <style>
-    body {
-      font-family: sans-serif;
-      margin: 0;
-      padding-top: 60px;
-    }
-
-    .navbar {
-      position: fixed;
-      top: 0;
-      width: 100%;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      background: #333;
-      color: white;
-      padding: 0.5rem 1rem;
-      z-index: 1000;
-    }
-
-    .navbar-logo {
-      font-weight: bold;
-      font-size: 1.2rem;
-    }
-
-    .navbar-toggle {
-      font-size: 1.5rem;
-      background: none;
-      border: none;
-      color: white;
-      display: none;
-      cursor: pointer;
-    }
-
-    .navbar-links {
-      list-style: none;
-      display: flex;
-      gap: 1rem;
-    }
-
-    .navbar-links li a {
-      color: white;
-      text-decoration: none;
-    }
-
-    @media (max-width: 768px) {
-      .navbar-toggle {
-        display: block;
-      }
-
-      .navbar-links {
-        display: none;
-        flex-direction: column;
-        background-color: #444;
-        position: absolute;
-        top: 60px;
-        right: 60px;
-        width: 200px;
-        padding: 1rem;
-      }
-
-      .navbar-links.show {
-        display: flex;
-      }
-    }
-
-    main {
-      padding: 1rem;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-
-    th, td {
-      padding: 10px;
-      border: 1px solid #ccc;
-      text-align: left;
-    }
-
-    th {
-      background-color: #eee;
-    }
-  </style>
+  <link rel="stylesheet" href="/styles.css">
 </head>
-<body>
-  <!-- 🔝 Navbar -->
-  <nav class="navbar">
-    <div class="navbar-logo">Leaderboard</div>
-    <button class="navbar-toggle" id="burger">&#9776;</button>
-    <ul class="navbar-links" id="nav-links">
-      <li><a href="/index">Home</a></li>
-      <li><a href="/leaderboard">Leaderboard</a></li>
-      <li><a href="/logout">Logout</a></li>
-    </ul>
-  </nav>
+<body class="<%= guild %>">
+
+  <%- include('partials/navbar', { user, guild }) %>
 
   <main>
     <h2>Guild Leaderboard</h2>
@@ -119,12 +27,6 @@
       <% }) %>
     </table>
   </main>
-
-  <!-- 🍔 Burger menu script -->
-  <script>
-    document.getElementById("burger").addEventListener("click", () => {
-      document.getElementById("nav-links").classList.toggle("show");
-    });
-  </script>
 </body>
 </html>
+

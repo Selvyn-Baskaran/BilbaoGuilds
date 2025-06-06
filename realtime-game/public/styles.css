@@ -1,0 +1,112 @@
+body {
+  font-family: sans-serif;
+  margin: 0;
+  padding-top: 60px;
+}
+
+/* Guild-based theming */
+.Fire .navbar { background-color: red; }
+.Water .navbar { background-color: blue; }
+.Earth .navbar { background-color: green; }
+
+/* Navbar styles */
+.navbar {
+  position: fixed;
+  top: 0;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #333;
+  color: white;
+  padding: 0.5rem 1rem;
+  z-index: 1000;
+}
+
+.navbar-logo {
+  font-weight: bold;
+  font-size: 1.2rem;
+}
+
+.navbar-toggle {
+  font-size: 1.5rem;
+  background: none;
+  border: none;
+  color: white;
+  display: none;
+  cursor: pointer;
+}
+
+.navbar-links {
+  list-style: none;
+  display: flex;
+  gap: 1rem;
+}
+
+.navbar-links li a {
+  color: white;
+  text-decoration: none;
+}
+
+@media (max-width: 768px) {
+  .navbar-toggle {
+    display: block;
+  }
+
+  .navbar-links {
+    display: none;
+    flex-direction: column;
+    background-color: #444;
+    position: absolute;
+    top: 60px;
+    right: 0;
+    width: 200px;
+    padding: 1rem;
+  }
+
+  .navbar-links.show {
+    display: flex;
+  }
+}
+
+/* Main content */
+main {
+  padding: 1rem;
+}
+
+form {
+  max-width: 300px;
+  margin: 2rem auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+input, button {
+  padding: 0.5rem;
+  font-size: 1rem;
+}
+
+#messages {
+  border: 1px solid #ccc;
+  padding: 10px;
+  height: 300px;
+  overflow-y: scroll;
+  margin-bottom: 1rem;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+}
+
+th, td {
+  padding: 10px;
+  border: 1px solid #ccc;
+  text-align: left;
+}
+
+th {
+  background-color: #eee;
+}

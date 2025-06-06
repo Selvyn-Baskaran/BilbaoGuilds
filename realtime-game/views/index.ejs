@@ -4,111 +4,12 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Socket.IO Game</title>
-
-  <style>
-    body {
-      font-family: sans-serif;
-      margin: 0;
-      padding-top: 60px;
-    }
-
-    /* Guild-based color theming */
-    .Fire .navbar { background-color: red; }
-    .Water .navbar { background-color: blue; }
-    .Earth .navbar { background-color: green; }
-
-
-    /* Default Navbar styles */
-    .navbar {
-      position: fixed;
-      top: 0;
-      width: 100%;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      color: white;
-      padding: 0.5rem 1rem;
-      z-index: 1000;
-    }
-
-    .navbar-logo {
-      font-weight: bold;
-      font-size: 1.2rem;
-    }
-
-    .navbar-toggle {
-      font-size: 1.5rem;
-      background: none;
-      border: none;
-      color: white;
-      display: none;
-      cursor: pointer;
-    }
-
-    .navbar-links {
-      list-style: none;
-      display: flex;
-      gap: 1rem;
-    }
-
-    .navbar-links li a {
-      color: white;
-      text-decoration: none;
-    }
-
-    @media (max-width: 768px) {
-      .navbar-toggle {
-        display: block;
-      }
-
-      .navbar-links {
-        display: none;
-        flex-direction: column;
-        background-color: #444;
-        position: absolute;
-        top: 60px;
-        right: 60px;
-        width: 200px;
-        padding: 1rem;
-      }
-
-      .navbar-links.show {
-        display: flex;
-      }
-    }
-
-    /* Chat styles */
-    main {
-      padding: 1rem;
-    }
-
-    #messages {
-      border: 1px solid #ccc;
-      padding: 10px;
-      height: 300px;
-      overflow-y: scroll;
-      margin-bottom: 1rem;
-    }
-  </style>
+  <link rel="stylesheet" href="/styles.css">
 </head>
-
-
-
 <body class="<%= guild %>">
 
-  <nav class="navbar">
-    <div class="navbar-logo">Points: <%= points %></div>
+  <%- include('partials/navbar', { points, user }) %>
 
-
-    <button class="navbar-toggle" id="burger">&#9776;</button>
-    <ul class="navbar-links" id="nav-links">
-      <li><a href="/index">Chat clip dat</a></li>
-      <li><a href="/leaderboard">Leaderboard</a></li>
-      <li><a href="/logout">Logout</a></li>
-    </ul>
-  </nav>
-
-  <!-- 🎮 Game Area -->
   <main>
     <h2>Join a Room</h2>
     <input id="roomInput" placeholder="Room name" />
@@ -122,7 +23,6 @@
     </div>
   </main>
 
-  <!-- 🔌 Socket.IO Script -->
   <script src="/socket.io/socket.io.js"></script>
   <script>
     const socket = io();
@@ -146,11 +46,6 @@
       const el = document.createElement("div");
       el.textContent = data;
       document.getElementById("messages").appendChild(el);
-    });
-
-    // 🍔 Burger menu script
-    document.getElementById("burger").addEventListener("click", () => {
-      document.getElementById("nav-links").classList.toggle("show");
     });
   </script>
 </body>
