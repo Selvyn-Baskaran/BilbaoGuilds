@@ -1,0 +1,15 @@
+{
+  "silly": {
+    "password": "$2b$10$0xC0IDAIGu5Lk01TtoN1PuRaxnegDXb9ZI7WeqZpqIfSLLKeS6OHO",
+    "guild": "Water",
+    "points": 5
+  },
+  "aks": {
+    "password": "$2b$10$UykT8p1J9DWbZWww8K/XFuTbfvi9OOLp.MkNOOOOxjuYe5hU9az/i",
+    "guild": "Fire"
+  },
+  "charles": {
+    "password": "$2b$10$GSwIwzsTy7HrOASqUJtQk.bPIh2Sgx4.CgtCcIUEokmvVyKaYXyoy",
+    "guild": "Earth"
+  }
+}

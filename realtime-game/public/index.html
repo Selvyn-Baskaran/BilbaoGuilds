@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Socket.IO Game</title>
+
+  <style>
+    body {
+      font-family: sans-serif;
+      margin: 0;
+      padding-top: 60px;
+    }
+
+    /* Navbar styles */
+    .navbar {
+      position: fixed;
+      top: 0;
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #333;
+      color: white;
+      padding: 0.5rem 1rem;
+      z-index: 1000;
+    }
+
+    .navbar-logo {
+      font-weight: bold;
+      font-size: 1.2rem;
+    }
+
+    .navbar-toggle {
+      font-size: 1.5rem;
+      background: none;
+      border: none;
+      color: white;
+      display: none;
+      cursor: pointer;
+    }
+
+    .navbar-links {
+      list-style: none;
+      display: flex;
+      gap: 1rem;
+    }
+
+    .navbar-links li a {
+      color: white;
+      text-decoration: none;
+    }
+
+    @media (max-width: 768px) {
+      .navbar-toggle {
+        display: block;
+      }
+
+      .navbar-links {
+        display: none;
+        flex-direction: column;
+        background-color: #444;
+        position: absolute;
+        top: 60px;
+        right: 60px;
+        width: 200px;
+        padding: 1rem;
+      }
+
+      .navbar-links.show {
+        display: flex;
+      }
+    }
+
+    /* Chat styles */
+    main {
+      padding: 1rem;
+    }
+
+    #messages {
+      border: 1px solid #ccc;
+      padding: 10px;
+      height: 300px;
+      overflow-y: scroll;
+      margin-bottom: 1rem;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- 🔝 Navbar -->
+  <nav class="navbar">
+    <div class="navbar-logo">MyGame</div>
+    <button class="navbar-toggle" id="burger">&#9776;</button>
+    <ul class="navbar-links" id="nav-links">
+      <li><a href="/index">Chat clip dat</a></li>
+      <li><a href="/signup.html">Sign Up</a></li>
+      <li><a href="/login.html">Log In</a></li>
+    </ul>
+  </nav>
+
+  <!-- 🎮 Game Area -->
+  <main>
+    <h2>Join a Room</h2>
+    <input id="roomInput" placeholder="Room name" />
+    <button onclick="joinRoom()">Join</button>
+
+    <div id="chat" style="display: none;">
+      <h3>Messages</h3>
+      <div id="messages"></div>
+      <input id="msgInput" placeholder="Message" />
+      <button onclick="sendMessage()">Send</button>
+    </div>
+  </main>
+
+  <!-- 🔌 Socket.IO Script -->
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const socket = io();
+    let currentRoom = "";
+
+    function joinRoom() {
+      const room = document.getElementById("roomInput").value;
+      if (!room) return;
+      currentRoom = room;
+      socket.emit("joinRoom", room);
+      document.getElementById("chat").style.display = "block";
+    }
+
+    function sendMessage() {
+      const msg = document.getElementById("msgInput").value;
+      socket.emit("sendMessage", { room: currentRoom, message: msg });
+      document.getElementById("msgInput").value = "";
+    }
+
+    socket.on("message", (data) => {
+      const el = document.createElement("div");
+      el.textContent = data;
+      document.getElementById("messages").appendChild(el);
+    });
+
+    // 🍔 Burger menu script
+    document.getElementById("burger").addEventListener("click", () => {
+      document.getElementById("nav-links").classList.toggle("show");
+    });
+  </script>
+</body>
+</html>
