@@ -8,6 +8,7 @@ body {
 .Fire .navbar { background-color: red; }
 .Water .navbar { background-color: blue; }
 .Earth .navbar { background-color: green; }
+.None .navbar { background-color: purple; }
 
 /* Navbar styles */
 .navbar {
