@@ -1,0 +1,14 @@
+<h2><%= challenge.title %></h2>
+<p><%= challenge.description %></p>
+
+<h3>Replies</h3>
+<ul>
+  <% challenge.comments.forEach(c => { %>
+    <li><strong><%= c.user %>:</strong> <%= c.text %></li>
+  <% }) %>
+</ul>
+
+<form method="POST" action="/challenges/<%= challenge.id %>/comment">
+  <input name="text" placeholder="Add a reply..." required />
+  <button type="submit">Post</button>
+</form>

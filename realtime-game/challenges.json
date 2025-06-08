@@ -1,0 +1,10 @@
+[
+  {
+    "id": "challenge1",
+    "title": "Capture the Flag",
+    "description": "Complete the stealth mission without being detected.",
+    "comments": [
+      { "user": "Alice", "text": "This one was 🔥!" }
+    ]
+  }
+]

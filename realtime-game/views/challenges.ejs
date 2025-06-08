@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Central Guild Challenges</title>
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<script src="/socket.io/socket.io.js"></script>
+<script>
+  const socket = io();
+  socket.on("updateOnline", (count) => {
+    const onlineEl = document.getElementById("onlineCount");
+    if (onlineEl) {
+      onlineEl.textContent = count;
+    }
+  });
+</script>
+<body class="<%= guild %>">
+
+  <%- include('partials/navbar', { user, guild }) %>
+
+  <main>
+    <h2>Central Guild Challenges</h2>
+
+    <% challenges.forEach(c => { %>
+      <div class="challenge-card" style="margin-bottom: 1rem; padding: 1rem; border: 1px solid #ccc; border-radius: 8px;">
+        <a href="/challenges/<%= c.id %>" style="font-size: 1.2rem; font-weight: bold;"><%= c.title %></a>
+        <p><%= c.description %></p>
+      </div>
+    <% }) %>
+  </main>
+
+</body>
+</html>

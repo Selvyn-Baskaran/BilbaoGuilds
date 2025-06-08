@@ -11,7 +11,7 @@ const server = http.createServer(app);
 const { Server } = require("socket.io");
 const io = new Server(server);
 
-// Set EJS as templating engine
+// EJS view engine
 app.set("view engine", "ejs");
 
 // Load users from file
@@ -20,40 +20,79 @@ let users = {};
 if (fs.existsSync(USERS_FILE)) {
   users = JSON.parse(fs.readFileSync(USERS_FILE, "utf-8"));
 }
-
 function saveUsers() {
   fs.writeFileSync(USERS_FILE, JSON.stringify(users, null, 2));
 }
 
-// Session setup
+// Sessions
 const sessionMiddleware = session({
   secret: "replace-this-with-a-strong-secret",
   resave: false,
   saveUninitialized: false,
 });
-
 app.use(express.static("public", { index: "login.html" }));
 app.use(express.urlencoded({ extended: true }));
 app.use(sessionMiddleware);
 io.use(sharedSession(sessionMiddleware, { autoSave: true }));
 
-// Track total online users
+// Online count
 let totalOnline = 0;
 
 // Routes
 app.get("/", (req, res) => {
-  if (req.session.user) {
-    res.redirect("/index");
-  } else {
-    res.redirect("/signup.html");
-  }
+  res.redirect("/login.html");
 });
 
+// Central Challenges list
+app.get("/challenges", (req, res) => {
+  const challenges = JSON.parse(fs.readFileSync("./challenges.json", "utf-8"));
+  res.render("challenges", {
+    user: req.session.user,
+    guild: req.session.guild,
+    challenges,
+    online: totalOnline,
+  });
+});
+
+// View challenge thread
+app.get("/challenges/:id", (req, res) => {
+  const challenges = JSON.parse(fs.readFileSync("./challenges.json", "utf-8"));
+  const challenge = challenges.find(c => c.id === req.params.id);
+  if (!challenge) return res.send("Not found");
+  res.render("challenge-thread", { challenge, user: req.session.user });
+});
+
+// Post comment to challenge
+app.post("/challenges/:id/comment", (req, res) => {
+  const challenges = JSON.parse(fs.readFileSync("./challenges.json", "utf-8"));
+  const challenge = challenges.find(c => c.id === req.params.id);
+  if (!challenge) return res.send("Not found");
+
+  challenge.comments.push({ user: req.session.user, text: req.body.text });
+  fs.writeFileSync("./challenges.json", JSON.stringify(challenges, null, 2));
+  res.redirect(`/challenges/${req.params.id}`);
+});
+
+// Guild Chat Page
+app.get("/guild-chat", (req, res) => {
+  if (!req.session.user) return res.redirect("/login.html");
+  const userData = users[req.session.user] || {};
+  const guild = userData.guild || "Fire";
+
+  res.render("guild-chat", {
+    user: req.session.user,
+    guild,
+    online: totalOnline,
+  });
+});
+
+// Session checker (AJAX)
 app.get("/session-check", (req, res) => {
   if (req.session.user) res.sendStatus(200);
   else res.sendStatus(401);
 });
 
+// Signup - To Remove
 app.post("/signup", async (req, res) => {
   const { username, password } = req.body;
   if (!username || !password) return res.send("All fields are required.");
@@ -67,6 +106,7 @@ app.post("/signup", async (req, res) => {
   res.redirect("/index");
 });
 
+// Login
 app.post("/login", async (req, res) => {
   const { username, password } = req.body;
   const user = users[username];
@@ -80,6 +120,7 @@ app.post("/login", async (req, res) => {
   res.redirect("/index");
 });
 
+// Main index page
 app.get("/index", (req, res) => {
   if (!req.session.user) return res.redirect("/login.html");
 
@@ -95,6 +136,7 @@ app.get("/index", (req, res) => {
   });
 });
 
+// Leaderboard
 app.get("/leaderboard", (req, res) => {
   const guildsFile = "./guilds.json";
   let guilds = { Fire: 0, Water: 0, Earth: 0 };
@@ -118,6 +160,7 @@ app.get("/leaderboard", (req, res) => {
   });
 });
 
+// Logout
 app.get("/logout", (req, res) => {
   req.session.destroy(() => {
     res.redirect("/login.html");
@@ -136,13 +179,15 @@ io.on("connection", (socket) => {
   totalOnline++;
   io.emit("updateOnline", totalOnline);
 
-  socket.on("joinRoom", (room) => {
-    socket.join(room);
-    socket.to(room).emit("message", `${username} joined the room`);
+
+
+  // New guild chat system
+  socket.on("joinGuildRoom", (guild) => {
+    socket.join(guild);
   });
 
-  socket.on("sendMessage", ({ room, message }) => {
-    io.to(room).emit("message", `${username}: ${message}`);
+  socket.on("guildMessage", ({ guild, message }) => {
+    io.to(guild).emit("guildMessage", { user: username, message });
   });
 
   socket.on("disconnect", () => {

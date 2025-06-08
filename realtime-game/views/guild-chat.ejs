@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title><%= guild %> Guild Chat</title>
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<script src="/socket.io/socket.io.js"></script>
+<script>
+  const socket = io();
+  socket.on("updateOnline", (count) => {
+    const onlineEl = document.getElementById("onlineCount");
+    if (onlineEl) {
+      onlineEl.textContent = count;
+    }
+  });
+</script>
+<body class="<%= guild %>">
+
+  <%- include('partials/navbar', { user, guild }) %>
+
+  <main>
+    <h2><%= guild %> Guild Chat</h2>
+    <div id="messages" style="border: 1px solid #ccc; padding: 1rem; height: 300px; overflow-y: scroll; margin-bottom: 1rem;"></div>
+    <input id="msgInput" placeholder="Type your message..." />
+    <button onclick="sendMessage()">Send</button>
+  </main>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const guild = "<%= guild %>";
+
+    socket.emit("joinGuildRoom", guild);
+
+    socket.on("guildMessage", (data) => {
+      const el = document.createElement("div");
+      el.innerHTML = `<strong>${data.user}:</strong> ${data.message}`;
+      document.getElementById("messages").appendChild(el);
+    });
+
+    function sendMessage() {
+      const msg = document.getElementById("msgInput").value;
+      socket.emit("guildMessage", { guild, message: msg });
+      document.getElementById("msgInput").value = "";
+    }
+  </script>
+</body>
+</html>
