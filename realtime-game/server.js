@@ -59,7 +59,13 @@ app.get("/challenges/:id", (req, res) => {
   const challenges = JSON.parse(fs.readFileSync("./challenges.json", "utf-8"));
   const challenge = challenges.find(c => c.id === req.params.id);
   if (!challenge) return res.send("Not found");
-  res.render("challenge-thread", { challenge, user: req.session.user });
+  res.render("challenge-thread", {
+  challenge,
+  user: req.session.user,
+  guild: req.session.guild,
+  points: users[req.session.user]?.points || 0,
+  online: totalOnline
+});
 });
 
 // Post comment to challenge

@@ -1,10 +1,21 @@
 [
   {
     "id": "challenge1",
-    "title": "Capture the Flag",
-    "description": "Complete the stealth mission without being detected.",
+    "title": "Test",
+    "description": "if ur reading this u r a 🐐",
     "comments": [
-      { "user": "Alice", "text": "This one was 🔥!" }
+      {
+        "user": "drizzy",
+        "text": "ayo dis website littt!!! 🔥"
+      },
+      {
+        "user": "aks",
+        "text": "foshooo"
+      },
+      {
+        "user": "aks",
+        "text": "yeye"
+      }
     ]
   }
 ]

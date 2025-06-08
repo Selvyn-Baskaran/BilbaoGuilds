@@ -1,14 +1,31 @@
-<h2><%= challenge.title %></h2>
-<p><%= challenge.description %></p>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title><%= challenge.title %> - Challenge Thread</title>
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body class="<%= guild %>">
 
-<h3>Replies</h3>
-<ul>
-  <% challenge.comments.forEach(c => { %>
-    <li><strong><%= c.user %>:</strong> <%= c.text %></li>
-  <% }) %>
-</ul>
+  <%- include('partials/navbar', { user, guild, points, online }) %>
 
-<form method="POST" action="/challenges/<%= challenge.id %>/comment">
-  <input name="text" placeholder="Add a reply..." required />
-  <button type="submit">Post</button>
-</form>
+  <main>
+    <h2><%= challenge.title %></h2>
+    <p><%= challenge.description %></p>
+
+    <h3>Replies</h3>
+    <ul>
+      <% challenge.comments.forEach(c => { %>
+        <li><strong><%= c.user %>:</strong> <%= c.text %></li>
+      <% }) %>
+    </ul>
+
+    <form method="POST" action="/challenges/<%= challenge.id %>/comment">
+      <input name="text" placeholder="Add a reply..." required />
+      <button type="submit">Post</button>
+    </form>
+  </main>
+
+</body>
+</html>

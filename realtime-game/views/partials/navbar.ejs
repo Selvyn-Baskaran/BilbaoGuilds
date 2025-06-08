@@ -3,6 +3,8 @@
     <% if (typeof points !== 'undefined') { %>
       <%= user %> : <%= points %> points |
       🟢 Online: <span id="onlineCount"><%= online %></span>
+    <% } else if (typeof online !== 'undefined') { %>
+      🟢 Online: <span id="onlineCount"><%= online %></span>
     <% } else { %>
       MyApp
     <% } %>
@@ -11,20 +13,28 @@
   <button class="navbar-toggle" id="burger">&#9776;</button>
 
   <ul class="navbar-links" id="nav-links">
-    <li><a href="/index">Home</a></li>
     <% if (user) { %>
-      <li><a href="/challenges">Central Challenges</a></li>
+      <li><a href="/index">Home</a></li>
+      <li><a href="/challenges">Challenges</a></li>
       <li><a href="/guild-chat">Guild Chat</a></li>
       <li><a href="/leaderboard">Leaderboard</a></li>
       <li><a href="/logout">Logout</a></li>
     <% } else { %>
-      <li><a href="/signup.html">Sign Up</a></li>
       <li><a href="/login.html">Log In</a></li>
     <% } %>
   </ul>
 </nav>
 
+<script src="/socket.io/socket.io.js"></script>
 <script>
+  const socket = io();
+  socket.on("updateOnline", (count) => {
+    const onlineEl = document.getElementById("onlineCount");
+    if (onlineEl) {
+      onlineEl.textContent = count;
+    }
+  });
+
   document.getElementById("burger")?.addEventListener("click", () => {
     document.getElementById("nav-links")?.classList.toggle("show");
   });
