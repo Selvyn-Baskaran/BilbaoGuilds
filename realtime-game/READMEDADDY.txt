@@ -3,8 +3,8 @@ Things to do
 High Priority
 
 
-central challenge screen
-remove join a room and replace with guild chat
+central challenge screen ✅ (partially)
+remove join a room and replace with guild chat ✅
 create a system admin portal to post challenge, manage points, users,  etc
 event calendar
 mobile compatability
