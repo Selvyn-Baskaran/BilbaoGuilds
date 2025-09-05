@@ -1,0 +1,18 @@
+[
+  {
+    "id": "event1",
+    "title": "Guilds Opening Ceremony",
+    "date": "2025-09-15",
+    "time": "18:00",
+    "location": "Main Auditorium",
+    "description": "Kick-off event with team introductions and welcome speech."
+  },
+  {
+    "id": "event2",
+    "title": "Coding Marathon",
+    "date": "2025-09-20",
+    "time": "10:00",
+    "location": "Lab 204",
+    "description": "24-hour hackathon for all guilds!"
+  }
+]

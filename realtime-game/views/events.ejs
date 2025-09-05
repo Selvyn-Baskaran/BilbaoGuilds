@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Events</title>
+  <link rel="stylesheet" href="/styles.css"/>
+  <style>
+    /* Page shell */
+    .events-page {
+      max-width: 1200px;
+      width: min(1200px, 100% - 32px);
+      margin: 1rem auto;
+      display: grid;
+      grid-template-columns: 1fr 320px;
+      gap: 1rem;
+    }
+    @media (max-width: 980px) {
+      .events-page { grid-template-columns: 1fr; }
+    }
+
+    /* Calendar */
+    .calendar-card {
+      background: #fff; border: 1px solid #ddd; border-radius: 10px; padding: .8rem;
+    }
+    .calendar-header {
+      display: flex; justify-content: space-between; align-items: center; margin-bottom: .75rem;
+    }
+    .calendar-nav a {
+      text-decoration: none; padding: .4rem .6rem; border: 1px solid #ccc; border-radius: 6px;
+    }
+    .weekday-grid, .calendar-grid {
+      display: grid; grid-template-columns: repeat(7, 1fr); gap: .5rem;
+    }
+    .weekday { text-align: center; font-weight: 600; opacity: .8; }
+    .day {
+      min-height: 110px;
+      border: 1px solid #e6e6e6; border-radius: 8px; padding: .5rem;
+      background: #fff; position: relative; overflow: hidden;
+    }
+    .day.out { opacity: .55; background: #fafafa; }
+    .day .num { font-weight: 700; font-size: .95rem; }
+    .events { margin-top: .35rem; display: flex; flex-direction: column; gap: .35rem; }
+    .event-pill {
+      display: block; font-size: .85rem; line-height: 1.2; padding: .3rem .4rem;
+      border-radius: 6px; border: 1px solid #e0e0e0; background: #f7f7f7; text-decoration: none; color: inherit;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .event-pill:hover { background: #eee; }
+    @media (max-width: 700px) {
+      .day { min-height: 90px; padding: .4rem; }
+      .event-pill { font-size: .78rem; }
+    }
+      /* Highlight any calendar day that has events */
+    .day.has-events {
+      background: #c081ff;           /* light purple */
+      border-color: #4300a8;
+    }
+
+    /* Style the event pills themselves in purple tones */
+    .event-pill {
+      background: #c081ff;           /* soft purple chip */
+      border-color: #4300a8;
+    }
+
+
+    /* Sidebar */
+    .side-card {
+      background: #fff; border: 1px solid #ddd; border-radius: 10px; padding: .8rem;
+      position: sticky; top: 12px; height: fit-content;
+    }
+    .side-item + .side-item { margin-top: .75rem; }
+    .side-title { margin: 0 0 .5rem 0; }
+    .side-when { font-size: .9rem; opacity: .85; }
+    .side-link { text-decoration: none; }
+  </style>
+</head>
+<body class="<%= guild %>">
+  <%- include('partials/navbar', { user, guild, points, role, online }) %>
+
+  <main class="events-page">
+    <!-- Calendar -->
+    <section class="calendar-card">
+      <div class="calendar-header">
+        <div class="calendar-nav">
+          <a href="/events?y=<%= prevY %>&m=<%= prevM %>">⬅ Prev</a>
+        </div>
+        <h2 style="margin:0;"><%= monthLabel %></h2>
+        <div class="calendar-nav">
+          <a href="/events?y=<%= nextY %>&m=<%= nextM %>">Next ➡</a>
+        </div>
+      </div>
+
+      <div class="weekday-grid">
+        <div class="weekday">Mon</div>
+        <div class="weekday">Tue</div>
+        <div class="weekday">Wed</div>
+        <div class="weekday">Thu</div>
+        <div class="weekday">Fri</div>
+        <div class="weekday">Sat</div>
+        <div class="weekday">Sun</div>
+      </div>
+
+      <div class="calendar-grid">
+        <% weeks.forEach(week => { %>
+          <% week.forEach(day => { %>
+            <div class="day <%= day.inMonth ? '' : 'out' %> <%= day.events.length ? 'has-events' : '' %>">
+              <div class="num"><%= day.day %></div>
+              <div class="events">
+                <% day.events.forEach(ev => { %>
+                  <a class="event-pill" href="/events/<%= ev.id %>" title="<%= ev.title %> — <%= ev.time || 'All day' %> @ <%= ev.location %>">
+                    <%= ev.time ? ev.time + ' · ' : '' %><%= ev.title %>
+                  </a>
+                <% }) %>
+              </div>
+            </div>
+          <% }) %>
+        <% }) %>
+      </div>
+    </section>
+
+    <!-- Sidebar: Next 5 -->
+    <aside class="side-card">
+      <h3 class="side-title">Upcoming events</h3>
+      <% if (upcoming.length === 0) { %>
+        <p>No upcoming events.</p>
+      <% } %>
+      <% upcoming.forEach(e => { %>
+        <div class="side-item">
+          <a class="side-link" href="/events/<%= e.id %>">
+            <strong><%= e.title %></strong>
+          </a>
+          <div class="side-when">
+            <%= e.date %><%= e.time ? (' · ' + e.time) : '' %> @ <%= e.location %>
+          </div>
+        </div>
+      <% }) %>
+    </aside>
+  </main>
+</body>
+</html>

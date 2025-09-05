@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title><%= event.title %> - Event</title>
+  <link rel="stylesheet" href="/styles.css"/>
+</head>
+<body class="<%= guild %>">
+
+  <%- include('partials/navbar', { user, guild, points, online }) %>
+
+  <main>
+    <h2><%= event.title %></h2>
+    <p><strong>Date:</strong> <%= event.date %> @ <%= event.time %></p>
+    <p><strong>Location:</strong> <%= event.location %></p>
+    <p><%= event.description %></p>
+
+    <a href="/events">⬅ Back to Events</a>
+  </main>
+
+</body>
+</html>

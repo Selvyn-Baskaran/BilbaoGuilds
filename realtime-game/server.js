@@ -224,6 +224,115 @@ app.get("/index", (req, res) => {
   });
 });
 
+// Events page
+// --- helper: Monday-based day index (0=Mon ... 6=Sun)
+function monIndex(jsDay) { return (jsDay + 6) % 7; }
+
+// --- helper: build a 6-week calendar grid for year/month
+function buildCalendar(year, month, events) {
+  // events: array of { id, title, date, time, location, description }
+  const eventsByDate = events.reduce((acc, e) => {
+    acc[e.date] ??= [];
+    acc[e.date].push(e);
+    return acc;
+  }, {});
+
+  const firstOfMonth = new Date(Date.UTC(year, month, 1));
+  const lastOfMonth  = new Date(Date.UTC(year, month + 1, 0));
+  const daysInMonth  = lastOfMonth.getUTCDate();
+
+  // find the Monday to start the grid
+  const startOffset = monIndex(firstOfMonth.getUTCDay()); // 0..6
+  const gridStart = new Date(Date.UTC(year, month, 1 - startOffset));
+
+  const cells = [];
+  for (let i = 0; i < 42; i++) { // 7 days * 6 weeks
+    const d = new Date(Date.UTC(
+      gridStart.getUTCFullYear(),
+      gridStart.getUTCMonth(),
+      gridStart.getUTCDate() + i
+    ));
+    const y = d.getUTCFullYear();
+    const m = d.getUTCMonth();
+    const day = d.getUTCDate();
+
+    const iso = d.toISOString().slice(0, 10); // YYYY-MM-DD
+    cells.push({
+      iso,
+      day,
+      inMonth: (m === month),
+      events: eventsByDate[iso] || []
+    });
+  }
+
+  // chunk into weeks
+  const weeks = [];
+  for (let i = 0; i < 42; i += 7) weeks.push(cells.slice(i, i + 7));
+  return weeks;
+}
+
+// Events page (month view)
+app.get("/events", (req, res) => {
+  const events = JSON.parse(fs.readFileSync("./events.json", "utf-8"));
+
+  const now = new Date();
+  let y = parseInt(req.query.y ?? now.getUTCFullYear(), 10);
+  let m = parseInt(req.query.m ?? (now.getUTCMonth() + 1), 10);
+  if (isNaN(y)) y = now.getUTCFullYear();
+  if (isNaN(m)) m = now.getUTCMonth() + 1;
+  m = m - 1;
+
+  const weeks = buildCalendar(y, m, events);
+  const prev = new Date(Date.UTC(y, m - 1, 1));
+  const next = new Date(Date.UTC(y, m + 1, 1));
+
+  const todayISO = new Date().toISOString().slice(0, 10);
+  const upcoming = events
+    .filter(e => e.date >= todayISO)
+    .sort((a, b) => {
+      if (a.date !== b.date) return a.date.localeCompare(b.date);
+      const ta = a.time || "99:99";
+      const tb = b.time || "99:99";
+      return ta.localeCompare(tb);
+    })
+    .slice(0, 5);
+
+  res.render("events", {
+    user: req.session.user,
+    role: req.session.role || "user",
+    guild: req.session.guild,
+    points: users[req.session.user]?.points || 0,
+    online: totalOnline,
+    weeks,
+    monthLabel: new Intl.DateTimeFormat("en-GB", { month: "long", year: "numeric", timeZone: "UTC" }).format(new Date(Date.UTC(y, m, 1))),
+    prevY: prev.getUTCFullYear(),
+    prevM: prev.getUTCMonth() + 1,
+    nextY: next.getUTCFullYear(),
+    nextM: next.getUTCMonth() + 1,
+    upcoming,
+  });
+});
+
+
+// Event details stays the same as you have it
+
+
+// View event details
+app.get("/events/:id", (req, res) => {
+  const events = JSON.parse(fs.readFileSync("./events.json", "utf-8"));
+  const event = events.find(e => e.id === req.params.id);
+  if (!event) return res.send("Event not found");
+
+  res.render("event-details", {
+    user: req.session.user,
+    role: req.session.role,
+    guild: req.session.guild,
+    points: users[req.session.user]?.points || 0,
+    online: totalOnline,
+    event
+  });
+});
+
 // Leaderboard
 app.get("/leaderboard", (req, res) => {
   const guildsFile = "./guilds.json";
