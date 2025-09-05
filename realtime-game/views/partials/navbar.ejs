@@ -13,17 +13,20 @@
   <button class="navbar-toggle" id="burger">&#9776;</button>
 
   <ul class="navbar-links" id="nav-links">
-    <% if (user) { %>
-      <li><a href="/index">Home</a></li>
-      <li><a href="/challenges">Challenges</a></li>
-      <li><a href="/guild-chat">Guild Chat</a></li>
-      <li><a href="/leaderboard">Leaderboard</a></li>
-      <li><a href="/logout">Logout</a></li>
-    <% } else { %>
-      <li><a href="/login.html">Log In</a></li>
+  <% if (user) { %>
+    <li><a href="/index">Home</a></li>
+    <li><a href="/challenges">Challenges</a></li>
+    <li><a href="/guild-chat">Guild Chat</a></li>
+    <li><a href="/leaderboard">Leaderboard</a></li>
+    <% if (role === 'admin' || role === 'manager') { %>
+      <li><a href="/admin">Admin</a></li>
     <% } %>
-  </ul>
-</nav>
+    <li><a href="/logout">Logout</a></li>
+  <% } else { %>
+    <li><a href="/login.html">Log In</a></li>
+  <% } %>
+</ul>
+
 
 <script src="/socket.io/socket.io.js"></script>
 <script>
@@ -39,3 +42,4 @@
     document.getElementById("nav-links")?.classList.toggle("show");
   });
 </script>
+</nav>

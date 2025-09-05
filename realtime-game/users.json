@@ -2,15 +2,18 @@
   "silly": {
     "password": "$2b$10$0xC0IDAIGu5Lk01TtoN1PuRaxnegDXb9ZI7WeqZpqIfSLLKeS6OHO",
     "guild": "Water",
-    "points": 5
+    "points": 5,
+    "role": "admin"
   },
   "charles": {
     "password": "$2b$10$GSwIwzsTy7HrOASqUJtQk.bPIh2Sgx4.CgtCcIUEokmvVyKaYXyoy",
-    "guild": "Earth"
+    "guild": "Earth",
+    "role": "user"
   },
   "aks": {
     "password": "$2b$10$h4LrV6ic1m9TNXSmP7jv7eRDF2NJJfzR4R7dQtFTvyEvkI4BO3clu",
     "guild": "Fire",
-    "points": 1000000000
+    "points": 1000000000,
+    "role": "user"
   }
 }
