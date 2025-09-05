@@ -46,9 +46,10 @@ app.get("/", (req, res) => {
 // Central Challenges list
 app.get("/challenges", (req, res) => {
   const challenges = JSON.parse(fs.readFileSync("./challenges.json", "utf-8"));
-  res.render("challenges", {
+  res.render("challenges", {  
     user: req.session.user,
     guild: req.session.guild,
+    points: users[req.session.user]?.points || 0,
     role: req.session.role,
     challenges,
     online: totalOnline,
@@ -90,6 +91,7 @@ app.get("/guild-chat", (req, res) => {
   res.render("guild-chat", {
     user: req.session.user,
     guild,
+    points: users[req.session.user]?.points || 0,
     role: req.session.role,
     online: totalOnline,
   });
@@ -153,6 +155,7 @@ app.get("/admin", ensureAdmin, (req, res) => {
     role: req.session.role,
     guild: req.session.guild,
     online: totalOnline,
+    points: users[req.session.user]?.points || 0,
     challenges,
     allUsers,
     guilds
@@ -241,6 +244,7 @@ app.get("/leaderboard", (req, res) => {
     sortedGuilds,
     user: req.session.user,
     guild,
+    points: users[req.session.user]?.points || 0,
     role: req.session.role,
     online: totalOnline,
   });
