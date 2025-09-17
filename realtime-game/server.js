@@ -3,8 +3,9 @@ const http = require("http");
 const path = require("path");
 const session = require("express-session");
 const sharedSession = require("express-socket.io-session");
-const bcrypt = require("bcrypt");
 const fs = require("fs");
+const passport = require("passport");
+const OIDCStrategy = require("passport-azure-ad").OIDCStrategy;
 
 const app = express();
 const server = http.createServer(app);
@@ -13,16 +14,6 @@ const io = new Server(server);
 
 // EJS view engine
 app.set("view engine", "ejs");
-
-// Load users from file
-const USERS_FILE = "./users.json";
-let users = {};
-if (fs.existsSync(USERS_FILE)) {
-  users = JSON.parse(fs.readFileSync(USERS_FILE, "utf-8"));
-}
-function saveUsers() {
-  fs.writeFileSync(USERS_FILE, JSON.stringify(users, null, 2));
-}
 
 // Sessions
 const sessionMiddleware = session({
@@ -35,6 +26,34 @@ app.use(express.urlencoded({ extended: true }));
 app.use(sessionMiddleware);
 io.use(sharedSession(sessionMiddleware, { autoSave: true }));
 
+// Passport setup
+app.use(passport.initialize());
+app.use(passport.session());
+
+// Configure Microsoft Azure AD strategy
+passport.use(
+  new OIDCStrategy(
+    {
+      identityMetadata:
+        "https://login.microsoftonline.com/2fd4305e-4a8d-40ff-a0d2-e92381196e1a/v2.0/.well-known/openid-configuration",
+      clientID: "5418c944-d78f-485b-bbde-45b77a4110e6",
+      responseType: "code",
+      responseMode: "form_post",
+      redirectUrl: "http://localhost:3000/auth/microsoft/callback",
+      allowHttpForRedirectUrl: true,
+      clientSecret: "xeR8Q~zuitUbPsXPG.ZfImBoWyvpKkd5y6S-McyW",
+      validateIssuer: true,
+      scope: ["profile", "email", "openid"],
+    },
+    function (iss, sub, profile, accessToken, refreshToken, done) {
+      return done(null, profile);
+    }
+  )
+);
+
+passport.serializeUser((user, done) => done(null, user));
+passport.deserializeUser((obj, done) => done(null, obj));
+
 // Online count
 let totalOnline = 0;
 
@@ -43,59 +62,20 @@ app.get("/", (req, res) => {
   res.redirect("/login.html");
 });
 
-// Central Challenges list
-app.get("/challenges", (req, res) => {
-  const challenges = JSON.parse(fs.readFileSync("./challenges.json", "utf-8"));
-  res.render("challenges", {  
-    user: req.session.user,
-    guild: req.session.guild,
-    points: users[req.session.user]?.points || 0,
-    role: req.session.role,
-    challenges,
-    online: totalOnline,
-  });
-});
+// Microsoft login start
+app.get("/auth/microsoft", passport.authenticate("azuread-openidconnect"));
 
-// View challenge thread
-app.get("/challenges/:id", (req, res) => {
-  const challenges = JSON.parse(fs.readFileSync("./challenges.json", "utf-8"));
-  const challenge = challenges.find(c => c.id === req.params.id);
-  if (!challenge) return res.send("Not found");
-  res.render("challenge-thread", {
-  challenge,
-  user: req.session.user,
-  guild: req.session.guild,
-  role: req.session.role,
-  points: users[req.session.user]?.points || 0,
-  online: totalOnline
-});
-});
-
-// Post comment to challenge
-app.post("/challenges/:id/comment", (req, res) => {
-  const challenges = JSON.parse(fs.readFileSync("./challenges.json", "utf-8"));
-  const challenge = challenges.find(c => c.id === req.params.id);
-  if (!challenge) return res.send("Not found");
-
-  challenge.comments.push({ user: req.session.user, text: req.body.text });
-  fs.writeFileSync("./challenges.json", JSON.stringify(challenges, null, 2));
-  res.redirect(`/challenges/${req.params.id}`);
-});
-
-// Guild Chat Page
-app.get("/guild-chat", (req, res) => {
-  if (!req.session.user) return res.redirect("/login.html");
-  const userData = users[req.session.user] || {};
-  const guild = userData.guild || "Fire";
-
-  res.render("guild-chat", {
-    user: req.session.user,
-    guild,
-    points: users[req.session.user]?.points || 0,
-    role: req.session.role,
-    online: totalOnline,
-  });
-});
+// Microsoft login callback
+app.post(
+  "/auth/microsoft/callback",
+  passport.authenticate("azuread-openidconnect", { failureRedirect: "/" }),
+  (req, res) => {
+    req.session.user = req.user.displayName;
+    req.session.email = req.user._json.preferred_username;
+    req.session.role = "user"; // default role
+    res.redirect("/index");
+  }
+);
 
 // Session checker (AJAX)
 app.get("/session-check", (req, res) => {
@@ -103,257 +83,18 @@ app.get("/session-check", (req, res) => {
   else res.sendStatus(401);
 });
 
-// Signup - To Remove
-app.post("/signup", async (req, res) => {
-  const { username, password } = req.body;
-  if (!username || !password) return res.send("All fields are required.");
-  if (users[username]) return res.send("Username already exists.");
-
-  const hashedPassword = await bcrypt.hash(password, 10);
-  users[username] = { password: hashedPassword };
-  saveUsers();
-
-  req.session.user = username;
-  res.redirect("/index");
-});
-
-// Login
-app.post("/login", async (req, res) => {
-  const { username, password } = req.body;
-  const user = users[username];
-  if (!user) return res.send("Invalid username or password.");
-
-  const valid = await bcrypt.compare(password, user.password);
-  if (!valid) return res.send("Invalid username or password.");
-
-  req.session.user = username;
-  req.session.guild = user.guild;
-  req.session.role = user.role || "user";
-  res.redirect("/index");
-});
-
+// Protect pages
 function ensureLoggedIn(req, res, next) {
   if (!req.session.user) return res.redirect("/login.html");
   next();
 }
 
-function ensureAdmin(req, res, next) {
-  if (!req.session.user) return res.redirect("/login.html");
-  if (req.session.role !== "admin" && req.session.role !== "manager") {
-    return res.status(403).send("Forbidden");
-  }
-  next();
-}
-
-// Admin portal (view)
-app.get("/admin", ensureAdmin, (req, res) => {
-  const challenges = JSON.parse(fs.readFileSync("./challenges.json", "utf-8"));
-  const allUsers = users; // already in memory
-  const guilds = JSON.parse(fs.readFileSync("./guilds.json", "utf-8"));
-  res.render("admin", {
-    user: req.session.user,
-    role: req.session.role,
-    guild: req.session.guild,
-    online: totalOnline,
-    points: users[req.session.user]?.points || 0,
-    challenges,
-    allUsers,
-    guilds
-  });
-});
-
-// Create challenge
-app.post("/admin/challenges/create", ensureAdmin, (req, res) => {
-  const { id, title, description } = req.body;
-  if (!id || !title) return res.send("id and title are required.");
-
-  const challenges = JSON.parse(fs.readFileSync("./challenges.json", "utf-8"));
-  if (challenges.find(c => c.id === id)) return res.send("Challenge id already exists.");
-
-  challenges.push({ id, title, description: description || "", comments: [] });
-  fs.writeFileSync("./challenges.json", JSON.stringify(challenges, null, 2));
-  res.redirect("/admin");
-});
-
-// Adjust user points (+/-)
-app.post("/admin/users/points", ensureAdmin, (req, res) => {
-  const { username, delta } = req.body;
-  if (!users[username]) return res.send("No such user.");
-  const d = Number(delta) || 0;
-  users[username].points = (users[username].points || 0) + d;
-  saveUsers();
-  res.redirect("/admin");
-});
-
-// Set user role
-app.post("/admin/users/role", ensureAdmin, (req, res) => {
-  const { username, role } = req.body;
-  if (!users[username]) return res.send("No such user.");
-  users[username].role = role; // "user" | "manager" | "admin"
-  saveUsers();
-  res.redirect("/admin");
-});
-
-// Adjust guild total points
-app.post("/admin/guilds/points", ensureAdmin, (req, res) => {
-  const { guild, delta } = req.body;
-  const file = "./guilds.json";
-  let guilds = fs.existsSync(file) ? JSON.parse(fs.readFileSync(file, "utf-8")) : { Fire:0, Water:0, Earth:0 };
-  if (!(guild in guilds)) return res.send("No such guild.");
-
-  const d = Number(delta) || 0;
-  guilds[guild] = (guilds[guild] || 0) + d;
-  fs.writeFileSync(file, JSON.stringify(guilds, null, 2));
-  res.redirect("/admin");
-});
-
 // Main index page
-app.get("/index", (req, res) => {
-  if (!req.session.user) return res.redirect("/login.html");
-
-  const userData = users[req.session.user];
-  const guild = userData?.guild || "Fire";
-  const points = userData?.points || 0;
-
+app.get("/index", ensureLoggedIn, (req, res) => {
   res.render("index", {
-    guild,
-    points,
+    guild: req.session.guild || "Fire",
+    points: 0,
     user: req.session.user,
-    role: req.session.role,
-    online: totalOnline,
-  });
-});
-
-// Events page
-// --- helper: Monday-based day index (0=Mon ... 6=Sun)
-function monIndex(jsDay) { return (jsDay + 6) % 7; }
-
-// --- helper: build a 6-week calendar grid for year/month
-function buildCalendar(year, month, events) {
-  // events: array of { id, title, date, time, location, description }
-  const eventsByDate = events.reduce((acc, e) => {
-    acc[e.date] ??= [];
-    acc[e.date].push(e);
-    return acc;
-  }, {});
-
-  const firstOfMonth = new Date(Date.UTC(year, month, 1));
-  const lastOfMonth  = new Date(Date.UTC(year, month + 1, 0));
-  const daysInMonth  = lastOfMonth.getUTCDate();
-
-  // find the Monday to start the grid
-  const startOffset = monIndex(firstOfMonth.getUTCDay()); // 0..6
-  const gridStart = new Date(Date.UTC(year, month, 1 - startOffset));
-
-  const cells = [];
-  for (let i = 0; i < 42; i++) { // 7 days * 6 weeks
-    const d = new Date(Date.UTC(
-      gridStart.getUTCFullYear(),
-      gridStart.getUTCMonth(),
-      gridStart.getUTCDate() + i
-    ));
-    const y = d.getUTCFullYear();
-    const m = d.getUTCMonth();
-    const day = d.getUTCDate();
-
-    const iso = d.toISOString().slice(0, 10); // YYYY-MM-DD
-    cells.push({
-      iso,
-      day,
-      inMonth: (m === month),
-      events: eventsByDate[iso] || []
-    });
-  }
-
-  // chunk into weeks
-  const weeks = [];
-  for (let i = 0; i < 42; i += 7) weeks.push(cells.slice(i, i + 7));
-  return weeks;
-}
-
-// Events page (month view)
-app.get("/events", (req, res) => {
-  const events = JSON.parse(fs.readFileSync("./events.json", "utf-8"));
-
-  const now = new Date();
-  let y = parseInt(req.query.y ?? now.getUTCFullYear(), 10);
-  let m = parseInt(req.query.m ?? (now.getUTCMonth() + 1), 10);
-  if (isNaN(y)) y = now.getUTCFullYear();
-  if (isNaN(m)) m = now.getUTCMonth() + 1;
-  m = m - 1;
-
-  const weeks = buildCalendar(y, m, events);
-  const prev = new Date(Date.UTC(y, m - 1, 1));
-  const next = new Date(Date.UTC(y, m + 1, 1));
-
-  const todayISO = new Date().toISOString().slice(0, 10);
-  const upcoming = events
-    .filter(e => e.date >= todayISO)
-    .sort((a, b) => {
-      if (a.date !== b.date) return a.date.localeCompare(b.date);
-      const ta = a.time || "99:99";
-      const tb = b.time || "99:99";
-      return ta.localeCompare(tb);
-    })
-    .slice(0, 5);
-
-  res.render("events", {
-    user: req.session.user,
-    role: req.session.role || "user",
-    guild: req.session.guild,
-    points: users[req.session.user]?.points || 0,
-    online: totalOnline,
-    weeks,
-    monthLabel: new Intl.DateTimeFormat("en-GB", { month: "long", year: "numeric", timeZone: "UTC" }).format(new Date(Date.UTC(y, m, 1))),
-    prevY: prev.getUTCFullYear(),
-    prevM: prev.getUTCMonth() + 1,
-    nextY: next.getUTCFullYear(),
-    nextM: next.getUTCMonth() + 1,
-    upcoming,
-  });
-});
-
-
-// Event details stays the same as you have it
-
-
-// View event details
-app.get("/events/:id", (req, res) => {
-  const events = JSON.parse(fs.readFileSync("./events.json", "utf-8"));
-  const event = events.find(e => e.id === req.params.id);
-  if (!event) return res.send("Event not found");
-
-  res.render("event-details", {
-    user: req.session.user,
-    role: req.session.role,
-    guild: req.session.guild,
-    points: users[req.session.user]?.points || 0,
-    online: totalOnline,
-    event
-  });
-});
-
-// Leaderboard
-app.get("/leaderboard", (req, res) => {
-  const guildsFile = "./guilds.json";
-  let guilds = { Fire: 0, Water: 0, Earth: 0 };
-
-  if (fs.existsSync(guildsFile)) {
-    guilds = JSON.parse(fs.readFileSync(guildsFile, "utf-8"));
-  }
-
-  const sortedGuilds = Object.entries(guilds)
-    .sort((a, b) => b[1] - a[1])
-    .map(([name, points]) => ({ name, points }));
-
-  const userData = users[req.session.user] || {};
-  const guild = userData.guild || "Fire";
-
-  res.render("leaderboard", {
-    sortedGuilds,
-    user: req.session.user,
-    guild,
-    points: users[req.session.user]?.points || 0,
     role: req.session.role,
     online: totalOnline,
   });
@@ -361,8 +102,10 @@ app.get("/leaderboard", (req, res) => {
 
 // Logout
 app.get("/logout", (req, res) => {
-  req.session.destroy(() => {
-    res.redirect("/login.html");
+  req.logout(() => {
+    req.session.destroy(() => {
+      res.redirect("/login.html");
+    });
   });
 });
 
@@ -378,9 +121,6 @@ io.on("connection", (socket) => {
   totalOnline++;
   io.emit("updateOnline", totalOnline);
 
-
-
-  // New guild chat system
   socket.on("joinGuildRoom", (guild) => {
     socket.join(guild);
   });
