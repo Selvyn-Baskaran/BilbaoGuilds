@@ -35,7 +35,7 @@ passport.use(
   new OIDCStrategy(
     {
       identityMetadata:
-        "https://login.microsoftonline.com/2fd4305e-4a8d-40ff-a0d2-e92381196e1a/v2.0/.well-known/openid-configuration",
+        "https://login.microsoftonline.com/common/v2.0/.well-known/openid-configuration",
       clientID: "5418c944-d78f-485b-bbde-45b77a4110e6",
       responseType: "code",
       responseMode: "form_post",
@@ -44,6 +44,8 @@ passport.use(
       clientSecret: "xeR8Q~zuitUbPsXPG.ZfImBoWyvpKkd5y6S-McyW",
       validateIssuer: true,
       scope: ["profile", "email", "openid"],
+      validateIssuer: false,
+      issuer: null,
     },
     function (iss, sub, profile, accessToken, refreshToken, done) {
       return done(null, profile);
