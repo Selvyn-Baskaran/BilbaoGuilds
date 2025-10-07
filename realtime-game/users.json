@@ -1,20 +1,17 @@
 {
-  "silly": {
-    "password": "$2b$10$0xC0IDAIGu5Lk01TtoN1PuRaxnegDXb9ZI7WeqZpqIfSLLKeS6OHO",
-    "guild": "Water",
-    "points": 1150,
+  "akaansh.ajit@digipen.edu": {
+    "guild": "Fire",
+    "points": 0,
     "role": "admin"
   },
-  "charles": {
-    "password": "$2b$10$GSwIwzsTy7HrOASqUJtQk.bPIh2Sgx4.CgtCcIUEokmvVyKaYXyoy",
+  "charles.tan@digipen.edu": {
     "guild": "Earth",
-    "role": "user",
-    "points": 100
+    "points": 0,
+    "role": "user"
   },
-  "aks": {
-    "password": "$2b$10$h4LrV6ic1m9TNXSmP7jv7eRDF2NJJfzR4R7dQtFTvyEvkI4BO3clu",
+  "aks.patel@digipen.edu": {
     "guild": "Fire",
-    "points": 1000000000,
+    "points": 0,
     "role": "user"
   }
 }
