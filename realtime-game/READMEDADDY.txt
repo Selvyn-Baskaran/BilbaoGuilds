@@ -1,4 +1,17 @@
-Things to do
+Compile lines
+
+    # To run the website locally:
+            node server.js
+    # or use this for auto updates when changing code
+            nodemon server.js
+
+    # and to run online we open bash terminal asw and run the line
+            npx ngrok http 3000
+
+    # and then anyone with the link it gives can open the website.
+
+
+- Things to do -
 
 High Priority
 
