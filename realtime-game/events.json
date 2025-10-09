@@ -2,17 +2,25 @@
   {
     "id": "event1",
     "title": "Guilds Opening Ceremony",
-    "date": "2025-09-15",
-    "time": "18:00",
+    "date": "2025-10-01",
+    "time": "15:00",
     "location": "Main Auditorium",
     "description": "Kick-off event with team introductions and welcome speech."
   },
   {
     "id": "event2",
-    "title": "Coding Marathon",
-    "date": "2025-09-20",
-    "time": "10:00",
-    "location": "Lab 204",
-    "description": "24-hour hackathon for all guilds!"
+    "title": "Crochet Workshop",
+    "date": "2025-10-21",
+    "time": "15:30",
+    "location": "Free Room",
+    "description": "Looking for a creative way to relax and learn something new? Come join us for a Crochet Workshop on October 14 at 3:00 PM!, Whether you're a total beginner or already know a few stitches, this session is the perfect opportunity to unwind, meet new people, and create something beautiful with your own hands. We’ll provide materials, guidance, and good vibes, - you just bring your curiosity and enthusiasm!"
+  },
+  {
+    "id": "Pyjama1",
+    "title": "Pyjama Day",
+    "date": "2025-10-28",
+    "time": "",
+    "location": "DIGIPEN",
+    "description": "Wear your pyjamas to DigiPen to earn guild points. Additionally bring a pillow to battle against other armed pillow fighters! 🤺⚔️"
   }
 ]

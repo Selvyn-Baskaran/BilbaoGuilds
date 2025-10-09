@@ -90,6 +90,20 @@ function readJsonOrDefault(file, fallback) {
   return fallback;
 }
 
+// --- Events helpers (files optional) ---
+const EVENTS_FILE = "./events.json";
+
+function writeJson(file, obj) {
+  fs.writeFileSync(file, JSON.stringify(obj, null, 2));
+}
+function readJsonOrDefault(file, fallback) {
+  try {
+    if (fs.existsSync(file)) return JSON.parse(fs.readFileSync(file, "utf-8"));
+  } catch (_) {}
+  return fallback;
+}
+
+
 // --- Routes ---
 app.get("/", (req, res) => {
   res.redirect("/login.html");
@@ -388,6 +402,7 @@ app.get("/leaderboard", ensureLoggedIn, (req, res) => {
 app.get("/admin", ensureAdmin, (req, res) => {
   const allUsers = readJsonOrDefault(USERS_FILE, {});       // { username/email: {guild, points, role, ...} }
   const guildTotals = readJsonOrDefault(GUILDS_FILE, { Fire: 0, Water: 0, Earth: 0 });
+  const events      = readJsonOrDefault("./events.json", []);
 
   res.render("admin", {
     user:   req.session.user,
@@ -397,6 +412,7 @@ app.get("/admin", ensureAdmin, (req, res) => {
     points: req.session.points || 0,
     allUsers,
     guildTotals,
+    events,
   });
 });
 
@@ -411,6 +427,60 @@ app.post("/admin/challenges/create", ensureAdmin, (req, res) => {
   writeJson(CHALLENGES_FILE, challenges);
   res.redirect("/challenges");
 });
+
+// Create Event
+app.post("/admin/events/create", ensureAdmin, (req, res) => {
+  const { id, title, date, time, location, description } = req.body;
+
+  if (!id || !title || !date) {
+    return res.status(400).send("id, title, and date are required");
+  }
+
+  const events = readJsonOrDefault(EVENTS_FILE, []);
+  if (events.some(e => String(e.id) === String(id))) {
+    return res.status(400).send("Event id already exists");
+  }
+
+  events.push({
+    id: String(id),
+    title: String(title),
+    date: String(date),             // "YYYY-MM-DD" (your calendar already uses this)
+    time: time ? String(time) : "", // optional "HH:MM"
+    location: location ? String(location) : "",
+    description: description ? String(description) : "",
+  });
+
+  writeJson(EVENTS_FILE, events);
+  res.redirect("/events");
+});
+
+// Delete Event
+app.post("/admin/events/:id/delete", ensureAdmin, (req, res) => {
+  const events = readJsonOrDefault("./events.json", []);
+  const filtered = events.filter(e => String(e.id) !== String(req.params.id));
+  writeJson("./events.json", filtered);
+  res.redirect("/admin");
+});
+
+// Update/Edit Event
+app.post("/admin/events/:id/update", ensureAdmin, (req, res) => {
+  const { title, date, time, location, description } = req.body;
+  const events = readJsonOrDefault("./events.json", []);
+  const idx = events.findIndex(e => String(e.id) === String(req.params.id));
+  if (idx === -1) return res.status(404).send("Event not found");
+
+  // update only provided fields
+  if (title !== undefined)      events[idx].title = String(title);
+  if (date !== undefined)       events[idx].date = String(date);
+  if (time !== undefined)       events[idx].time = String(time);
+  if (location !== undefined)   events[idx].location = String(location);
+  if (description !== undefined)events[idx].description = String(description);
+
+  writeJson("./events.json", events);
+  res.redirect("/admin");
+});
+
+
 
 // Adjust user points
 app.post("/admin/users/points", ensureAdmin, (req, res) => {

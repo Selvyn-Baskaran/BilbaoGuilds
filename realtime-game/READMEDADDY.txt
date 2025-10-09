@@ -46,7 +46,15 @@ background music
 make sure logout isnt off the screen ✅
 display username once you login ✅
 
-
+<section class="card">
+      <h3>Add Event</h3>
+      <form method="POST" action="/admin/events/create">
+        <input name="id" placeholder="challenge id (slug)" required />
+        <input name="title" placeholder="title" required />
+        <textarea name="description" placeholder="description"></textarea>
+        <button type="submit">Create</button>
+      </form>
+    </section>
 
 
 

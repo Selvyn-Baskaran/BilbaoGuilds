@@ -22,6 +22,95 @@
       </form>
     </section>
 
+    <!-- <section class="card">
+      <h3>Create Event</h3>
+      <form method="POST" action="/admin/events/create">
+        <input name="id" placeholder="event id (slug)" required />
+        <input name="title" placeholder="title" required />
+        <input name="date" type="date" required />
+        <input name="time" type="time" placeholder="optional time" />
+        <input name="location" placeholder="location" />
+        <textarea name="description" placeholder="description"></textarea>
+        <button type="submit">Create</button>
+      </form>
+    </section> -->
+
+    <section class="card">
+      <h3>Events</h3>
+
+      <!-- Create -->
+      <form method="POST" action="/admin/events/create" style="margin-bottom:1rem;">
+        <input name="id" placeholder="event id (slug)" required />
+        <input name="title" placeholder="title" required />
+        <input name="date" type="date" required />
+        <input name="time" type="time" placeholder="optional time" />
+        <input name="location" placeholder="location" />
+        <textarea name="description" placeholder="description"></textarea>
+        <button type="submit">Create</button>
+      </form>
+
+      <!-- Collapsible manage list -->
+      <details>
+        <summary style="cursor:pointer; font-weight:600;">
+          Manage existing events (<%= events?.length || 0 %>)
+        </summary>
+
+        <!-- Optional quick filter -->
+        <input id="eventFilter" placeholder="Filter by title/location…" style="margin:.6rem 0; width:100%; max-width:420px;" oninput="
+          const q = this.value.toLowerCase();
+          document.querySelectorAll('.event-row').forEach(li=>{
+            const t = li.getAttribute('data-text');
+            li.style.display = t.includes(q) ? '' : 'none';
+          });
+        " />
+
+        <ul style="list-style:none; padding:0; margin:0;">
+          <% (events || []).forEach(ev => { %>
+            <li class="event-row"
+                data-text="<%= (ev.title + ' ' + (ev.location||'')).toLowerCase() %>"
+                style="border:1px solid #eee; border-radius:8px; padding:.75rem; margin:.5rem 0;">
+              <div style="display:flex; gap:.5rem; align-items:center; justify-content:space-between; flex-wrap:wrap;">
+                <div>
+                  <strong><a href="/events/<%= ev.id %>" target="_blank"><%= ev.title %></a></strong>
+                  <div style="font-size:.9rem; opacity:.85;">
+                    <%= ev.date %><%= ev.time ? (' · ' + ev.time) : '' %>
+                    <% if (ev.location) { %> · <%= ev.location %><% } %>
+                  </div>
+                </div>
+
+                <div style="display:flex; gap:.5rem;">
+                  <!-- Delete -->
+                  <form method="POST" action="/admin/events/<%= ev.id %>/delete" onsubmit="return confirm('Delete this event?');">
+                    <button type="submit">Delete</button>
+                  </form>
+
+                  <!-- Edit (per-item collapsible) -->
+                  <details>
+                    <summary style="cursor:pointer; padding:.4rem .6rem; border:1px solid #ccc; border-radius:6px;">Edit</summary>
+                    <form method="POST" action="/admin/events/<%= ev.id %>/update" style="margin-top:.5rem; max-width:520px;">
+                      <label>Title</label>
+                      <input name="title" value="<%= ev.title %>" required />
+                      <label>Date</label>
+                      <input name="date" type="date" value="<%= ev.date %>" required />
+                      <label>Time</label>
+                      <input name="time" type="time" value="<%= ev.time || '' %>" />
+                      <label>Location</label>
+                      <input name="location" value="<%= ev.location || '' %>" />
+                      <label>Description</label>
+                      <textarea name="description"><%= ev.description || '' %></textarea>
+
+                      <button type="submit" style="margin-top:.4rem;">Save Changes</button>
+                    </form>
+                  </details>
+                </div>
+              </div>
+            </li>
+          <% }) %>
+        </ul>
+      </details>
+    </section>
+
+
     <section class="card">
       <h3>Adjust User Points</h3>
       <form method="POST" action="/admin/users/points">
