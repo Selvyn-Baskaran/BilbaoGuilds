@@ -391,23 +391,29 @@ app.get("/challenges/:id", ensureLoggedIn, (req, res) => {
 });
 
 // --- POST COMMENT TO CHALLENGE ---
-app.post("/challenges/:id/comment", ensureLoggedIn, (req, res) => {
+app.post("/challenges/:id/comment", ensureLoggedIn, upload.single("attachment"), (req, res) => {
   const challenges = readJsonOrDefault(CHALLENGES_FILE, []);
   const idx = challenges.findIndex(c => String(c.id) === String(req.params.id));
   if (idx === -1) return res.status(404).send("Not found");
 
   const avatar = req.session.avatar || "/images/default-avatar.png";
+  const text = String(req.body.text || "").slice(0, 1000);
+  const attachment = req.file ? `/uploads/${req.file.filename}` : null;
+
   challenges[idx].comments = challenges[idx].comments || [];
   challenges[idx].comments.push({
-    user: req.session.user,        // display name
-    email: req.session.email || "",// (optional) store email too
-    text: req.body.text,
-    avatar
+    user:   req.session.user,                // display name
+    email:  (req.session.email || ""),       // optional, for moderation
+    text,
+    avatar,
+    attachment,
+    ts: Date.now()
   });
 
   writeJson(CHALLENGES_FILE, challenges);
   res.redirect(`/challenges/${req.params.id}`);
 });
+
 
 
 // --- GUILD CHAT ---

@@ -16,24 +16,43 @@
     <p><%= challenge.description %></p>
 
     <h3>Replies</h3>
+
       <ul class="comment-list">
-        <% challenge.comments.forEach(c => { %>
+        <% (challenge.comments || []).forEach(c => { %>
           <li class="comment">
             <img src="<%= c.avatar || '/images/default-avatar.png' %>" class="comment-avatar" alt="<%= c.user %>">
             <div class="comment-body">
-              <strong><%= c.user %></strong><br>
-              <span><%= c.text %></span>
+              <div>
+                <strong><%= c.user %></strong>
+                <% if (c.ts) { %>
+                  <span style="opacity:.7; font-size:.9em; margin-left:.4rem;">
+                    <%= new Date(c.ts).toLocaleString() %>
+                  </span>
+                <% } %>
+              </div>
+              <div><%= c.text %></div>
+
+              <% if (c.attachment) { %>
+                <div style="margin-top:.5rem;">
+                  <% if (/\.(png|jpe?g|gif|webp)$/i.test(c.attachment)) { %>
+                    <a href="<%= c.attachment %>" target="_blank" rel="noopener">
+                      <img src="<%= c.attachment %>" alt="attachment" style="max-width:220px;border-radius:8px;display:block;">
+                    </a>
+                  <% } else { %>
+                    <a href="<%= c.attachment %>" target="_blank" rel="noopener">View attachment</a>
+                  <% } %>
+                </div>
+              <% } %>
             </div>
           </li>
         <% }) %>
       </ul>
 
-
-    <form method="POST" action="/challenges/<%= challenge.id %>/comment">
-      <input name="text" placeholder="Add a reply..." required />
-      <button type="submit">Post</button>
-    </form>
-  </main>
+<form method="POST" action="/challenges/<%= challenge.id %>/comment" enctype="multipart/form-data">
+  <input name="text" placeholder="Add a reply..." required />
+  <input type="file" name="attachment" accept="image/*,.pdf,.zip,.txt" />
+  <button type="submit">Post</button>
+</form>
 
 </body>
 </html>
