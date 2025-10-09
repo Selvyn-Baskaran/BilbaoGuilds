@@ -11,23 +11,108 @@
 
   <%- include('partials/navbar', { user, guild }) %>
 
-  <main>
-    <h2>Guild Leaderboard</h2>
-    <table>
-      <tr>
-        <th>Rank</th>
-        <th>Guild</th>
-        <th>Total Points</th>
-      </tr>
-      <% sortedGuilds.forEach((guild, index) => { %>
-        <tr>
-          <td><%= index + 1 %></td>
-          <td><%= guild.name %></td>
-          <td><%= guild.points %></td>
-        </tr>
-      <% }) %>
-    </table>
-  </main>
+  <main class="lb-wrap">
+  <h2>Guild Leaderboard</h2>
+
+  <div class="pillars">
+    <% const ranks = JSON.parse(JSON.stringify(sortedGuilds)); %>
+    <% // ensure consistent order: Fire, Earth, Water (or keep ranks order) %>
+    <% const order = ["Fire", "Earth", "Water"]; %>
+    <% const byName = Object.fromEntries(sortedGuilds.map(g => [g.name, g])); %>
+    <% order.forEach((name, i) => { const g = byName[name] || {name, points: 0}; %>
+      <div class="pillar-card <%= g.name %>"
+           data-guild="<%= g.name %>"
+           data-points="<%= g.points %>"
+           data-max="<%= maxPoints %>">
+        <div class="pillar">
+          <div class="shaft"></div>
+          <div class="capital"></div>
+          <div class="base"></div>
+        </div>
+
+        <div class="badge">
+          <!-- swap these with your actual shield images if you have them -->
+          <img src="/images/<%= g.name.toLowerCase() %>-shield.png" onerror="this.style.display='none'">
+        </div>
+
+        <div class="stats">
+          <div class="guild-name"><%= g.name %> Guild</div>
+          <div class="points"><%= g.points %> pts</div>
+        </div>
+
+        <div class="rank-medal"></div>
+      </div>
+    <% }) %>
+  </div>
+</main>
+
+<script>
+  // Animate pillars on load
+  (function(){
+    const cards = document.querySelectorAll('.pillar-card');
+    // compute rank and crown the winner
+    const arr = Array.from(cards).sort((a,b)=> Number(b.dataset.points)-Number(a.dataset.points));
+    arr.forEach((el,idx)=>{
+      el.querySelector('.rank-medal').textContent = idx===0 ? "1" : idx===1 ? "2" : "3";
+      el.classList.toggle('first', idx===0);
+      el.classList.toggle('second', idx===1);
+      el.classList.toggle('third', idx===2);
+    });
+
+    cards.forEach(card=>{
+      const pts = Number(card.dataset.points||0);
+      const max = Number(card.dataset.max||1);
+      const h = Math.max(5, Math.round( (pts/max)*100 )); // 5–100%
+      const shaft = card.querySelector('.shaft');
+
+      // Optional "crumble" if points dropped vs last view
+      try {
+        const key = "guild-last-" + card.dataset.guild;
+        const last = Number(localStorage.getItem(key) || "0");
+        localStorage.setItem(key, pts);
+        if (pts < last) {
+          // trigger quick shake
+          card.classList.add('crumble');
+          setTimeout(()=>card.classList.remove('crumble'), 1200);
+        }
+      } catch (e){}
+
+      // Rise animation
+      requestAnimationFrame(()=>{
+        shaft.style.setProperty('--target-h', h + '%');
+        shaft.classList.add('rise');
+      });
+    });
+  })();
+</script>
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+  const socket = io();
+  socket.on("guildPointsUpdate", ({guild, delta})=>{
+    const card = document.querySelector(`.pillar-card[data-guild="${guild}"]`);
+    if (!card) return;
+    const pts = Number(card.dataset.points||0) + Number(delta||0);
+    card.dataset.points = pts;
+
+    // recompute max across all cards and re-animate heights
+    const cards = document.querySelectorAll('.pillar-card');
+    const max = Math.max(1, ...Array.from(cards).map(c=>Number(c.dataset.points||0)));
+    cards.forEach(c=>{
+      c.dataset.max = max;
+      const shaft = c.querySelector('.shaft');
+      const h = Math.max(5, Math.round((Number(c.dataset.points)/max)*100));
+      requestAnimationFrame(()=>{
+        shaft.style.setProperty('--target-h', h + '%');
+        shaft.classList.add('rise');
+      });
+    });
+  });
+</script>
+</body>
+</html>
+
+
 </body>
 </html>
 

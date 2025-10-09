@@ -437,14 +437,16 @@ app.get("/leaderboard", ensureLoggedIn, (req, res) => {
   const sortedGuilds = Object.entries(guilds)
     .sort((a, b) => b[1] - a[1])
     .map(([name, points]) => ({ name, points }));
+  const maxPoints = Math.max(1, ...sortedGuilds.map(g => g.points));
 
   res.render("leaderboard", {
-    sortedGuilds,
+    sortedGuilds, maxPoints,
     user: req.session.user,
     guild: req.session.guild || "Fire",
     online: totalOnline,
   });
 });
+
 
 app.get("/profile", requireLogin, (req, res) => {
   const email = (req.session.email || "").toLowerCase(); // canonical
@@ -642,6 +644,10 @@ app.post("/admin/guilds/points", ensureAdmin, (req, res) => {
   const guilds = readJsonOrDefault(GUILDS_FILE, { Fire: 0, Water: 0, Earth: 0 });
   guilds[guild] = (guilds[guild] || 0) + d;
   writeJson(GUILDS_FILE, guilds);
+
+  // 🔥 Broadcast live leaderboard update
+  io.emit("guildPointsUpdate", { guild, delta: d });
+
   res.redirect("/admin");
 });
 
