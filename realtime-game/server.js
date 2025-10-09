@@ -272,6 +272,30 @@ app.get("/events", ensureLoggedIn, (req, res) => {
 });
 
 
+app.get("/events/:id", ensureLoggedIn, (req, res) => {
+  let events = [];
+  try {
+    events = JSON.parse(fs.readFileSync("./events.json", "utf-8"));
+  } catch (e) {
+    return res.status(500).send("Failed to load events.json");
+  }
+
+  const event = events.find(e => e.id === req.params.id);
+  if (!event) return res.status(404).send("Event not found");
+
+  res.render("event-details", {
+    // pass the event!
+    event,
+
+    // navbar + common
+    user:   req.session.user,
+    role:   req.session.role || "user",
+    guild:  req.session.guild || "Fire",
+    points: req.session.points || 0,
+    online: totalOnline,
+  });
+});
+
 
 
 // --- CENTRAL CHALLENGES LIST ---

@@ -39,7 +39,6 @@ ongoing challenges under upcoming events so uno when challenges are ending, (the
 Low priority
 
 
-create a forget password function to reset password
 make the leaderboard look nice 
 admin portal - analyse website usage
 chat - filter bullshit out
