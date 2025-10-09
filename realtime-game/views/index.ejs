@@ -3,18 +3,41 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Welcome to Bilbao Guilds</title>
+  <title>Home</title>
   <link rel="stylesheet" href="/styles.css">
   <link rel="stylesheet" href="/css/navbar.css">
+  <style>
+    .landing {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 80vh;
+      text-align: center;
+      padding: 2rem;
+    }
+    .landing h1 { font-size: 2.5rem; margin-bottom: 1rem; }
+    .landing p { font-size: 1.2rem; max-width: 600px; margin-bottom: 2rem; }
+    .landing a {
+      display: inline-block;
+      padding: 0.75rem 1.5rem;
+      font-size: 1rem;
+      background-color: #444;
+      color: white;
+      text-decoration: none;
+      border-radius: 8px;
+      transition: background-color 0.2s;
+    }
+    .landing a:hover { background-color: #666; }
+  </style>
 </head>
 <body class="<%= guild %>">
 
-  <%- include('partials/navbar', { points, user, online, role }) %>
+  <%- include('partials/navbar', { points, user, online }) %>
 
   <main class="landing">
     <h1>Welcome to Bilbao Guilds</h1>
-    <p>Unite with your Guild. Complete The Guild Quests. Climb the ranks and claim victory.  
-    Join the fun and prove your Guild is the best!</p>
+    <p>Unite with your Guild. Complete The Guild Quests. Climb the ranks and claim victory. Join the fun and prove your Guild is the best!</p>
 
     <% if (user) { %>
       <a href="/challenges">View Challenges</a>
@@ -22,16 +45,6 @@
       <a href="/login.html">Log In to Begin</a>
     <% } %>
   </main>
-
-  <script src="/socket.io/socket.io.js"></script>
-  <script>
-    const socket = io();
-
-    socket.on("updateOnline", (count) => {
-      const onlineEl = document.getElementById("onlineCount");
-      if (onlineEl) onlineEl.textContent = count;
-    });
-  </script>
 
 </body>
 </html>

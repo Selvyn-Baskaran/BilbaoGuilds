@@ -1,12 +1,17 @@
 <nav class="navbar">
   <div class="navbar-header">
-    <span class="navbar-logo">
-      <% if (user) { %>
-        <%= user %> : <%= points %> pts
+    <div class="navbar-logo">
+      <% if (typeof points !== 'undefined') { %>
+        <span class="user-points">
+          <%= user %> : <%= points %> points
+          <span class="online-status">🟢 Online: <span id="onlineCount"><%= online %></span></span>
+        </span>
+      <% } else if (typeof online !== 'undefined') { %>
+        <span class="online-status">🟢 Online: <span id="onlineCount"><%= online %></span></span>
       <% } else { %>
-        Bilbao Guilds
+        MyApp
       <% } %>
-    </span>
+    </div>
 
     <button class="navbar-toggle" id="burger">&#9776;</button>
   </div>
@@ -28,28 +33,29 @@
     <% } %>
   </ul>
 
-  <div class="online-status">
-    🟢 Online: <span id="onlineCount"><%= online %></span>
-  </div>
-</nav>
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // Apply dark mode site-wide
+      if (localStorage.getItem('darkMode') === 'enabled') {
+        document.body.classList.add('dark-mode');
+      }
 
-<script src="/socket.io/socket.io.js"></script>
-<script>
-  document.addEventListener("DOMContentLoaded", () => {
-    const socket = io();
+      // Burger menu toggle
+      const burger = document.getElementById('burger');
+      const navLinks = document.getElementById('nav-links');
+      if (burger && navLinks) {
+        burger.addEventListener('click', () => {
+          navLinks.classList.toggle('show');
+        });
+      }
 
-    socket.on("updateOnline", (count) => {
-      const onlineEl = document.getElementById("onlineCount");
-      if (onlineEl) onlineEl.textContent = count;
-    });
-
-    const burger = document.getElementById("burger");
-    const navLinks = document.getElementById("nav-links");
-
-    if (burger && navLinks) {
-      burger.addEventListener("click", () => {
-        navLinks.classList.toggle("show");
+      // Online counter
+      const socket = io();
+      socket.on("updateOnline", (count) => {
+        const onlineEl = document.getElementById("onlineCount");
+        if (onlineEl) onlineEl.textContent = count;
       });
-    }
-  });
-</script>
+    });
+  </script>
+</nav>

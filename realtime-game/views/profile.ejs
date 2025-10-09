@@ -7,12 +7,13 @@
   <link rel="stylesheet" href="/styles.css"/>
   <link rel="stylesheet" href="/css/navbar.css">
   <style>
+    /* Profile layout */
     .profile-wrap { max-width: 900px; margin: 2rem auto; padding: 1rem; }
     .card { border: 1px solid #ddd; border-radius: 12px; padding: 1rem; }
     .row { display: grid; grid-template-columns: 220px 1fr; gap: 1rem; }
     @media (max-width: 768px){ .row{ grid-template-columns: 1fr; } }
     .avatar { width: 200px; height: 200px; object-fit: cover; border-radius: 12px; background:#f2f2f2; }
-    .muted { color: #666; font-size: 0.95rem; }
+    .muted { font-size: 0.95rem; }
     .field { margin-bottom: 1rem; }
     .field label { display:block; margin-bottom: 0.4rem; font-weight: 600; }
     .field input[type="text"], .field textarea {
@@ -21,12 +22,51 @@
     button { padding: 0.6rem 1rem; border: 0; border-radius: 8px; background:#444; color:#fff; cursor:pointer; }
     button:hover { transform: translateY(-1px); transition: 150ms; }
     .meta { display:flex; gap:1rem; flex-wrap: wrap; margin-top: 0.5rem; }
-    .chip { background:#f5f5f5; border-radius: 999px; padding: 0.35rem 0.75rem; }
+    .chip { background:#7e7e7e; border-radius: 999px; padding: 0.35rem 0.75rem; }
+
+    /* Dark mode overrides */
+    body.dark-mode {
+      background-color: #121212;
+      color: #f0f0f0;
+    }
+    body.dark-mode .profile-wrap,
+    body.dark-mode .card {
+      background-color: #1e1e1e !important;
+      color: #f0f0f0 !important;
+      border-color: #333 !important;
+    }
+    body.dark-mode .chip,
+    body.dark-mode .muted,
+    body.dark-mode label,
+    body.dark-mode strong {
+      color: #f0f0f0 !important;
+    }
+    body.dark-mode input,
+    body.dark-mode textarea {
+      background-color: #2a2a2a !important;
+      color: #f0f0f0 !important;
+      border-color: #444 !important;
+    }
+    body.dark-mode button {
+      background-color: #444 !important;
+      color: #fff !important;
+    }
+    body.dark-mode .avatar {
+      background-color: #333 !important;
+    }
+
+    /* Optional: spacing for toggle inside profile if you have it */
+    .dark-mode-toggle {
+      margin: 1rem 0;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
   </style>
 </head>
 <body class="<%= guild %>">
 
-  <%- include('partials/navbar', { user, guild, points, online }) %>
+  <%- include('partials/navbar', { user, guild, points, role, online }) %>
 
   <main class="profile-wrap">
     <h2>Your Profile</h2>
@@ -59,9 +99,40 @@
 
           <button type="submit">Save Profile</button>
         </form>
+
+        <!-- Dark mode toggle -->
+        <div class="dark-mode-toggle">
+          <label for="toggle-dark">Dark Mode:</label>
+          <input type="checkbox" id="toggle-dark" />
+        </div>
       </div>
     </div>
   </main>
+
+  <script>
+document.addEventListener('DOMContentLoaded', () => {
+  const toggle = document.getElementById('toggle-dark');
+
+  // Apply dark mode if saved
+  if (localStorage.getItem('darkMode') === 'enabled') {
+    document.body.classList.add('dark-mode');
+    if(toggle) toggle.checked = true;
+  }
+
+  // Listen for toggle changes
+  if(toggle){
+    toggle.addEventListener('change', () => {
+      if(toggle.checked){
+        document.body.classList.add('dark-mode');
+        localStorage.setItem('darkMode','enabled');
+      } else {
+        document.body.classList.remove('dark-mode');
+        localStorage.setItem('darkMode','disabled');
+      }
+    });
+  }
+});
+</script>
 
 </body>
 </html>

@@ -6,6 +6,7 @@
   <title>Events</title>
   <link rel="stylesheet" href="/styles.css"/>
   <link rel="stylesheet" href="/css/navbar.css">
+
   <style>
     /* Page shell */
     .events-page {
@@ -52,18 +53,14 @@
       .day { min-height: 90px; padding: .4rem; }
       .event-pill { font-size: .78rem; }
     }
-      /* Highlight any calendar day that has events */
     .day.has-events {
       background: #c081ff;           /* light purple */
       border-color: #4300a8;
     }
-
-    /* Style the event pills themselves in purple tones */
     .event-pill {
-      background: #c081ff;           /* soft purple chip */
+      background: #c081ff;
       border-color: #4300a8;
     }
-
 
     /* Sidebar */
     .side-card {
@@ -74,8 +71,26 @@
     .side-title { margin: 0 0 .5rem 0; }
     .side-when { font-size: .9rem; opacity: .85; }
     .side-link { text-decoration: none; }
+
+    /* Dark mode overrides for events */
+    body.dark-mode .calendar-card,
+    body.dark-mode .day,
+    body.dark-mode .side-card {
+      background-color: #1e1e1e !important;
+      border-color: #333 !important;
+    }
+    body.dark-mode .day.has-events {
+      background-color: #6b3cff !important;
+      border-color: #4300a8 !important;
+    }
+    body.dark-mode .event-pill {
+      background-color: #6b3cff !important;
+      border-color: #4300a8 !important;
+      color: #fff;
+    }
   </style>
 </head>
+
 <body class="<%= guild %>">
   <%- include('partials/navbar', { user, guild, points, role, online }) %>
 
@@ -110,7 +125,7 @@
               <div class="events">
                 <% day.events.forEach(ev => { %>
                   <a class="event-pill" href="/events/<%= ev.id %>" title="<%= ev.title %> — <%= ev.time || 'All day' %> @ <%= ev.location %>">
-                    <%= ev.time ? ev.time + ' · ' : '' %><%= ev.title %>
+                    <%= ev.time ? (ev.time + ' · ') : '' %><%= ev.title %>
                   </a>
                 <% }) %>
               </div>
