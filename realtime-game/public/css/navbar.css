@@ -1,14 +1,26 @@
-/* --- Base layout --- */
+/* --- Reset default browser spacing --- */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* --- Base navbar layout --- */
 .navbar {
   background-color: #222;
   color: white;
-  padding: 1rem;
+  padding: 0.5rem 1rem; /* reduce top/bottom padding to minimize height */
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  position: relative;
+  position: fixed;   /* always at top */
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 1000;
 }
 
+/* Navbar header */
 .navbar-header {
   width: 100%;
   display: flex;
@@ -23,7 +35,7 @@
   color: white;
   font-size: 1.8rem;
   cursor: pointer;
-  display: block; /* always show burger */
+  display: block;
 }
 
 /* Navbar links container (hidden by default) */
@@ -31,16 +43,16 @@
   list-style: none;
   padding: 0;
   margin: 0;
-  display: none; /* hidden initially */
+  display: none;
   flex-direction: column;
-  position: absolute; /* position relative to navbar */
-  top: 60px;         /* below header */
-  right: 0;          /* align to right */
+  position: absolute;
+  top: 100%;        /* directly below navbar */
+  right: 0;
   background-color: #222;
   border-radius: 8px;
   width: 200px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
-  text-align: right;  /* text aligns right */
+  text-align: right;
   z-index: 1000;
 }
 
@@ -50,13 +62,11 @@
   animation: slideDown 0.3s ease;
 }
 
-/* Slide down animation */
 @keyframes slideDown {
   from { opacity: 0; transform: translateY(-10px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* Links styling */
 .navbar-links li {
   margin: 0.5rem 0;
 }
@@ -69,7 +79,7 @@
   padding: 0.5rem 1rem;
   border-radius: 6px;
   transition: background 0.2s;
-  text-align: right; /* text aligns right */
+  text-align: right;
 }
 
 .navbar-links a:hover {
@@ -81,9 +91,47 @@
   font-size: 1.2rem;
 }
 
-/* Online counter */
 .online-status {
-  margin-top: 1rem;
+  margin-top: 0.5rem;
   font-size: 0.9rem;
   opacity: 0.85;
+}
+
+/* --- Landing section --- */
+.landing {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 80vh;
+  text-align: center;
+  padding: 2rem;
+  margin: 0;
+  padding-top: 4rem; /* space for fixed navbar so content is not under it */
+}
+
+.landing h1 {
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+}
+
+.landing p {
+  font-size: 1.2rem;
+  max-width: 600px;
+  margin-bottom: 2rem;
+}
+
+.landing a {
+  display: inline-block;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  background-color: #444;
+  color: white;
+  text-decoration: none;
+  border-radius: 8px;
+  transition: background-color 0.2s;
+}
+
+.landing a:hover {
+  background-color: #666;
 }
