@@ -16,11 +16,18 @@
     <p><%= challenge.description %></p>
 
     <h3>Replies</h3>
-    <ul>
-      <% challenge.comments.forEach(c => { %>
-        <li><strong><%= c.user %>:</strong> <%= c.text %></li>
-      <% }) %>
-    </ul>
+      <ul class="comment-list">
+        <% challenge.comments.forEach(c => { %>
+          <li class="comment">
+            <img src="<%= c.avatar || '/images/default-avatar.png' %>" class="comment-avatar" alt="<%= c.user %>">
+            <div class="comment-body">
+              <strong><%= c.user %></strong><br>
+              <span><%= c.text %></span>
+            </div>
+          </li>
+        <% }) %>
+      </ul>
+
 
     <form method="POST" action="/challenges/<%= challenge.id %>/comment">
       <input name="text" placeholder="Add a reply..." required />

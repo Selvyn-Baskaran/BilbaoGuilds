@@ -1,5 +1,6 @@
 const express = require("express");
 const http = require("http");
+const multer = require("multer");
 const path = require("path");
 const session = require("express-session");
 const sharedSession = require("express-socket.io-session");
@@ -79,6 +80,30 @@ app.use((req, res, next) => {
   next();
 });
 
+
+// simple login guard
+function requireLogin(req, res, next) {
+  if (!req.session.user) return res.redirect("/login.html");
+  next();
+}
+
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => cb(null, path.join(__dirname, "public/uploads")),
+  filename: (req, file, cb) => {
+    const ext = path.extname(file.originalname || "");
+    cb(null, `${Date.now()}-${Math.random().toString(36).slice(2)}${ext}`);
+  },
+});
+const upload = multer({
+  storage,
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
+  fileFilter: (req, file, cb) => {
+    const ok = ["image/png", "image/jpeg", "image/gif", "image/webp"].includes(file.mimetype);
+    cb(ok ? null : new Error("Only PNG/JPEG/GIF/WEBP allowed"), ok);
+  },
+});
+
+
 // --- Users / Challenges helpers (files optional) ---
 const USERS_FILE = "./users.json";
 const CHALLENGES_FILE = "./challenges.json";
@@ -134,6 +159,8 @@ app.post(
     req.session.guild  = existing.guild  || "Fire";
     req.session.points = existing.points || 0;
     req.session.role   = existing.role   || "user";        // <- pulls "admin" if present!
+    req.session.avatar = existing.avatar || "/images/default-avatar.png";
+
 
     // 5) If first login: create entry
     if (!users[email]) {
@@ -169,6 +196,19 @@ function ensureAdmin(req, res, next) {
   if (req.session.role === "admin" || req.session.role === "manager") return next();
   return res.status(403).send("Forbidden: admin only");
 }
+
+app.use((req, res, next) => {
+  if (req.user) {
+    console.log("AAD profile snapshot:", {
+      preferred_username: req.user._json?.preferred_username,
+      upn: req.user._json?.upn,
+      emails_json: req.user._json?.emails,
+      emails_obj: req.user.emails
+    });
+  }
+  console.log("session.user =", req.session.user);
+  next();
+});
 
 
 // --- MAIN INDEX ---
@@ -356,17 +396,19 @@ app.post("/challenges/:id/comment", ensureLoggedIn, (req, res) => {
   const idx = challenges.findIndex(c => String(c.id) === String(req.params.id));
   if (idx === -1) return res.status(404).send("Not found");
 
+  const avatar = req.session.avatar || "/images/default-avatar.png";
   challenges[idx].comments = challenges[idx].comments || [];
   challenges[idx].comments.push({
-    user: req.session.user || "Anonymous",
-    text: req.body.text || "",
+    user: req.session.user,        // display name
+    email: req.session.email || "",// (optional) store email too
+    text: req.body.text,
+    avatar
   });
 
-  try {
-    fs.writeFileSync(CHALLENGES_FILE, JSON.stringify(challenges, null, 2));
-  } catch (_) {}
+  writeJson(CHALLENGES_FILE, challenges);
   res.redirect(`/challenges/${req.params.id}`);
 });
+
 
 // --- GUILD CHAT ---
 app.get("/guild-chat", ensureLoggedIn, (req, res) => {
@@ -397,6 +439,54 @@ app.get("/leaderboard", ensureLoggedIn, (req, res) => {
     online: totalOnline,
   });
 });
+
+app.get("/profile", requireLogin, (req, res) => {
+  const email = (req.session.email || "").toLowerCase(); // canonical
+  const allUsers = readJsonOrDefault(USERS_FILE, {});
+  const u = allUsers[email] || {};
+
+  // keep session avatar in sync (nice-to-have)
+  if (!req.session.avatar) {
+    req.session.avatar = u.avatar || "/images/default-avatar.png";
+  }
+
+  res.render("profile", {
+    user: req.session.user,                  // display name
+    guild: u.guild || "Fire",
+    points: u.points || 0,
+    role: u.role || "user",
+    online: totalOnline,
+    profile: {
+      avatar: u.avatar || null,
+      bio: u.bio || "",
+    },
+  });
+});
+
+app.post("/profile", requireLogin, upload.single("avatar"), (req, res) => {
+  const email = (req.session.email || "").toLowerCase();
+  const allUsers = readJsonOrDefault(USERS_FILE, {});
+  const u = allUsers[email] || (allUsers[email] = {});
+
+  // text fields
+  u.bio = String(req.body.bio || "").slice(0, 500);
+
+  // remove avatar
+  if (req.body.removeAvatar === "on") {
+    u.avatar = null;
+    req.session.avatar = "/images/default-avatar.png";
+  }
+
+  // new avatar
+  if (req.file) {
+    u.avatar = `/uploads/${req.file.filename}`;
+    req.session.avatar = u.avatar; // keep session in sync
+  }
+
+  writeJson(USERS_FILE, allUsers);
+  res.redirect("/profile");
+});
+
 
 // Admin portal
 app.get("/admin", ensureAdmin, (req, res) => {
@@ -579,8 +669,9 @@ io.on("connection", (socket) => {
   });
 
   socket.on("guildMessage", ({ guild, message }) => {
-    io.to(guild).emit("guildMessage", { user: username, message });
-  });
+  const avatar = socket.handshake.session?.avatar || "/images/default-avatar.png";
+  io.to(guild).emit("guildMessage", { user: username, message, avatar });
+});
 
   socket.on("disconnect", () => {
     console.log(`${username} disconnected`);

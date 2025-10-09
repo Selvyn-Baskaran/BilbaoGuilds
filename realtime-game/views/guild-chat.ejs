@@ -35,10 +35,15 @@
     socket.emit("joinGuildRoom", guild);
 
     socket.on("guildMessage", (data) => {
-      const el = document.createElement("div");
-      el.innerHTML = `<strong>${data.user}:</strong> ${data.message}`;
-      document.getElementById("messages").appendChild(el);
-    });
+  const wrapper = document.createElement("div");
+  wrapper.className = "chat-message";
+  wrapper.innerHTML = `
+    <div class="chat-avatar"><img src="${data.avatar}" alt="${data.user}" /></div>
+    <div class="chat-text"><strong>${data.user}</strong>: ${data.message}</div>
+  `;
+  document.getElementById("messages").appendChild(wrapper);
+  wrapper.scrollIntoView({ behavior: "smooth", block: "end" });
+});
 
     function sendMessage() {
       const msg = document.getElementById("msgInput").value;

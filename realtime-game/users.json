@@ -1,213 +1,1059 @@
 {
-  "akaansh.ajit@digipen.edu": { "guild": "Fire", "points": 0, "role": "admin"},
-  "akaansh.ajit@gmail.com": { "guild": "Water", "points": 9001, "role": "admin"},
-  "selvyn2004@live.co.uk": { "guild": "Water", "points": 1, "role": "admin"},
-  "jon.f@digipen.edu": { "guild": "Earth", "points": 0, "role": "user" },
-  "jon.marin@digipen.edu": { "guild": "Earth", "points": 0, "role": "user" },
-  "daniel.sanchez@digipen.edu": { "guild": "Earth", "points": 0, "role": "user" },
-  "marta.m@digipen.edu": { "guild": "Earth", "points": 0, "role": "user" },
-  "alain.l@digipen.edu": { "guild": "Earth", "points": 0, "role": "user" },
-  "mikel.ruiz@digipen.edu": { "guild": "Earth", "points": 0, "role": "user" },
-  "asier.azkarraga@digipen.edu": { "guild": "Earth", "points": 0, "role": "user" },
-  "b.arrue@digipen.edu": { "guild": "Earth", "points": 0, "role": "user" },
-  "isabella.f@digipen.edu": { "guild": "Earth", "points": 0, "role": "user" },
-  "j.villa@digipen.edu": { "guild": "Earth", "points": 0, "role": "user" },
-  "pablo.garbizu@digipen.edu": { "guild": "Earth", "points": 0, "role": "user" },
-  "a.marsal@digipen.edu": { "guild": "Earth", "points": 0, "role": "user" },
-  "lide.b@digipen.edu": { "guild": "Earth", "points": 0, "role": "user" },
-  "jone.santisteban@digipen.edu": { "guild": "Earth", "points": 0, "role": "user" },
-  "aitor.garay@digipen.edu": { "guild": "Earth", "points": 0, "role": "user" },
-  "nerea.vilor@digipen.edu": { "guild": "Earth", "points": 0, "role": "user" },
-  "ariane.c@digipen.edu": { "guild": "Earth", "points": 0, "role": "user" },
-  "olatz.zugasti@digipen.edu": { "guild": "Earth", "points": 0, "role": "user" },
-  "davidgabriel.chavez@digipen.edu": { "guild": "Earth", "points": 0, "role": "user" },
-  "jaime.sararu@digipen.edu": { "guild": "Earth", "points": 0, "role": "user" },
-  "javierm@digipen.edu": { "guild": "Earth", "points": 0, "role": "user" },
-  "paula.bajo@digipen.edu": { "guild": "Earth", "points": 0, "role": "user" },
-  "d.rodrguez@digipen.edu": { "guild": "Earth", "points": 0, "role": "user" },
-  "i.omaechevarra@digipen.edu": { "guild": "Earth", "points": 0, "role": "user" },
-  "aitor.r@digipen.edu": { "guild": "Earth", "points": 0, "role": "user" },
-  "imacias@digipen.edu": { "guild": "Earth", "points": 0, "role": "user" },
-  "i.garmendia@digipen.edu": { "guild": "Earth", "points": 0, "role": "user" },
-  "t.mazzega@digipen.edu": { "guild": "Earth", "points": 0, "role": "user" },
-  "jokin.martinez@digipen.edu": { "guild": "Earth", "points": 0, "role": "user" },
-  "pablo.rodrguez@digipen.edu": { "guild": "Earth", "points": 0, "role": "user" },
-  "ainhoa.ellacuria@digipen.edu": { "guild": "Earth", "points": 0, "role": "user" },
-  "jon.u@digipen.edu": { "guild": "Earth", "points": 0, "role": "user" },
-  "imartin@digipen.edu": { "guild": "Earth", "points": 0, "role": "user" },
-  "sarahmaria.g@digipen.edu": { "guild": "Earth", "points": 0, "role": "user" },
-  "iker.quintana@digipen.edu": { "guild": "Earth", "points": 0, "role": "user" },
-  "nespejo@digipen.edu": { "guild": "Earth", "points": 0, "role": "user" },
-  "fang.z@digipen.edu": { "guild": "Earth", "points": 0, "role": "user" },
-  "chan.n@digipen.edu": { "guild": "Earth", "points": 0, "role": "user" },
-  "leire.camacho@digipen.edu": { "guild": "Earth", "points": 0, "role": "user" },
-  "a.gurov@digipen.edu": { "guild": "Earth", "points": 0, "role": "user" },
-  "laura.choueri@digipen.edu": { "guild": "Earth", "points": 0, "role": "user" },
-  "nerea.pinilla@digipen.edu": { "guild": "Earth", "points": 0, "role": "user" },
-  "joane.larrabe@digipen.edu": { "guild": "Earth", "points": 0, "role": "user" },
-  "a.marcaida@digipen.edu": { "guild": "Earth", "points": 0, "role": "user" },
-  "ander.martinez@digipen.edu": { "guild": "Earth", "points": 0, "role": "user" },
-  "isilvano@digipen.edu": { "guild": "Earth", "points": 0, "role": "user" },
-  "adam.prenosil@digipen.edu": { "guild": "Earth", "points": 0, "role": "user" },
-  "f.iker@digipen.edu": { "guild": "Earth", "points": 0, "role": "user" },
-  "g.eduardo@digipen.edu": { "guild": "Earth", "points": 0, "role": "user" },
-  "alma.g@digipen.edu": { "guild": "Earth", "points": 0, "role": "user" },
-  "leire.meseguer@digipen.edu": { "guild": "Earth", "points": 0, "role": "user" },
-  "daniel.ruiz@digipen.edu": { "guild": "Earth", "points": 0, "role": "user" },
-  "viljamas.s@digipen.edu": { "guild": "Earth", "points": 0, "role": "user" },
-  "e.ireton@digipen.edu": { "guild": "Earth", "points": 0, "role": "user" },
-  "davidalejandro.s@digipen.edu": { "guild": "Earth", "points": 0, "role": "user" },
-  "lindsey.larsen@digipen.edu": { "guild": "Earth", "points": 0, "role": "user" },
-  "i.domnguez@digipen.edu": { "guild": "Earth", "points": 0, "role": "user" },
-  "pablo.m@digipen.edu": { "guild": "Earth", "points": 0, "role": "user" },
-  "j.alvarez@digipen.edu": { "guild": "Earth", "points": 0, "role": "user" },
-  "i.sastre@digipen.edu": { "guild": "Earth", "points": 0, "role": "user" },
-  "siro.francoeur@digipen.edu": { "guild": "Earth", "points": 0, "role": "user" },
-  "l.galan@digipen.edu": { "guild": "Earth", "points": 0, "role": "user" },
-  "martin.g@digipen.edu": { "guild": "Earth", "points": 0, "role": "user" },
-  "dibyajone.l@digipen.edu": { "guild": "Earth", "points": 0, "role": "user" },
-  "anabella.l@digipen.edu": { "guild": "Earth", "points": 0, "role": "user" },
-  "hugo.ramirez@digipen.edu": { "guild": "Earth", "points": 0, "role": "user" },
-  "i.toquero@digipen.edu": { "guild": "Earth", "points": 0, "role": "user" },
-  "aitor.zaballa@digipen.edu": { "guild": "Earth", "points": 0, "role": "user" },
-  "lawrence.winters@digipen.edu": { "guild": "Earth", "points": 0, "role": "user" },
-  "ruben.marano@digipen.edu": { "guild": "Earth", "points": 0, "role": "user" },
-   "alexander.rebek@digipen.edu": { "guild": "Fire", "points": 0, "role": "user" },
-  "irati.arranz@digipen.edu": { "guild": "Fire", "points": 0, "role": "user" },
-  "jfernandez@digipen.edu": { "guild": "Fire", "points": 0, "role": "user" },
-  "markel.gutierrez@digipen.edu": { "guild": "Fire", "points": 0, "role": "user" },
-  "jone.esteban@digipen.edu": { "guild": "Fire", "points": 0, "role": "user" },
-  "carlos.canut@digipen.edu": { "guild": "Fire", "points": 0, "role": "user" },
-  "p.cazzaniga@digipen.edu": { "guild": "Fire", "points": 0, "role": "user" },
-  "tkomair@digipen.edu": { "guild": "Fire", "points": 0, "role": "user" },
-  "leire.m@digipen.edu": { "guild": "Fire", "points": 0, "role": "user" },
-  "mario.c@digipen.edu": { "guild": "Fire", "points": 0, "role": "user" },
-  "irati.n@digipen.edu": { "guild": "Fire", "points": 0, "role": "user" },
-  "ander.fernandez@digipen.edu": { "guild": "Fire", "points": 0, "role": "user" },
-  "diego.garcia@digipen.edu": { "guild": "Fire", "points": 0, "role": "user" },
-  "b.jon@digipen.edu": { "guild": "Fire", "points": 0, "role": "user" },
-  "uxue.f@digipen.edu": { "guild": "Fire", "points": 0, "role": "user" },
-  "d.harper@digipen.edu": { "guild": "Fire", "points": 0, "role": "user" },
-  "l.bartkevich@digipen.edu": { "guild": "Fire", "points": 0, "role": "user" },
-  "lucas.orbea@digipen.edu": { "guild": "Fire", "points": 0, "role": "user" },
-  "s.portilla@digipen.edu": { "guild": "Fire", "points": 0, "role": "user" },
-  "uxuehuan.mendez@digipen.edu": { "guild": "Fire", "points": 0, "role": "user" },
-  "s.paas@digipen.edu": { "guild": "Fire", "points": 0, "role": "user" },
-  "a.goi@digipen.edu": { "guild": "Fire", "points": 0, "role": "user" },
-  "sofiia.zhyhlii@digipen.edu": { "guild": "Fire", "points": 0, "role": "user" },
-  "telmo.t@digipen.edu": { "guild": "Fire", "points": 0, "role": "user" },
-  "mfeijoo@digipen.edu": { "guild": "Fire", "points": 0, "role": "user" },
-  "patricia.l@digipen.edu": { "guild": "Fire", "points": 0, "role": "user" },
-  "jon.sanchez@digipen.edu": { "guild": "Fire", "points": 0, "role": "user" },
-  "irene.l@digipen.edu": { "guild": "Fire", "points": 0, "role": "user" },
-  "alejandro.v@digipen.edu": { "guild": "Fire", "points": 0, "role": "user" },
-  "david.puertas@digipen.edu": { "guild": "Fire", "points": 0, "role": "user" },
-  "erika.zdravkovic@digipen.edu": { "guild": "Fire", "points": 0, "role": "user" },
-  "sofiia.glinskaia@digipen.edu": { "guild": "Fire", "points": 0, "role": "user" },
-  "josu.g@digipen.edu": { "guild": "Fire", "points": 0, "role": "user" },
-  "guillermo.hurtado@digipen.edu": { "guild": "Fire", "points": 0, "role": "user" },
-  "f.hernandez@digipen.edu": { "guild": "Fire", "points": 0, "role": "user" },
-  "imadina@digipen.edu": { "guild": "Fire", "points": 0, "role": "user" },
-  "diego.alcazar@digipen.edu": { "guild": "Fire", "points": 0, "role": "user" },
-  "june.asua@digipen.edu": { "guild": "Fire", "points": 0, "role": "user" },
-  "archi.n@digipen.edu": { "guild": "Fire", "points": 0, "role": "user" },
-  "asier.r@digipen.edu": { "guild": "Fire", "points": 0, "role": "user" },
-  "pedro.teixeira@digipen.edu": { "guild": "Fire", "points": 0, "role": "user" },
-  "julia.sanchez@digipen.edu": { "guild": "Fire", "points": 0, "role": "user" },
-  "i.jahangir@digipen.edu": { "guild": "Fire", "points": 0, "role": "user" },
-  "lucas.p@digipen.edu": { "guild": "Fire", "points": 0, "role": "user" },
-  "anne.t@digipen.edu": { "guild": "Fire", "points": 0, "role": "user" },
-  "josu.orobengoa@digipen.edu": { "guild": "Fire", "points": 0, "role": "user" },
-  "steven.longden@digipen.edu": { "guild": "Fire", "points": 0, "role": "user" },
-  "oihan.a@digipen.edu": { "guild": "Fire", "points": 0, "role": "user" },
-  "atahan.akay@digipen.edu": { "guild": "Fire", "points": 0, "role": "user" },
-  "c.alonso@digipen.edu": { "guild": "Fire", "points": 0, "role": "user" },
-  "e.elorriaga@digipen.edu": { "guild": "Fire", "points": 0, "role": "user" },
-  "amalia.m@digipen.edu": { "guild": "Fire", "points": 0, "role": "user" },
-  "a.delgado@digipen.edu": { "guild": "Fire", "points": 0, "role": "user" },
-  "borja.manso@digipen.edu": { "guild": "Fire", "points": 0, "role": "user" },
-  "v.alidibirova@digipen.edu": { "guild": "Fire", "points": 0, "role": "user" },
-  "v.alonso@digipen.edu": { "guild": "Fire", "points": 0, "role": "user" },
-  "i.azkarate@digipen.edu": { "guild": "Fire", "points": 0, "role": "user" },
-  "zoe.c@digipen.edu": { "guild": "Fire", "points": 0, "role": "user" },
-  "ugaitz.g@digipen.edu": { "guild": "Fire", "points": 0, "role": "user" },
-  "claudia.larrauri@digipen.edu": { "guild": "Fire", "points": 0, "role": "user" },
-  "shyla.lennie@digipen.edu": { "guild": "Fire", "points": 0, "role": "user" },
-  "len.k@digipen.edu": { "guild": "Fire", "points": 0, "role": "user" },
-  "danielavalentina.c@digipen.edu": { "guild": "Fire", "points": 0, "role": "user" },
-  "k.susilasate@digipen.edu": { "guild": "Fire", "points": 0, "role": "user" },
-  "alejandro.ursua@digipen.edu": { "guild": "Fire", "points": 0, "role": "user" },
-  "khit.goh@digipen.edu": { "guild": "Fire", "points": 0, "role": "user" },
-  "matteo.pintonello@digipen.edu": { "guild": "Fire", "points": 0, "role": "user" },
-  "lorenzo.barquin@digipen.edu": { "guild": "Fire", "points": 0, "role": "user" },
-  "holly.doolittle@digipen.edu": { "guild": "Fire", "points": 0, "role": "user" },
-  "guoxiang.zheng@digipen.edu": { "guild": "Water", "points": 0, "role": "user" },
-  "iraia.c@digipen.edu": { "guild": "Water", "points": 0, "role": "user" },
-  "rabi.ghannam@digipen.edu": { "guild": "Water", "points": 0, "role": "user" },
-  "pedro.r@digipen.edu": { "guild": "Water", "points": 0, "role": "user" },
-  "j.lin@digipen.edu": { "guild": "Water", "points": 0, "role": "user" },
-  "eneko.d@digipen.edu": { "guild": "Water", "points": 0, "role": "user" },
-  "j.cuestas@digipen.edu": { "guild": "Water", "points": 0, "role": "user" },
-  "b.ortega@digipen.edu": { "guild": "Water", "points": 0, "role": "user" },
-  "berta.fernandez@digipen.edu": { "guild": "Water", "points": 0, "role": "user" },
-  "eduardo.devega@digipen.edu": { "guild": "Water", "points": 0, "role": "user" },
-  "iotalora@digipen.edu": { "guild": "Water", "points": 0, "role": "user" },
-  "laura.a@digipen.edu": { "guild": "Water", "points": 0, "role": "user" },
-  "paulina.s@digipen.edu": { "guild": "Water", "points": 0, "role": "user" },
-  "j.jauregui@digipen.edu": { "guild": "Water", "points": 0, "role": "user" },
-  "gema.ormazabal@digipen.edu": { "guild": "Water", "points": 0, "role": "user" },
-  "malen.pozo@digipen.edu": { "guild": "Water", "points": 0, "role": "user" },
-  "ignacio.santalla@digipen.edu": { "guild": "Water", "points": 0, "role": "user" },
-  "fernando.velasco@digipen.edu": { "guild": "Water", "points": 0, "role": "user" },
-  "cristina.juesas@digipen.edu": { "guild": "Water", "points": 0, "role": "user" },
-  "aroa.e@digipen.edu": { "guild": "Water", "points": 0, "role": "user" },
-  "oier.morate@digipen.edu": { "guild": "Water", "points": 0, "role": "user" },
-  "d.higuera@digipen.edu": { "guild": "Water", "points": 0, "role": "user" },
-  "aneli.f@digipen.edu": { "guild": "Water", "points": 0, "role": "user" },
-  "sergio.martinez@digipen.edu": { "guild": "Water", "points": 0, "role": "user" },
-  "a.gandarias@digipen.edu": { "guild": "Water", "points": 0, "role": "user" },
-  "luca.z@digipen.edu": { "guild": "Water", "points": 0, "role": "user" },
-  "ainhize.arce@digipen.edu": { "guild": "Water", "points": 0, "role": "user" },
-  "izaro.gondra@digipen.edu": { "guild": "Water", "points": 0, "role": "user" },
-  "virginia.d@digipen.edu": { "guild": "Water", "points": 0, "role": "user" },
-  "david.sanchez@digipen.edu": { "guild": "Water", "points": 0, "role": "user" },
-  "eder.b1@digipen.edu": { "guild": "Water", "points": 0, "role": "user" },
-  "oier.m@digipen.edu": { "guild": "Water", "points": 0, "role": "user" },
-  "ainhize.ruiz@digipen.edu": { "guild": "Water", "points": 0, "role": "user" },
-  "e.olaizola@digipen.edu": { "guild": "Water", "points": 0, "role": "user" },
-  "c.hierro@digipen.edu": { "guild": "Water", "points": 0, "role": "user" },
-  "jon.lopez@digipen.edu": { "guild": "Water", "points": 0, "role": "user" },
-  "nerea.t@digipen.edu": { "guild": "Water", "points": 0, "role": "user" },
-  "natasa.cuic@digipen.edu": { "guild": "Water", "points": 0, "role": "user" },
-  "marta.p@digipen.edu": { "guild": "Water", "points": 0, "role": "user" },
-  "ivan.campos@digipen.edu": { "guild": "Water", "points": 0, "role": "user" },
-  "a.campos@digipen.edu": { "guild": "Water", "points": 0, "role": "user" },
-  "daniel.andia@digipen.edu": { "guild": "Water", "points": 0, "role": "user" },
-  "yaiza.t@digipen.edu": { "guild": "Water", "points": 0, "role": "user" },
-  "j.du@digipen.edu": { "guild": "Water", "points": 0, "role": "user" },
-  "alejandra.garbati@digipen.edu": { "guild": "Water", "points": 0, "role": "user" },
-  "jon.alonso@digipen.edu": { "guild": "Water", "points": 0, "role": "user" },
-  "sergi.subirats@digipen.edu": { "guild": "Water", "points": 0, "role": "user" },
-  "soraya.saenz@digipen.edu": { "guild": "Water", "points": 0, "role": "user" },
-  "oier.elorduy@digipen.edu": { "guild": "Water", "points": 0, "role": "user" },
-  "k.youssef@digipen.edu": { "guild": "Water", "points": 0, "role": "user" },
-  "peru.g@digipen.edu": { "guild": "Water", "points": 0, "role": "user" },
-  "marina.rodrigo@digipen.edu": { "guild": "Water", "points": 0, "role": "user" },
-  "arwen.dejess@digipen.edu": { "guild": "Water", "points": 0, "role": "user" },
-  "eder.delicado@digipen.edu": { "guild": "Water", "points": 0, "role": "user" },
-  "ane.n@digipen.edu": { "guild": "Water", "points": 0, "role": "user" },
-  "alvaro.zurinaga@digipen.edu": { "guild": "Water", "points": 0, "role": "user" },
-  "elrik.h@digipen.edu": { "guild": "Water", "points": 0, "role": "user" },
-  "eder.perello@digipen.edu": { "guild": "Water", "points": 0, "role": "user" },
-  "h.besteiro@digipen.edu": { "guild": "Water", "points": 0, "role": "user" },
-  "yue.c@digipen.edu": { "guild": "Water", "points": 0, "role": "user" },
-  "fuentes.b@digipen.edu": { "guild": "Water", "points": 0, "role": "user" },
-  "u.gonzlez@digipen.edu": { "guild": "Water", "points": 0, "role": "user" },
-  "n.plata@digipen.edu": { "guild": "Water", "points": 0, "role": "user" },
-  "unai.ranea@digipen.edu": { "guild": "Water", "points": 0, "role": "user" },
-  "ainhoa.zumaran@digipen.edu": { "guild": "Water", "points": 0, "role": "user" },
-  "victoriamikaela.a@digipen.edu": { "guild": "Water", "points": 0, "role": "user" },
-  "markel.susial@digipen.edu": { "guild": "Water", "points": 0, "role": "user" },
-  "diego.arias@digipen.edu": { "guild": "Water", "points": 0, "role": "user" },
-  "hugo.andrade@digipen.edu": { "guild": "Water", "points": 0, "role": "user" }
+  "akaansh.ajit@digipen.edu": {
+    "guild": "Fire",
+    "points": 0,
+    "role": "admin"
+  },
+  "akaansh.ajit@gmail.com": {
+    "guild": "Water",
+    "points": 9001,
+    "role": "admin",
+    "bio": "I am a really cool person",
+    "avatar": "/uploads/1760032231785-rg8eccks3kq.jpg"
+  },
+  "selvyn2004@live.co.uk": {
+    "guild": "Water",
+    "points": 1,
+    "role": "admin"
+  },
+  "jon.f@digipen.edu": {
+    "guild": "Earth",
+    "points": 0,
+    "role": "user"
+  },
+  "jon.marin@digipen.edu": {
+    "guild": "Earth",
+    "points": 0,
+    "role": "user"
+  },
+  "daniel.sanchez@digipen.edu": {
+    "guild": "Earth",
+    "points": 0,
+    "role": "user"
+  },
+  "marta.m@digipen.edu": {
+    "guild": "Earth",
+    "points": 0,
+    "role": "user"
+  },
+  "alain.l@digipen.edu": {
+    "guild": "Earth",
+    "points": 0,
+    "role": "user"
+  },
+  "mikel.ruiz@digipen.edu": {
+    "guild": "Earth",
+    "points": 0,
+    "role": "user"
+  },
+  "asier.azkarraga@digipen.edu": {
+    "guild": "Earth",
+    "points": 0,
+    "role": "user"
+  },
+  "b.arrue@digipen.edu": {
+    "guild": "Earth",
+    "points": 0,
+    "role": "user"
+  },
+  "isabella.f@digipen.edu": {
+    "guild": "Earth",
+    "points": 0,
+    "role": "user"
+  },
+  "j.villa@digipen.edu": {
+    "guild": "Earth",
+    "points": 0,
+    "role": "user"
+  },
+  "pablo.garbizu@digipen.edu": {
+    "guild": "Earth",
+    "points": 0,
+    "role": "user"
+  },
+  "a.marsal@digipen.edu": {
+    "guild": "Earth",
+    "points": 0,
+    "role": "user"
+  },
+  "lide.b@digipen.edu": {
+    "guild": "Earth",
+    "points": 0,
+    "role": "user"
+  },
+  "jone.santisteban@digipen.edu": {
+    "guild": "Earth",
+    "points": 0,
+    "role": "user"
+  },
+  "aitor.garay@digipen.edu": {
+    "guild": "Earth",
+    "points": 0,
+    "role": "user"
+  },
+  "nerea.vilor@digipen.edu": {
+    "guild": "Earth",
+    "points": 0,
+    "role": "user"
+  },
+  "ariane.c@digipen.edu": {
+    "guild": "Earth",
+    "points": 0,
+    "role": "user"
+  },
+  "olatz.zugasti@digipen.edu": {
+    "guild": "Earth",
+    "points": 0,
+    "role": "user"
+  },
+  "davidgabriel.chavez@digipen.edu": {
+    "guild": "Earth",
+    "points": 0,
+    "role": "user"
+  },
+  "jaime.sararu@digipen.edu": {
+    "guild": "Earth",
+    "points": 0,
+    "role": "user"
+  },
+  "javierm@digipen.edu": {
+    "guild": "Earth",
+    "points": 0,
+    "role": "user"
+  },
+  "paula.bajo@digipen.edu": {
+    "guild": "Earth",
+    "points": 0,
+    "role": "user"
+  },
+  "d.rodrguez@digipen.edu": {
+    "guild": "Earth",
+    "points": 0,
+    "role": "user"
+  },
+  "i.omaechevarra@digipen.edu": {
+    "guild": "Earth",
+    "points": 0,
+    "role": "user"
+  },
+  "aitor.r@digipen.edu": {
+    "guild": "Earth",
+    "points": 0,
+    "role": "user"
+  },
+  "imacias@digipen.edu": {
+    "guild": "Earth",
+    "points": 0,
+    "role": "user"
+  },
+  "i.garmendia@digipen.edu": {
+    "guild": "Earth",
+    "points": 0,
+    "role": "user"
+  },
+  "t.mazzega@digipen.edu": {
+    "guild": "Earth",
+    "points": 0,
+    "role": "user"
+  },
+  "jokin.martinez@digipen.edu": {
+    "guild": "Earth",
+    "points": 0,
+    "role": "user"
+  },
+  "pablo.rodrguez@digipen.edu": {
+    "guild": "Earth",
+    "points": 0,
+    "role": "user"
+  },
+  "ainhoa.ellacuria@digipen.edu": {
+    "guild": "Earth",
+    "points": 0,
+    "role": "user"
+  },
+  "jon.u@digipen.edu": {
+    "guild": "Earth",
+    "points": 0,
+    "role": "user"
+  },
+  "imartin@digipen.edu": {
+    "guild": "Earth",
+    "points": 0,
+    "role": "user"
+  },
+  "sarahmaria.g@digipen.edu": {
+    "guild": "Earth",
+    "points": 0,
+    "role": "user"
+  },
+  "iker.quintana@digipen.edu": {
+    "guild": "Earth",
+    "points": 0,
+    "role": "user"
+  },
+  "nespejo@digipen.edu": {
+    "guild": "Earth",
+    "points": 0,
+    "role": "user"
+  },
+  "fang.z@digipen.edu": {
+    "guild": "Earth",
+    "points": 0,
+    "role": "user"
+  },
+  "chan.n@digipen.edu": {
+    "guild": "Earth",
+    "points": 0,
+    "role": "user"
+  },
+  "leire.camacho@digipen.edu": {
+    "guild": "Earth",
+    "points": 0,
+    "role": "user"
+  },
+  "a.gurov@digipen.edu": {
+    "guild": "Earth",
+    "points": 0,
+    "role": "user"
+  },
+  "laura.choueri@digipen.edu": {
+    "guild": "Earth",
+    "points": 0,
+    "role": "user"
+  },
+  "nerea.pinilla@digipen.edu": {
+    "guild": "Earth",
+    "points": 0,
+    "role": "user"
+  },
+  "joane.larrabe@digipen.edu": {
+    "guild": "Earth",
+    "points": 0,
+    "role": "user"
+  },
+  "a.marcaida@digipen.edu": {
+    "guild": "Earth",
+    "points": 0,
+    "role": "user"
+  },
+  "ander.martinez@digipen.edu": {
+    "guild": "Earth",
+    "points": 0,
+    "role": "user"
+  },
+  "isilvano@digipen.edu": {
+    "guild": "Earth",
+    "points": 0,
+    "role": "user"
+  },
+  "adam.prenosil@digipen.edu": {
+    "guild": "Earth",
+    "points": 0,
+    "role": "user"
+  },
+  "f.iker@digipen.edu": {
+    "guild": "Earth",
+    "points": 0,
+    "role": "user"
+  },
+  "g.eduardo@digipen.edu": {
+    "guild": "Earth",
+    "points": 0,
+    "role": "user"
+  },
+  "alma.g@digipen.edu": {
+    "guild": "Earth",
+    "points": 0,
+    "role": "user"
+  },
+  "leire.meseguer@digipen.edu": {
+    "guild": "Earth",
+    "points": 0,
+    "role": "user"
+  },
+  "daniel.ruiz@digipen.edu": {
+    "guild": "Earth",
+    "points": 0,
+    "role": "user"
+  },
+  "viljamas.s@digipen.edu": {
+    "guild": "Earth",
+    "points": 0,
+    "role": "user"
+  },
+  "e.ireton@digipen.edu": {
+    "guild": "Earth",
+    "points": 0,
+    "role": "user"
+  },
+  "davidalejandro.s@digipen.edu": {
+    "guild": "Earth",
+    "points": 0,
+    "role": "user"
+  },
+  "lindsey.larsen@digipen.edu": {
+    "guild": "Earth",
+    "points": 0,
+    "role": "user"
+  },
+  "i.domnguez@digipen.edu": {
+    "guild": "Earth",
+    "points": 0,
+    "role": "user"
+  },
+  "pablo.m@digipen.edu": {
+    "guild": "Earth",
+    "points": 0,
+    "role": "user"
+  },
+  "j.alvarez@digipen.edu": {
+    "guild": "Earth",
+    "points": 0,
+    "role": "user"
+  },
+  "i.sastre@digipen.edu": {
+    "guild": "Earth",
+    "points": 0,
+    "role": "user"
+  },
+  "siro.francoeur@digipen.edu": {
+    "guild": "Earth",
+    "points": 0,
+    "role": "user"
+  },
+  "l.galan@digipen.edu": {
+    "guild": "Earth",
+    "points": 0,
+    "role": "user"
+  },
+  "martin.g@digipen.edu": {
+    "guild": "Earth",
+    "points": 0,
+    "role": "user"
+  },
+  "dibyajone.l@digipen.edu": {
+    "guild": "Earth",
+    "points": 0,
+    "role": "user"
+  },
+  "anabella.l@digipen.edu": {
+    "guild": "Earth",
+    "points": 0,
+    "role": "user"
+  },
+  "hugo.ramirez@digipen.edu": {
+    "guild": "Earth",
+    "points": 0,
+    "role": "user"
+  },
+  "i.toquero@digipen.edu": {
+    "guild": "Earth",
+    "points": 0,
+    "role": "user"
+  },
+  "aitor.zaballa@digipen.edu": {
+    "guild": "Earth",
+    "points": 0,
+    "role": "user"
+  },
+  "lawrence.winters@digipen.edu": {
+    "guild": "Earth",
+    "points": 0,
+    "role": "user"
+  },
+  "ruben.marano@digipen.edu": {
+    "guild": "Earth",
+    "points": 0,
+    "role": "user"
+  },
+  "alexander.rebek@digipen.edu": {
+    "guild": "Fire",
+    "points": 0,
+    "role": "user"
+  },
+  "irati.arranz@digipen.edu": {
+    "guild": "Fire",
+    "points": 0,
+    "role": "user"
+  },
+  "jfernandez@digipen.edu": {
+    "guild": "Fire",
+    "points": 0,
+    "role": "user"
+  },
+  "markel.gutierrez@digipen.edu": {
+    "guild": "Fire",
+    "points": 0,
+    "role": "user"
+  },
+  "jone.esteban@digipen.edu": {
+    "guild": "Fire",
+    "points": 0,
+    "role": "user"
+  },
+  "carlos.canut@digipen.edu": {
+    "guild": "Fire",
+    "points": 0,
+    "role": "user"
+  },
+  "p.cazzaniga@digipen.edu": {
+    "guild": "Fire",
+    "points": 0,
+    "role": "user"
+  },
+  "tkomair@digipen.edu": {
+    "guild": "Fire",
+    "points": 0,
+    "role": "user"
+  },
+  "leire.m@digipen.edu": {
+    "guild": "Fire",
+    "points": 0,
+    "role": "user"
+  },
+  "mario.c@digipen.edu": {
+    "guild": "Fire",
+    "points": 0,
+    "role": "user"
+  },
+  "irati.n@digipen.edu": {
+    "guild": "Fire",
+    "points": 0,
+    "role": "user"
+  },
+  "ander.fernandez@digipen.edu": {
+    "guild": "Fire",
+    "points": 0,
+    "role": "user"
+  },
+  "diego.garcia@digipen.edu": {
+    "guild": "Fire",
+    "points": 0,
+    "role": "user"
+  },
+  "b.jon@digipen.edu": {
+    "guild": "Fire",
+    "points": 0,
+    "role": "user"
+  },
+  "uxue.f@digipen.edu": {
+    "guild": "Fire",
+    "points": 0,
+    "role": "user"
+  },
+  "d.harper@digipen.edu": {
+    "guild": "Fire",
+    "points": 0,
+    "role": "user"
+  },
+  "l.bartkevich@digipen.edu": {
+    "guild": "Fire",
+    "points": 0,
+    "role": "user"
+  },
+  "lucas.orbea@digipen.edu": {
+    "guild": "Fire",
+    "points": 0,
+    "role": "user"
+  },
+  "s.portilla@digipen.edu": {
+    "guild": "Fire",
+    "points": 0,
+    "role": "user"
+  },
+  "uxuehuan.mendez@digipen.edu": {
+    "guild": "Fire",
+    "points": 0,
+    "role": "user"
+  },
+  "s.paas@digipen.edu": {
+    "guild": "Fire",
+    "points": 0,
+    "role": "user"
+  },
+  "a.goi@digipen.edu": {
+    "guild": "Fire",
+    "points": 0,
+    "role": "user"
+  },
+  "sofiia.zhyhlii@digipen.edu": {
+    "guild": "Fire",
+    "points": 0,
+    "role": "user"
+  },
+  "telmo.t@digipen.edu": {
+    "guild": "Fire",
+    "points": 0,
+    "role": "user"
+  },
+  "mfeijoo@digipen.edu": {
+    "guild": "Fire",
+    "points": 0,
+    "role": "user"
+  },
+  "patricia.l@digipen.edu": {
+    "guild": "Fire",
+    "points": 0,
+    "role": "user"
+  },
+  "jon.sanchez@digipen.edu": {
+    "guild": "Fire",
+    "points": 0,
+    "role": "user"
+  },
+  "irene.l@digipen.edu": {
+    "guild": "Fire",
+    "points": 0,
+    "role": "user"
+  },
+  "alejandro.v@digipen.edu": {
+    "guild": "Fire",
+    "points": 0,
+    "role": "user"
+  },
+  "david.puertas@digipen.edu": {
+    "guild": "Fire",
+    "points": 0,
+    "role": "user"
+  },
+  "erika.zdravkovic@digipen.edu": {
+    "guild": "Fire",
+    "points": 0,
+    "role": "user"
+  },
+  "sofiia.glinskaia@digipen.edu": {
+    "guild": "Fire",
+    "points": 0,
+    "role": "user"
+  },
+  "josu.g@digipen.edu": {
+    "guild": "Fire",
+    "points": 0,
+    "role": "user"
+  },
+  "guillermo.hurtado@digipen.edu": {
+    "guild": "Fire",
+    "points": 0,
+    "role": "user"
+  },
+  "f.hernandez@digipen.edu": {
+    "guild": "Fire",
+    "points": 0,
+    "role": "user"
+  },
+  "imadina@digipen.edu": {
+    "guild": "Fire",
+    "points": 0,
+    "role": "user"
+  },
+  "diego.alcazar@digipen.edu": {
+    "guild": "Fire",
+    "points": 0,
+    "role": "user"
+  },
+  "june.asua@digipen.edu": {
+    "guild": "Fire",
+    "points": 0,
+    "role": "user"
+  },
+  "archi.n@digipen.edu": {
+    "guild": "Fire",
+    "points": 0,
+    "role": "user"
+  },
+  "asier.r@digipen.edu": {
+    "guild": "Fire",
+    "points": 0,
+    "role": "user"
+  },
+  "pedro.teixeira@digipen.edu": {
+    "guild": "Fire",
+    "points": 0,
+    "role": "user"
+  },
+  "julia.sanchez@digipen.edu": {
+    "guild": "Fire",
+    "points": 0,
+    "role": "user"
+  },
+  "i.jahangir@digipen.edu": {
+    "guild": "Fire",
+    "points": 0,
+    "role": "user"
+  },
+  "lucas.p@digipen.edu": {
+    "guild": "Fire",
+    "points": 0,
+    "role": "user"
+  },
+  "anne.t@digipen.edu": {
+    "guild": "Fire",
+    "points": 0,
+    "role": "user"
+  },
+  "josu.orobengoa@digipen.edu": {
+    "guild": "Fire",
+    "points": 0,
+    "role": "user"
+  },
+  "steven.longden@digipen.edu": {
+    "guild": "Fire",
+    "points": 0,
+    "role": "user"
+  },
+  "oihan.a@digipen.edu": {
+    "guild": "Fire",
+    "points": 0,
+    "role": "user"
+  },
+  "atahan.akay@digipen.edu": {
+    "guild": "Fire",
+    "points": 0,
+    "role": "user"
+  },
+  "c.alonso@digipen.edu": {
+    "guild": "Fire",
+    "points": 0,
+    "role": "user"
+  },
+  "e.elorriaga@digipen.edu": {
+    "guild": "Fire",
+    "points": 0,
+    "role": "user"
+  },
+  "amalia.m@digipen.edu": {
+    "guild": "Fire",
+    "points": 0,
+    "role": "user"
+  },
+  "a.delgado@digipen.edu": {
+    "guild": "Fire",
+    "points": 0,
+    "role": "user"
+  },
+  "borja.manso@digipen.edu": {
+    "guild": "Fire",
+    "points": 0,
+    "role": "user"
+  },
+  "v.alidibirova@digipen.edu": {
+    "guild": "Fire",
+    "points": 0,
+    "role": "user"
+  },
+  "v.alonso@digipen.edu": {
+    "guild": "Fire",
+    "points": 0,
+    "role": "user"
+  },
+  "i.azkarate@digipen.edu": {
+    "guild": "Fire",
+    "points": 0,
+    "role": "user"
+  },
+  "zoe.c@digipen.edu": {
+    "guild": "Fire",
+    "points": 0,
+    "role": "user"
+  },
+  "ugaitz.g@digipen.edu": {
+    "guild": "Fire",
+    "points": 0,
+    "role": "user"
+  },
+  "claudia.larrauri@digipen.edu": {
+    "guild": "Fire",
+    "points": 0,
+    "role": "user"
+  },
+  "shyla.lennie@digipen.edu": {
+    "guild": "Fire",
+    "points": 0,
+    "role": "user"
+  },
+  "len.k@digipen.edu": {
+    "guild": "Fire",
+    "points": 0,
+    "role": "user"
+  },
+  "danielavalentina.c@digipen.edu": {
+    "guild": "Fire",
+    "points": 0,
+    "role": "user"
+  },
+  "k.susilasate@digipen.edu": {
+    "guild": "Fire",
+    "points": 0,
+    "role": "user"
+  },
+  "alejandro.ursua@digipen.edu": {
+    "guild": "Fire",
+    "points": 0,
+    "role": "user"
+  },
+  "khit.goh@digipen.edu": {
+    "guild": "Fire",
+    "points": 0,
+    "role": "user"
+  },
+  "matteo.pintonello@digipen.edu": {
+    "guild": "Fire",
+    "points": 0,
+    "role": "user"
+  },
+  "lorenzo.barquin@digipen.edu": {
+    "guild": "Fire",
+    "points": 0,
+    "role": "user"
+  },
+  "holly.doolittle@digipen.edu": {
+    "guild": "Fire",
+    "points": 0,
+    "role": "user"
+  },
+  "guoxiang.zheng@digipen.edu": {
+    "guild": "Water",
+    "points": 0,
+    "role": "user"
+  },
+  "iraia.c@digipen.edu": {
+    "guild": "Water",
+    "points": 0,
+    "role": "user"
+  },
+  "rabi.ghannam@digipen.edu": {
+    "guild": "Water",
+    "points": 0,
+    "role": "user"
+  },
+  "pedro.r@digipen.edu": {
+    "guild": "Water",
+    "points": 0,
+    "role": "user"
+  },
+  "j.lin@digipen.edu": {
+    "guild": "Water",
+    "points": 0,
+    "role": "user"
+  },
+  "eneko.d@digipen.edu": {
+    "guild": "Water",
+    "points": 0,
+    "role": "user"
+  },
+  "j.cuestas@digipen.edu": {
+    "guild": "Water",
+    "points": 0,
+    "role": "user"
+  },
+  "b.ortega@digipen.edu": {
+    "guild": "Water",
+    "points": 0,
+    "role": "user"
+  },
+  "berta.fernandez@digipen.edu": {
+    "guild": "Water",
+    "points": 0,
+    "role": "user"
+  },
+  "eduardo.devega@digipen.edu": {
+    "guild": "Water",
+    "points": 0,
+    "role": "user"
+  },
+  "iotalora@digipen.edu": {
+    "guild": "Water",
+    "points": 0,
+    "role": "user"
+  },
+  "laura.a@digipen.edu": {
+    "guild": "Water",
+    "points": 0,
+    "role": "user"
+  },
+  "paulina.s@digipen.edu": {
+    "guild": "Water",
+    "points": 0,
+    "role": "user"
+  },
+  "j.jauregui@digipen.edu": {
+    "guild": "Water",
+    "points": 0,
+    "role": "user"
+  },
+  "gema.ormazabal@digipen.edu": {
+    "guild": "Water",
+    "points": 0,
+    "role": "user"
+  },
+  "malen.pozo@digipen.edu": {
+    "guild": "Water",
+    "points": 0,
+    "role": "user"
+  },
+  "ignacio.santalla@digipen.edu": {
+    "guild": "Water",
+    "points": 0,
+    "role": "user"
+  },
+  "fernando.velasco@digipen.edu": {
+    "guild": "Water",
+    "points": 0,
+    "role": "user"
+  },
+  "cristina.juesas@digipen.edu": {
+    "guild": "Water",
+    "points": 0,
+    "role": "user"
+  },
+  "aroa.e@digipen.edu": {
+    "guild": "Water",
+    "points": 0,
+    "role": "user"
+  },
+  "oier.morate@digipen.edu": {
+    "guild": "Water",
+    "points": 0,
+    "role": "user"
+  },
+  "d.higuera@digipen.edu": {
+    "guild": "Water",
+    "points": 0,
+    "role": "user"
+  },
+  "aneli.f@digipen.edu": {
+    "guild": "Water",
+    "points": 0,
+    "role": "user"
+  },
+  "sergio.martinez@digipen.edu": {
+    "guild": "Water",
+    "points": 0,
+    "role": "user"
+  },
+  "a.gandarias@digipen.edu": {
+    "guild": "Water",
+    "points": 0,
+    "role": "user"
+  },
+  "luca.z@digipen.edu": {
+    "guild": "Water",
+    "points": 0,
+    "role": "user"
+  },
+  "ainhize.arce@digipen.edu": {
+    "guild": "Water",
+    "points": 0,
+    "role": "user"
+  },
+  "izaro.gondra@digipen.edu": {
+    "guild": "Water",
+    "points": 0,
+    "role": "user"
+  },
+  "virginia.d@digipen.edu": {
+    "guild": "Water",
+    "points": 0,
+    "role": "user"
+  },
+  "david.sanchez@digipen.edu": {
+    "guild": "Water",
+    "points": 0,
+    "role": "user"
+  },
+  "eder.b1@digipen.edu": {
+    "guild": "Water",
+    "points": 0,
+    "role": "user"
+  },
+  "oier.m@digipen.edu": {
+    "guild": "Water",
+    "points": 0,
+    "role": "user"
+  },
+  "ainhize.ruiz@digipen.edu": {
+    "guild": "Water",
+    "points": 0,
+    "role": "user"
+  },
+  "e.olaizola@digipen.edu": {
+    "guild": "Water",
+    "points": 0,
+    "role": "user"
+  },
+  "c.hierro@digipen.edu": {
+    "guild": "Water",
+    "points": 0,
+    "role": "user"
+  },
+  "jon.lopez@digipen.edu": {
+    "guild": "Water",
+    "points": 0,
+    "role": "user"
+  },
+  "nerea.t@digipen.edu": {
+    "guild": "Water",
+    "points": 0,
+    "role": "user"
+  },
+  "natasa.cuic@digipen.edu": {
+    "guild": "Water",
+    "points": 0,
+    "role": "user"
+  },
+  "marta.p@digipen.edu": {
+    "guild": "Water",
+    "points": 0,
+    "role": "user"
+  },
+  "ivan.campos@digipen.edu": {
+    "guild": "Water",
+    "points": 0,
+    "role": "user"
+  },
+  "a.campos@digipen.edu": {
+    "guild": "Water",
+    "points": 0,
+    "role": "user"
+  },
+  "daniel.andia@digipen.edu": {
+    "guild": "Water",
+    "points": 0,
+    "role": "user"
+  },
+  "yaiza.t@digipen.edu": {
+    "guild": "Water",
+    "points": 0,
+    "role": "user"
+  },
+  "j.du@digipen.edu": {
+    "guild": "Water",
+    "points": 0,
+    "role": "user"
+  },
+  "alejandra.garbati@digipen.edu": {
+    "guild": "Water",
+    "points": 0,
+    "role": "user"
+  },
+  "jon.alonso@digipen.edu": {
+    "guild": "Water",
+    "points": 0,
+    "role": "user"
+  },
+  "sergi.subirats@digipen.edu": {
+    "guild": "Water",
+    "points": 0,
+    "role": "user"
+  },
+  "soraya.saenz@digipen.edu": {
+    "guild": "Water",
+    "points": 0,
+    "role": "user"
+  },
+  "oier.elorduy@digipen.edu": {
+    "guild": "Water",
+    "points": 0,
+    "role": "user"
+  },
+  "k.youssef@digipen.edu": {
+    "guild": "Water",
+    "points": 0,
+    "role": "user"
+  },
+  "peru.g@digipen.edu": {
+    "guild": "Water",
+    "points": 0,
+    "role": "user"
+  },
+  "marina.rodrigo@digipen.edu": {
+    "guild": "Water",
+    "points": 0,
+    "role": "user"
+  },
+  "arwen.dejess@digipen.edu": {
+    "guild": "Water",
+    "points": 0,
+    "role": "user"
+  },
+  "eder.delicado@digipen.edu": {
+    "guild": "Water",
+    "points": 0,
+    "role": "user"
+  },
+  "ane.n@digipen.edu": {
+    "guild": "Water",
+    "points": 0,
+    "role": "user"
+  },
+  "alvaro.zurinaga@digipen.edu": {
+    "guild": "Water",
+    "points": 0,
+    "role": "user"
+  },
+  "elrik.h@digipen.edu": {
+    "guild": "Water",
+    "points": 0,
+    "role": "user"
+  },
+  "eder.perello@digipen.edu": {
+    "guild": "Water",
+    "points": 0,
+    "role": "user"
+  },
+  "h.besteiro@digipen.edu": {
+    "guild": "Water",
+    "points": 0,
+    "role": "user"
+  },
+  "yue.c@digipen.edu": {
+    "guild": "Water",
+    "points": 0,
+    "role": "user"
+  },
+  "fuentes.b@digipen.edu": {
+    "guild": "Water",
+    "points": 0,
+    "role": "user"
+  },
+  "u.gonzlez@digipen.edu": {
+    "guild": "Water",
+    "points": 0,
+    "role": "user"
+  },
+  "n.plata@digipen.edu": {
+    "guild": "Water",
+    "points": 0,
+    "role": "user"
+  },
+  "unai.ranea@digipen.edu": {
+    "guild": "Water",
+    "points": 0,
+    "role": "user"
+  },
+  "ainhoa.zumaran@digipen.edu": {
+    "guild": "Water",
+    "points": 0,
+    "role": "user"
+  },
+  "victoriamikaela.a@digipen.edu": {
+    "guild": "Water",
+    "points": 0,
+    "role": "user"
+  },
+  "markel.susial@digipen.edu": {
+    "guild": "Water",
+    "points": 0,
+    "role": "user"
+  },
+  "diego.arias@digipen.edu": {
+    "guild": "Water",
+    "points": 0,
+    "role": "user"
+  },
+  "hugo.andrade@digipen.edu": {
+    "guild": "Water",
+    "points": 0,
+    "role": "user"
+  }
 }
