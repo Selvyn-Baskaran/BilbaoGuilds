@@ -1,46 +1,55 @@
 <nav class="navbar">
-  <div class="navbar-logo">
-    <% if (typeof points !== 'undefined') { %>
-      <%= user %> : <%= points %> points |
-      🟢 Online: <span id="onlineCount"><%= online %></span>
-    <% } else if (typeof online !== 'undefined') { %>
-      🟢 Online: <span id="onlineCount"><%= online %></span>
-    <% } else { %>
-      MyApp
-    <% } %>
+  <div class="navbar-header">
+    <span class="navbar-logo">
+      <% if (user) { %>
+        <%= user %> : <%= points %> pts
+      <% } else { %>
+        Bilbao Guilds
+      <% } %>
+    </span>
+
+    <button class="navbar-toggle" id="burger">&#9776;</button>
   </div>
 
-  <button class="navbar-toggle" id="burger">&#9776;</button>
-
   <ul class="navbar-links" id="nav-links">
-  <% if (user) { %>
-    <li><a href="/index">Home</a></li>
-    <li><a href="/events">Events</a></li>
-    <li><a href="/challenges">Challenges</a></li>
-    <li><a href="/guild-chat">Guild Chat</a></li>
-    <li><a href="/leaderboard">Leaderboard</a></li>
-    <% if (role === 'admin' || role === 'manager') { %>
-      <li><a href="/admin">Admin</a></li>
+    <% if (user) { %>
+      <li><a href="/index">Home</a></li>
+      <li><a href="/events">Events</a></li>
+      <li><a href="/challenges">Challenges</a></li>
+      <li><a href="/guild-chat">Guild Chat</a></li>
+      <li><a href="/leaderboard">Leaderboard</a></li>
+      <li><a href="/profile">Profile</a></li>
+      <% if (role === 'admin' || role === 'manager') { %>
+        <li><a href="/admin">Admin</a></li>
+      <% } %>
+      <li><a href="/logout">Logout</a></li>
+    <% } else { %>
+      <li><a href="/login.html">Log In</a></li>
     <% } %>
-    <li><a href="/logout">Logout</a></li>
-  <% } else { %>
-    <li><a href="/login.html">Log In</a></li>
-  <% } %>
-</ul>
+  </ul>
 
+  <div class="online-status">
+    🟢 Online: <span id="onlineCount"><%= online %></span>
+  </div>
+</nav>
 
 <script src="/socket.io/socket.io.js"></script>
 <script>
-  const socket = io();
-  socket.on("updateOnline", (count) => {
-    const onlineEl = document.getElementById("onlineCount");
-    if (onlineEl) {
-      onlineEl.textContent = count;
+  document.addEventListener("DOMContentLoaded", () => {
+    const socket = io();
+
+    socket.on("updateOnline", (count) => {
+      const onlineEl = document.getElementById("onlineCount");
+      if (onlineEl) onlineEl.textContent = count;
+    });
+
+    const burger = document.getElementById("burger");
+    const navLinks = document.getElementById("nav-links");
+
+    if (burger && navLinks) {
+      burger.addEventListener("click", () => {
+        navLinks.classList.toggle("show");
+      });
     }
   });
-
-  document.getElementById("burger")?.addEventListener("click", () => {
-    document.getElementById("nav-links")?.classList.toggle("show");
-  });
 </script>
-</nav>

@@ -1,0 +1,89 @@
+/* --- Base layout --- */
+.navbar {
+  background-color: #222;
+  color: white;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  position: relative;
+}
+
+.navbar-header {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* Always visible burger */
+.navbar-toggle {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 1.8rem;
+  cursor: pointer;
+  display: block; /* always show burger */
+}
+
+/* Navbar links container (hidden by default) */
+.navbar-links {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: none; /* hidden initially */
+  flex-direction: column;
+  position: absolute; /* position relative to navbar */
+  top: 60px;         /* below header */
+  right: 0;          /* align to right */
+  background-color: #222;
+  border-radius: 8px;
+  width: 200px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+  text-align: right;  /* text aligns right */
+  z-index: 1000;
+}
+
+/* Show menu when toggled */
+.navbar-links.show {
+  display: flex;
+  animation: slideDown 0.3s ease;
+}
+
+/* Slide down animation */
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Links styling */
+.navbar-links li {
+  margin: 0.5rem 0;
+}
+
+.navbar-links a {
+  color: white;
+  text-decoration: none;
+  font-size: 1rem;
+  display: block;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  transition: background 0.2s;
+  text-align: right; /* text aligns right */
+}
+
+.navbar-links a:hover {
+  background-color: #444;
+}
+
+.navbar-logo {
+  font-weight: bold;
+  font-size: 1.2rem;
+}
+
+/* Online counter */
+.online-status {
+  margin-top: 1rem;
+  font-size: 0.9rem;
+  opacity: 0.85;
+}
