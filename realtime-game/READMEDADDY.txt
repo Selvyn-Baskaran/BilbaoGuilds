@@ -32,7 +32,7 @@ make sure nav bar is consistent across webpages ✅
 -------CHALLENGES REVAMPP-------
 actually make them useful, other thhan text chat rn, be able to upload photos, or whatever, make acc games and stuff
 challenge deadlines
-ongoing challenges under upcoming events so uno when challenges are ending, (the ones that last longer than a day)
+ongoing challenges under upcoming events so uno when challenges are ending, (the ones that last longer than a day)✅
 
 
 
@@ -45,23 +45,6 @@ chat - filter bullshit out
 background music
 make sure logout isnt off the screen ✅
 display username once you login ✅
-
-<section class="card">
-      <h3>Add Event</h3>
-      <form method="POST" action="/admin/events/create">
-        <input name="id" placeholder="challenge id (slug)" required />
-        <input name="title" placeholder="title" required />
-        <textarea name="description" placeholder="description"></textarea>
-        <button type="submit">Create</button>
-      </form>
-    </section>
-
-
-
-
-
-
-
 
 
 easter eggs
