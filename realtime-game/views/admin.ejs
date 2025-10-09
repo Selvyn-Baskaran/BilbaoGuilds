@@ -13,27 +13,71 @@
     <h2>Admin Portal</h2>
 
     <section class="card">
-      <h3>Create Challenge</h3>
-      <form method="POST" action="/admin/challenges/create">
+      <h3>Challenges</h3>
+
+      <!-- Create -->
+      <form method="POST" action="/admin/challenges/create" style="margin-bottom:1rem;">
         <input name="id" placeholder="challenge id (slug)" required />
         <input name="title" placeholder="title" required />
         <textarea name="description" placeholder="description"></textarea>
         <button type="submit">Create</button>
       </form>
+
+      <!-- Manage -->
+      <details>
+        <summary style="cursor:pointer; font-weight:600;">
+          Manage existing challenges (<%= challenges?.length || 0 %>)
+        </summary>
+
+        <input id="challengeFilter"
+              placeholder="Filter by title…"
+              style="margin:.6rem 0; width:100%; max-width:420px;"
+              oninput="
+                const q = this.value.toLowerCase();
+                document.querySelectorAll('.challenge-row').forEach(li=>{
+                  const t = li.getAttribute('data-text');
+                  li.style.display = t.includes(q) ? '' : 'none';
+                });
+              " />
+
+        <ul style="list-style:none; padding:0; margin:0;">
+          <% (challenges || []).forEach(ch => { %>
+            <li class="challenge-row"
+                data-text="<%= ch.title.toLowerCase() %>"
+                style="border:1px solid #eee; border-radius:8px; padding:.75rem; margin:.5rem 0;">
+              <div style="display:flex; gap:.5rem; align-items:center; justify-content:space-between; flex-wrap:wrap;">
+                <div>
+                  <strong><a href="/challenges/<%= ch.id %>" target="_blank"><%= ch.title %></a></strong>
+                  <div style="font-size:.9rem; opacity:.85;">ID: <%= ch.id %></div>
+                </div>
+
+                <div style="display:flex; gap:.5rem;">
+                  <!-- Delete -->
+                  <form method="POST" action="/admin/challenges/<%= ch.id %>/delete"
+                        onsubmit="return confirm('Delete this challenge?');">
+                    <button type="submit">Delete</button>
+                  </form>
+
+                  <!-- Edit -->
+                  <details>
+                    <summary style="cursor:pointer; padding:.4rem .6rem; border:1px solid #ccc; border-radius:6px;">Edit</summary>
+                    <form method="POST" action="/admin/challenges/<%= ch.id %>/update"
+                          style="margin-top:.5rem; max-width:520px;">
+                      <label>Title</label>
+                      <input name="title" value="<%= ch.title %>" required />
+                      <label>Description</label>
+                      <textarea name="description"><%= ch.description || '' %></textarea>
+                      <button type="submit" style="margin-top:.4rem;">Save Changes</button>
+                    </form>
+                  </details>
+                </div>
+              </div>
+            </li>
+          <% }) %>
+        </ul>
+      </details>
     </section>
 
-    <!-- <section class="card">
-      <h3>Create Event</h3>
-      <form method="POST" action="/admin/events/create">
-        <input name="id" placeholder="event id (slug)" required />
-        <input name="title" placeholder="title" required />
-        <input name="date" type="date" required />
-        <input name="time" type="time" placeholder="optional time" />
-        <input name="location" placeholder="location" />
-        <textarea name="description" placeholder="description"></textarea>
-        <button type="submit">Create</button>
-      </form>
-    </section> -->
 
     <section class="card">
       <h3>Events</h3>

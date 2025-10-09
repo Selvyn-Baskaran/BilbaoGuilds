@@ -402,6 +402,7 @@ app.get("/leaderboard", ensureLoggedIn, (req, res) => {
 app.get("/admin", ensureAdmin, (req, res) => {
   const allUsers = readJsonOrDefault(USERS_FILE, {});       // { username/email: {guild, points, role, ...} }
   const guildTotals = readJsonOrDefault(GUILDS_FILE, { Fire: 0, Water: 0, Earth: 0 });
+  const challenges = readJsonOrDefault(CHALLENGES_FILE, []);
   const events      = readJsonOrDefault("./events.json", []);
 
   res.render("admin", {
@@ -412,6 +413,7 @@ app.get("/admin", ensureAdmin, (req, res) => {
     points: req.session.points || 0,
     allUsers,
     guildTotals,
+    challenges,
     events,
   });
 });
@@ -426,6 +428,28 @@ app.post("/admin/challenges/create", ensureAdmin, (req, res) => {
   challenges.push({ id, title, description: description || "", comments: [] });
   writeJson(CHALLENGES_FILE, challenges);
   res.redirect("/challenges");
+});
+
+// Delete Challenge
+app.post("/admin/challenges/:id/delete", ensureAdmin, (req, res) => {
+  const challenges = readJsonOrDefault(CHALLENGES_FILE, []);
+  const filtered = challenges.filter(c => String(c.id) !== String(req.params.id));
+  writeJson(CHALLENGES_FILE, filtered);
+  res.redirect("/admin");
+});
+
+// Update/Edit Challenge
+app.post("/admin/challenges/:id/update", ensureAdmin, (req, res) => {
+  const { title, description } = req.body;
+  const challenges = readJsonOrDefault(CHALLENGES_FILE, []);
+  const idx = challenges.findIndex(c => String(c.id) === String(req.params.id));
+  if (idx === -1) return res.status(404).send("Challenge not found");
+
+  if (title !== undefined) challenges[idx].title = String(title);
+  if (description !== undefined) challenges[idx].description = String(description);
+
+  writeJson(CHALLENGES_FILE, challenges);
+  res.redirect("/admin");
 });
 
 // Create Event

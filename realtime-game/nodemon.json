@@ -1,0 +1,5 @@
+{
+  "watch": ["server.js", "views", "public"],
+  "ignore": ["events.json", "challenges.json", "users.json", "guilds.json"],
+  "ext": "js,ejs,css"
+}
