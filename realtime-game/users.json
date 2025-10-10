@@ -2,14 +2,14 @@
   "akaansh.ajit@digipen.edu": {
     "guild": "Fire",
     "points": 0,
-    "role": "admin"
+    "role": "admin",
+    "bio": "yo",
+    "avatar": "/uploads/1760092765264-v4cleoz753r.jpg"
   },
   "akaansh.ajit@gmail.com": {
-    "guild": "Water",
-    "points": 9001,
-    "role": "admin",
-    "bio": "I am a really cool person",
-    "avatar": "/uploads/1760036286114-0lopwylhrw0e.jpg"
+    "guild": "Fire",
+    "points": 1,
+    "role": "admin"
   },
   "selvyn2004@live.co.uk": {
     "guild": "Water",

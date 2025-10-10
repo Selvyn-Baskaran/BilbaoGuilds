@@ -62,6 +62,24 @@
       align-items: center;
       gap: 0.5rem;
     }
+    /* Default avatar tint per guild */
+  body.Fire .avatar {
+    filter: hue-rotate(140deg) saturate(1.6) brightness(1.1);
+  }
+
+  body.Water .avatar {
+    filter: hue-rotate(10deg) saturate(1.8) brightness(1.1);
+  }
+
+  body.Earth .avatar {
+    filter: hue-rotate(240deg) saturate(1.5) brightness(1.1);
+  }
+
+  /* Optional: add smooth transition when page loads */
+  .avatar {
+    transition: filter 0.3s ease;
+  }
+
   </style>
 </head>
 <body class="<%= guild %>">
@@ -72,7 +90,7 @@
     <h2>Your Profile</h2>
     <div class="card row">
       <div>
-        <img class="avatar" src="<%= profile.avatar || '/images/default-avatar.png' %>" alt="avatar"/>
+        <img class="avatar" src="<%= (profile && profile.avatar) ? profile.avatar : '/uploads/default.png' %>" alt="avatar"/>
         <p class="muted" style="margin-top:0.5rem;">Email: <strong><%= user %></strong></p>
         <div class="meta">
           <span class="chip">Guild: <strong><%= guild %></strong></span>
