@@ -47,6 +47,30 @@
         "avatar": "/uploads/1760032231785-rg8eccks3kq.jpg",
         "attachment": "/uploads/1760034348558-5qa1s68aypj.png",
         "ts": 1760034348562
+      },
+      {
+        "user": "Akaansh Ajit",
+        "email": "akaansh.ajit@digipen.edu",
+        "text": "yo",
+        "avatar": "/uploads/1760092765264-v4cleoz753r.jpg",
+        "attachment": null,
+        "ts": 1760096411933
+      },
+      {
+        "user": "Akaansh Ajit",
+        "email": "akaansh.ajit@gmail.com",
+        "text": "yo",
+        "avatar": "/uploads/default.png",
+        "attachment": null,
+        "ts": 1760096433177
+      },
+      {
+        "user": "Akaansh Ajit",
+        "email": "akaansh.ajit@gmail.com",
+        "text": "yessir",
+        "avatar": "/uploads/default.png",
+        "attachment": null,
+        "ts": 1760096935363
       }
     ]
   },

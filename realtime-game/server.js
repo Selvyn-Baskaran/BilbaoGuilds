@@ -159,7 +159,7 @@ app.post(
     req.session.guild  = existing.guild  || "Fire";
     req.session.points = existing.points || 0;
     req.session.role   = existing.role   || "user";        // <- pulls "admin" if present!
-    req.session.avatar = existing.avatar || "/images/default-avatar.png";
+    req.session.avatar = existing.avatar || "/uploads/default.png";
 
 
     // 5) If first login: create entry
@@ -207,6 +207,32 @@ app.use((req, res, next) => {
     });
   }
   console.log("session.user =", req.session.user);
+  next();
+});
+
+// Make avatar vars available to all EJS views/partials
+app.use((req, res, next) => {
+  const allUsers = readJsonOrDefault(USERS_FILE, {});     // load safely
+  const emailKey = (req.session.email || "").toLowerCase();
+  const u = allUsers[emailKey] || {};
+
+  // Standardize your default path (file should live at public/uploads/default.png)
+  const DEFAULT = "/uploads/default.png";
+
+  // Prefer the stored web path (e.g., "/uploads/abc.png"), else default
+  let avatarPath = (typeof u.avatar === "string" && u.avatar.trim())
+    ? u.avatar.trim()
+    : DEFAULT;
+
+  // Normalize if someone saved bare filenames
+  if (!avatarPath.startsWith("/") && !avatarPath.startsWith("http")) {
+    avatarPath = `/uploads/${avatarPath.replace(/^\/+/, "")}`;
+  }
+
+  // Keep session copy around (handy for socket.io)
+  req.session.avatar = avatarPath;
+  res.locals.avatarUrl = avatarPath;
+  res.locals.isDefaultAvatar = (avatarPath === DEFAULT);
   next();
 });
 
@@ -379,7 +405,9 @@ app.get("/challenges/:id", ensureLoggedIn, (req, res) => {
   if (!challenge) return res.status(404).send("Challenge not found");
 
   const users = readJsonOrDefault(USERS_FILE, {});
-  const points = (users[req.session.user]?.points) ?? (req.session.points || 0);
+  const emailKey = (req.session.email || "").toLowerCase();
+  const points = (users[emailKey]?.points) ?? (req.session.points || 0);
+
 
   res.render("challenge-thread", {
     challenge,
@@ -396,7 +424,7 @@ app.post("/challenges/:id/comment", ensureLoggedIn, upload.single("attachment"),
   const idx = challenges.findIndex(c => String(c.id) === String(req.params.id));
   if (idx === -1) return res.status(404).send("Not found");
 
-  const avatar = req.session.avatar || "/images/default-avatar.png";
+  const avatar = req.session.avatar || "/uploads/default.png";
   const text = String(req.body.text || "").slice(0, 1000);
   const attachment = req.file ? `/uploads/${req.file.filename}` : null;
 
@@ -455,7 +483,7 @@ app.get("/profile", requireLogin, (req, res) => {
 
   // keep session avatar in sync (nice-to-have)
   if (!req.session.avatar) {
-    req.session.avatar = u.avatar || "/images/default-avatar.png";
+    req.session.avatar = u.avatar || "/uploads/default.png";
   }
 
   res.render("profile", {
@@ -482,7 +510,7 @@ app.post("/profile", requireLogin, upload.single("avatar"), (req, res) => {
   // remove avatar
   if (req.body.removeAvatar === "on") {
     u.avatar = null;
-    req.session.avatar = "/images/default-avatar.png";
+    req.session.avatar = "/uploads/default.png";
   }
 
   // new avatar
@@ -680,10 +708,11 @@ io.on("connection", (socket) => {
     socket.join(guild);
   });
 
-  socket.on("guildMessage", ({ guild, message }) => {
-  const avatar = socket.handshake.session?.avatar || "/images/default-avatar.png";
+ socket.on("guildMessage", ({ guild, message }) => {
+  const avatar = socket.handshake.session?.avatar || "/uploads/default.png"; // <- use uploads
   io.to(guild).emit("guildMessage", { user: username, message, avatar });
 });
+
 
   socket.on("disconnect", () => {
     console.log(`${username} disconnected`);

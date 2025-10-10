@@ -20,7 +20,8 @@
       <ul class="comment-list">
         <% (challenge.comments || []).forEach(c => { %>
           <li class="comment">
-            <img src="<%= c.avatar || '/images/default-avatar.png' %>" class="comment-avatar" alt="<%= c.user %>">
+            <img
+  src="<%= c.avatar || '/uploads/default.png' %>" class="comment-avatar <%= (!c.avatar || c.avatar === '/uploads/default.png') ? 'avatar--default' : '' %>" alt="<%= c.user %>" style="width:32px;height:32px;border-radius:50%;object-fit:cover;">
             <div class="comment-body">
               <div>
                 <strong><%= c.user %></strong>

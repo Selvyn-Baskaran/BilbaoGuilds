@@ -34,15 +34,23 @@
 
     // Receive messages
     socket.on("guildMessage", (data) => {
-      const wrapper = document.createElement("div");
-      wrapper.className = "chat-message";
-      wrapper.innerHTML = `
-        <div class="chat-avatar"><img src="${data.avatar}" alt="${data.user}" /></div>
-        <div class="chat-text"><strong>${data.user}</strong>: ${data.message}</div>
-      `;
-      messagesEl.appendChild(wrapper);
-      wrapper.scrollIntoView({ behavior: "smooth", block: "end" });
-    });
+  const url = data.avatar || "/uploads/default.png";
+  const isDefault = !data.avatar || data.avatar === "/uploads/default.png";
+
+  const wrapper = document.createElement("div");
+  wrapper.className = "chat-message";
+  wrapper.innerHTML = `
+    <div class="chat-avatar">
+      <img src="${url}" alt="${data.user}"
+           class="${isDefault ? 'avatar--default' : ''}"
+           style="width:32px;height:32px;border-radius:50%;object-fit:cover;">
+    </div>
+    <div class="chat-text"><strong>${data.user}</strong>: ${data.message}</div>
+  `;
+  messagesEl.appendChild(wrapper);
+  wrapper.scrollIntoView({ behavior: "smooth", block: "end" });
+});
+
 
     // --- Profanity Filter ---
     const badWords = [
