@@ -20,11 +20,11 @@ central challenge screen ✅ (partially)
 remove join a room and replace with guild chat ✅
 create a system admin portal to post challenge, manage points, users,  etc✅
 event calendar✅
-mobile compatability
+mobile compatability ✅
 be able to see how many people are online ✅
 contact us / suggestion page 
 help page
-create a profile page
+create a profile page ✅
 
 make sure nav bar is consistent across webpages ✅
 
@@ -38,8 +38,8 @@ ongoing challenges under upcoming events so uno when challenges are ending, (the
 Low priority
 
 
-make the leaderboard look nice 
-admin portal - analyse website usage
+make the leaderboard look nice ✅
+admin portal - analyse website usage 
 chat - filter bullshit out
 background music
 make sure logout isnt off the screen ✅

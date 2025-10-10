@@ -6,17 +6,8 @@
   <title><%= guild %> Guild Chat</title>
   <link rel="stylesheet" href="/styles.css" />
   <link rel="stylesheet" href="/css/navbar.css">
+  <script src="/socket.io/socket.io.js"></script>
 </head>
-<script src="/socket.io/socket.io.js"></script>
-<script>
-  const socket = io();
-  socket.on("updateOnline", (count) => {
-    const onlineEl = document.getElementById("onlineCount");
-    if (onlineEl) {
-      onlineEl.textContent = count;
-    }
-  });
-</script>
 <body class="<%= guild %>">
 
   <%- include('partials/navbar', { user, guild }) %>
@@ -25,31 +16,78 @@
     <h2><%= guild %> Guild Chat</h2>
     <div id="messages" style="border: 1px solid #ccc; padding: 1rem; height: 300px; overflow-y: scroll; margin-bottom: 1rem;"></div>
     <input id="msgInput" placeholder="Type your message..." />
-    <button onclick="sendMessage()">Send</button>
+    <button id="sendBtn">Send</button>
+    <p id="warning" style="color:red; display:none; font-weight:bold; margin-top:0.5rem;">
+      ⚠️ Please avoid using inappropriate language.
+    </p>
   </main>
 
-  <script src="/socket.io/socket.io.js"></script>
   <script>
+    const socket = io();
     const guild = "<%= guild %>";
+    const warningEl = document.getElementById("warning");
+    const msgInput = document.getElementById("msgInput");
+    const sendBtn = document.getElementById("sendBtn");
+    const messagesEl = document.getElementById("messages");
 
     socket.emit("joinGuildRoom", guild);
 
+    // Receive messages
     socket.on("guildMessage", (data) => {
-  const wrapper = document.createElement("div");
-  wrapper.className = "chat-message";
-  wrapper.innerHTML = `
-    <div class="chat-avatar"><img src="${data.avatar}" alt="${data.user}" /></div>
-    <div class="chat-text"><strong>${data.user}</strong>: ${data.message}</div>
-  `;
-  document.getElementById("messages").appendChild(wrapper);
-  wrapper.scrollIntoView({ behavior: "smooth", block: "end" });
-});
+      const wrapper = document.createElement("div");
+      wrapper.className = "chat-message";
+      wrapper.innerHTML = `
+        <div class="chat-avatar"><img src="${data.avatar}" alt="${data.user}" /></div>
+        <div class="chat-text"><strong>${data.user}</strong>: ${data.message}</div>
+      `;
+      messagesEl.appendChild(wrapper);
+      wrapper.scrollIntoView({ behavior: "smooth", block: "end" });
+    });
+
+    // --- Profanity Filter ---
+    const badWords = [
+      // English
+      "fuck", "shit", "bitch", "asshole", "bastard", "slut", "dick", "piss", "cunt",
+      "bollocks", "wanker", "prick", "whore", "jerk", "moron", "retard", "damn", "crap",
+      "arse", "twat", "nigger", "faggot",
+
+      // Spanish (mildly encoded for safety)
+      "mierda", "gilipollas", "cabron", "cabrona", "puta", "puto", "coño", "pendejo",
+      "pendeja", "imbecil", "estupido", "estupida", "maricon", "culero", "hijo de puta",
+      "chinga", "chingar", "joder", "carajo", "malparido", "zorra", "tonto", "idiota",
+      "baboso", "bobo"
+    ];
+
+    function containsBadLanguage(message) {
+      const lower = message.toLowerCase();
+      return badWords.some(word => lower.includes(word));
+    }
 
     function sendMessage() {
-      const msg = document.getElementById("msgInput").value;
+      const msg = msgInput.value.trim();
+      if (!msg) return;
+
+      if (containsBadLanguage(msg)) {
+        warningEl.style.display = "block";
+        setTimeout(() => warningEl.style.display = "none", 3000);
+        return;
+      }
+
       socket.emit("guildMessage", { guild, message: msg });
-      document.getElementById("msgInput").value = "";
+      msgInput.value = "";
     }
+
+    // Event listeners
+    sendBtn.addEventListener("click", sendMessage);
+    msgInput.addEventListener("keypress", (e) => {
+      if (e.key === "Enter") sendMessage();
+    });
+
+    // Update online users (optional)
+    socket.on("updateOnline", (count) => {
+      const onlineEl = document.getElementById("onlineCount");
+      if (onlineEl) onlineEl.textContent = count;
+    });
   </script>
 </body>
 </html>
