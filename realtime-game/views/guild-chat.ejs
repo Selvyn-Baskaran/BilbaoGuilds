@@ -23,79 +23,129 @@
   </main>
 
   <script>
-    const socket = io();
-    const guild = "<%= guild %>";
-    const warningEl = document.getElementById("warning");
-    const msgInput = document.getElementById("msgInput");
-    const sendBtn = document.getElementById("sendBtn");
-    const messagesEl = document.getElementById("messages");
+  const socket = io();
+  const guild = "<%= guild %>";
+  const me = "<%= user %>";                       // ← know who I am
+  const warningEl = document.getElementById("warning");
+  const msgInput = document.getElementById("msgInput");
+  const sendBtn = document.getElementById("sendBtn");
+  const messagesEl = document.getElementById("messages");
 
-    socket.emit("joinGuildRoom", guild);
+  socket.emit("joinGuildRoom", guild);
 
-    // Receive messages
-    socket.on("guildMessage", (data) => {
-  const url = data.avatar || "/uploads/default.png";
-  const isDefault = !data.avatar || data.avatar === "/uploads/default.png";
+  // ===== Receive messages (WhatsApp-like alignment) =====
+  socket.on("guildMessage", (data) => {
+    const url = data.avatar || "/uploads/default.png";
+    const isDefault = !data.avatar || data.avatar === "/uploads/default.png";
+    const isMe = (data.user === me);
 
-  const wrapper = document.createElement("div");
-  wrapper.className = "chat-message";
-  wrapper.innerHTML = `
-    <div class="chat-avatar">
-      <img src="${url}" alt="${data.user}"
-           class="${isDefault ? 'avatar--default' : ''}"
-           style="width:32px;height:32px;border-radius:50%;object-fit:cover;">
-    </div>
-    <div class="chat-text"><strong>${data.user}</strong>: ${data.message}</div>
-  `;
-  messagesEl.appendChild(wrapper);
-  wrapper.scrollIntoView({ behavior: "smooth", block: "end" });
-});
+    const wrapper = document.createElement("div");
+    wrapper.className = "chat-message" + (isMe ? " me" : "");
 
+    // avatar
+    const avatarDiv = document.createElement("div");
+    avatarDiv.className = "chat-avatar";
+    avatarDiv.innerHTML = `<img src="${url}" alt="${data.user}" class="${isDefault ? 'avatar--default' : ''}">`;
 
-    // --- Profanity Filter ---
-    const badWords = [
-      // English
-      "fuck", "shit", "bitch", "asshole", "bastard", "slut", "dick", "piss", "cunt",
-      "bollocks", "wanker", "prick", "whore", "jerk", "moron", "retard", "damn", "crap",
-      "arse", "twat", "nigger", "faggot",
+    // bubble
+    const textDiv = document.createElement("div");
+    textDiv.className = "chat-text";
 
-      // Spanish (mildly encoded for safety)
-      "mierda", "gilipollas", "cabron", "cabrona", "puta", "puto", "coño", "pendejo",
-      "pendeja", "imbecil", "estupido", "estupida", "maricon", "culero", "hijo de puta",
-      "chinga", "chingar", "joder", "carajo", "malparido", "zorra", "tonto", "idiota",
-      "baboso", "bobo"
-    ];
+    const meta = document.createElement("div");
+    meta.className = "chat-meta";
+    const name = document.createElement("span");
+    name.className = "name";
+    name.textContent = data.user;
+    const time = document.createElement("span");
+    time.className = "time";
+    time.textContent = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    meta.appendChild(name);
+    meta.appendChild(time);
 
-    function containsBadLanguage(message) {
-      const lower = message.toLowerCase();
-      return badWords.some(word => lower.includes(word));
+    const body = document.createElement("div");
+    body.textContent = data.message;
+
+    textDiv.appendChild(meta);
+    textDiv.appendChild(body);
+
+    if (isMe) {
+      wrapper.appendChild(textDiv);
+      wrapper.appendChild(avatarDiv);
+    } else {
+      wrapper.appendChild(avatarDiv);
+      wrapper.appendChild(textDiv);
     }
 
-    function sendMessage() {
-      const msg = msgInput.value.trim();
-      if (!msg) return;
+    messagesEl.appendChild(wrapper);
+    messagesEl.scrollTop = messagesEl.scrollHeight;
+  });
 
-      if (containsBadLanguage(msg)) {
-        warningEl.style.display = "block";
-        setTimeout(() => warningEl.style.display = "none", 3000);
-        return;
-      }
+  // ===== Smarter profanity filter (handles 1337 & repeated letters) =====
+  const BAD = [
+    "fuck","shit","bitch","asshole","bastard","slut","dick","piss","cunt",
+    "bollocks","wanker","prick","whore","jerk","moron","retard","damn","crap",
+    "arse","twat","nigger","faggot",
+    "mierda","gilipollas","cabron","cabrona","puta","puto","coño","pendejo","pendeja",
+    "imbecil","estupido","estupida","maricon","culero","hijo de puta","chinga","chingar",
+    "joder","carajo","malparido","zorra","tonto","idiota","baboso","bobo"
+  ];
 
-      socket.emit("guildMessage", { guild, message: msg });
-      msgInput.value = "";
+  // Normalization helpers
+  const leetMap = { '0':'o','1':'i','!':'i','3':'e','4':'a','@':'a','5':'s','$':'s','7':'t','8':'b' };
+  const accentsMap = {'á':'a','à':'a','ä':'a','â':'a','ã':'a','ç':'c','é':'e','è':'e','ë':'e','ê':'e',
+                      'í':'i','ì':'i','ï':'i','î':'i','ñ':'n','ó':'o','ò':'o','ö':'o','ô':'o','õ':'o',
+                      'ú':'u','ù':'u','ü':'u','û':'u','ý':'y','ÿ':'y'};
+
+  function normalize(s){
+    let t = s.toLowerCase();
+    // replace accents
+    t = t.split('').map(ch => accentsMap[ch] || ch).join('');
+    // swap common leetspeak
+    t = t.replace(/[0!13@45$78]/g, m => leetMap[m] || m);
+    // strip non-letters/numbers and collapse spaces
+    t = t.replace(/[^a-z0-9\s]/g, ' ');
+    // collapse repeated letters (e.g., fuuuuuck -> fuuck -> fuck)
+    t = t.replace(/([a-z0-9])\1{2,}/g, '$1$1');
+    // collapse spaces
+    t = t.replace(/\s+/g, ' ').trim();
+    return t;
+  }
+
+  // Build regexes with loose boundaries (covers "f u c k", "fu-ck", etc.)
+  const badPatterns = BAD.map(w => {
+    const word = normalize(w).replace(/\s+/g, '');
+    const chars = word.split('').map(ch => ch.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+    const fuzzy = chars.join('[\\s\\W_]*'); // allow separators between letters
+    return new RegExp(`\\b${fuzzy}\\b`, 'i');
+  });
+
+  function containsBadLanguage(message){
+    const t = normalize(message);
+    return badPatterns.some(rx => rx.test(t));
+  }
+
+  function sendMessage(){
+    const msg = msgInput.value.trim();
+    if (!msg) return;
+
+    if (containsBadLanguage(msg)) {
+      warningEl.style.display = "block";
+      setTimeout(() => warningEl.style.display = "none", 2800);
+      return;
     }
+    socket.emit("guildMessage", { guild, message: msg });
+    msgInput.value = "";
+  }
 
-    // Event listeners
-    sendBtn.addEventListener("click", sendMessage);
-    msgInput.addEventListener("keypress", (e) => {
-      if (e.key === "Enter") sendMessage();
-    });
+  // listeners
+  sendBtn.addEventListener("click", sendMessage);
+  msgInput.addEventListener("keypress", (e) => { if (e.key === "Enter") sendMessage(); });
 
-    // Update online users (optional)
-    socket.on("updateOnline", (count) => {
-      const onlineEl = document.getElementById("onlineCount");
-      if (onlineEl) onlineEl.textContent = count;
-    });
-  </script>
+  // online counter passthrough stays as-is
+  socket.on("updateOnline", (count) => {
+    const onlineEl = document.getElementById("onlineCount");
+    if (onlineEl) onlineEl.textContent = count;
+  });
+</script>
 </body>
 </html>

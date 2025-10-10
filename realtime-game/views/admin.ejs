@@ -6,201 +6,415 @@
   <title>Admin Portal</title>
   <link rel="stylesheet" href="/styles.css"/>
   <link rel="stylesheet" href="/css/navbar.css">
+
+  <style>
+    :root{
+      --ink:#0f0f14;
+      --muted:#6b6b6b;
+      --panel:rgba(255,255,255,.9);
+      --panel-br:rgba(0,0,0,.08);
+      --accent:#6e38ff;
+      --pill:#f7f3ff;
+    }
+    body.dark-mode{
+      --ink:#f1f1f1;
+      --muted:#bdbdbd;
+      --panel:rgba(28,28,32,.92);
+      --panel-br:rgba(255,255,255,.10);
+      --pill:rgba(110,56,255,.18);
+    }
+
+    .admin-wrap{
+      max-width: 1200px;
+      width: min(1200px, 100% - 24px);
+      margin: 14px auto 28px;
+      display: grid;
+      gap: 12px;
+    }
+
+    /* HERO STATS */
+    .hero{
+      background: var(--panel);
+      border: 1px solid var(--panel-br);
+      border-radius: 16px;
+      padding: 14px;
+      box-shadow: 0 10px 25px rgba(0,0,0,.08), 0 1px 0 rgba(255,255,255,.6) inset;
+      backdrop-filter: blur(6px);
+    }
+    .hero-head{
+      display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px;
+    }
+    .hero-head h2{ margin:0; font-weight:800; color:var(--ink); }
+    .stats{
+      margin-top:10px;
+      display:grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap:10px;
+    }
+    @media (max-width: 900px){ .stats{ grid-template-columns: repeat(2, minmax(0,1fr)); } }
+    @media (max-width: 520px){ .stats{ grid-template-columns: 1fr; } }
+
+    .stat{
+      background: linear-gradient(180deg, #fff, #fafafa);
+      border: 1px solid var(--panel-br);
+      border-radius: 12px;
+      padding: 12px;
+      box-shadow: 0 6px 14px rgba(0,0,0,.06);
+    }
+    body.dark-mode .stat{ background: linear-gradient(180deg, #1f1f1f, #1b1b1b); }
+    .stat .label{ font-size:.85rem; color:var(--muted); }
+    .stat .value{ font-size:1.35rem; font-weight:800; color:var(--ink); }
+
+    /* GRID LAYOUT */
+    .grid{
+      display:grid;
+      grid-template-columns: 1fr 360px;
+      gap: 12px;
+      align-items: start;
+    }
+    @media (max-width: 1020px){ .grid{ grid-template-columns: 1fr; } }
+
+    /* CARDS */
+    .card{
+      background: var(--panel);
+      border: 1px solid var(--panel-br);
+      border-radius: 16px;
+      padding: 14px;
+      box-shadow: 0 10px 25px rgba(0,0,0,.08), 0 1px 0 rgba(255,255,255,.6) inset;
+      color: var(--ink);
+    }
+    .card h3{ margin:0 0 10px; font-weight:800; }
+    .section-sub{ margin: 8px 0 10px; color: var(--muted); }
+
+    .divider{ height:1px; background: var(--panel-br); margin: 10px 0; }
+
+    /* FORMS */
+    .form-grid{
+      display:grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap:10px;
+    }
+    @media (max-width: 700px){ .form-grid{ grid-template-columns: 1fr; } }
+
+    input, select, textarea{
+      width: 100%;
+      padding: .65rem .75rem;
+      border-radius: 12px;
+      border: 1px solid var(--panel-br);
+      background: #fff;
+      color: var(--ink);
+    }
+    body.dark-mode input, body.dark-mode select, body.dark-mode textarea{
+      background: #1f1f1f; color:#f1f1f1; border-color: rgba(255,255,255,.12);
+    }
+    textarea{ min-height: 90px; }
+
+    .btn{
+      display:inline-flex; align-items:center; gap:.45rem;
+      padding:.6rem .9rem; border-radius:12px; text-decoration:none;
+      border:1px solid #6e38ff33; background:#6e38ff; color:#fff;
+      box-shadow:0 6px 16px rgba(110,56,255,.35);
+      cursor:pointer;
+    }
+    .btn:hover{ filter: brightness(1.05); }
+    .btn.ghost{
+      background: transparent; color: var(--accent);
+      border:1px solid var(--accent); box-shadow:none;
+    }
+    .btn.danger{
+      background:#e25151; border-color:#e25151; box-shadow:0 6px 16px rgba(226,81,81,.35);
+    }
+
+    /* LISTS (Manage items) */
+    .toolbar{
+      display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-bottom:8px;
+    }
+    .pill{
+      display:inline-flex; align-items:center; gap:.35rem;
+      padding:.35rem .6rem; border-radius:999px;
+      background: rgba(110,56,255,.14);
+      border:1px solid rgba(110,56,255,.35);
+      font-size:.85rem;
+    }
+
+    .list{
+      display:grid; grid-template-columns: 1fr; gap:10px; margin-top:8px;
+    }
+    .row{
+      background: linear-gradient(180deg, #fff, #fafafa);
+      border: 1px solid var(--panel-br);
+      border-radius: 12px;
+      padding: 10px;
+      display:flex; align-items:flex-start; justify-content:space-between; gap:10px; flex-wrap:wrap;
+      transition: border-color .15s ease, box-shadow .2s ease;
+    }
+    body.dark-mode .row{ background: linear-gradient(180deg, #1f1f1f, #1b1b1b); }
+    .row:hover{ border-color: rgba(110,56,255,.35); box-shadow: 0 10px 20px rgba(110,56,255,.15); }
+
+    .row-title{ font-weight:800; }
+    .row-sub{ font-size:.9rem; color: var(--muted); }
+
+    .row-actions{ display:flex; gap:8px; align-items:center; }
+
+    /* Right column sticky */
+    .sticky{ position: sticky; top: 12px; }
+
+    /* Details (native) look nicer */
+    details summary{
+      list-style:none; cursor:pointer;
+      display:inline-flex; align-items:center; gap:.5rem;
+      padding:.45rem .65rem; border-radius:10px;
+      border:1px solid var(--panel-br); background:#fff; color:var(--ink);
+    }
+    body.dark-mode details summary{ background:#1f1f1f; color:#f1f1f1; border-color: rgba(255,255,255,.12); }
+    details[open] summary{ background: var(--pill); border-color: rgba(110,56,255,.35); }
+    details .inner{ margin-top:8px; }
+
+    /* Small helpers */
+    .w-100{ width:100%; }
+    .mt-6{ margin-top:6px; }
+    .mt-10{ margin-top:10px; }
+    .hidden{ display:none !important; }
+  </style>
 </head>
+
 <body class="<%= guild %>">
   <%- include('partials/navbar', { user, guild, role, online }) %>
 
-  <main style="max-width:900px;margin:1.5rem auto;">
-    <h2>Admin Portal</h2>
-
-    <section class="card">
-      <h3>Challenges</h3>
-
-      <!-- Create -->
-      <form method="POST" action="/admin/challenges/create" style="margin-bottom:1rem;">
-        <input name="id" placeholder="challenge id (slug)" required />
-        <input name="title" placeholder="title" required />
-        <textarea name="description" placeholder="description"></textarea>
-        <button type="submit">Create</button>
-      </form>
-
-      <!-- Manage -->
-      <details>
-        <summary style="cursor:pointer; font-weight:600;">
-          Manage existing challenges (<%= challenges?.length || 0 %>)
-        </summary>
-
-        <input id="challengeFilter"
-              placeholder="Filter by title…"
-              style="margin:.6rem 0; width:100%; max-width:420px;"
-              oninput="
-                const q = this.value.toLowerCase();
-                document.querySelectorAll('.challenge-row').forEach(li=>{
-                  const t = li.getAttribute('data-text');
-                  li.style.display = t.includes(q) ? '' : 'none';
-                });
-              " />
-
-        <ul style="list-style:none; padding:0; margin:0;">
-          <% (challenges || []).forEach(ch => { %>
-            <li class="challenge-row"
-                data-text="<%= ch.title.toLowerCase() %>"
-                style="border:1px solid #eee; border-radius:8px; padding:.75rem; margin:.5rem 0;">
-              <div style="display:flex; gap:.5rem; align-items:center; justify-content:space-between; flex-wrap:wrap;">
-                <div>
-                  <strong><a href="/challenges/<%= ch.id %>" target="_blank"><%= ch.title %></a></strong>
-                  <div style="font-size:.9rem; opacity:.85;">ID: <%= ch.id %></div>
-                </div>
-
-                <div style="display:flex; gap:.5rem;">
-                  <!-- Delete -->
-                  <form method="POST" action="/admin/challenges/<%= ch.id %>/delete"
-                        onsubmit="return confirm('Delete this challenge?');">
-                    <button type="submit">Delete</button>
-                  </form>
-
-                  <!-- Edit -->
-                  <details>
-                    <summary style="cursor:pointer; padding:.4rem .6rem; border:1px solid #ccc; border-radius:6px;">Edit</summary>
-                    <form method="POST" action="/admin/challenges/<%= ch.id %>/update"
-                          style="margin-top:.5rem; max-width:520px;">
-                      <label>Title</label>
-                      <input name="title" value="<%= ch.title %>" required />
-                      <label>Description</label>
-                      <textarea name="description"><%= ch.description || '' %></textarea>
-                      <button type="submit" style="margin-top:.4rem;">Save Changes</button>
-                    </form>
-                  </details>
-                </div>
-              </div>
-            </li>
-          <% }) %>
-        </ul>
-      </details>
+  <main class="admin-wrap">
+    <!-- HERO -->
+    <section class="hero">
+      <div class="hero-head">
+        <h2>Admin Portal</h2>
+        <span class="pill">🟢 Online: <b id="onlineCount"><%= online %></b></span>
+      </div>
+      <div class="stats">
+        <div class="stat">
+          <div class="label">Total Users</div>
+          <div class="value"><%= Object.keys(allUsers || {}).length %></div>
+        </div>
+        <div class="stat">
+          <div class="label">Challenges</div>
+          <div class="value"><%= (challenges && challenges.length) || 0 %></div>
+        </div>
+        <div class="stat">
+          <div class="label">Events</div>
+          <div class="value"><%= (events && events.length) || 0 %></div>
+        </div>
+        <div class="stat">
+          <div class="label">Guild Totals</div>
+          <div class="value">
+            <span class="pill">🔥 <%= (guildTotals && guildTotals.Fire) || 0 %></span>
+            <span class="pill">💧 <%= (guildTotals && guildTotals.Water) || 0 %></span>
+            <span class="pill">🌿 <%= (guildTotals && guildTotals.Earth) || 0 %></span>
+          </div>
+        </div>
+      </div>
     </section>
 
+    <!-- GRID -->
+    <section class="grid">
+      <!-- LEFT COLUMN -->
+      <div class="left-col" style="display:flex; flex-direction:column; gap:12px;">
+        <!-- CHALLENGES -->
+        <article class="card">
+          <h3>Challenges</h3>
+          <div class="section-sub">Create or manage central challenges.</div>
 
-    <section class="card">
-      <h3>Events</h3>
+          <!-- Create -->
+          <form method="POST" action="/admin/challenges/create" class="mt-6">
+            <div class="form-grid">
+              <input name="id" placeholder="challenge id (slug)" required />
+              <input name="title" placeholder="title" required />
+            </div>
+            <textarea name="description" placeholder="description (optional)" class="mt-6"></textarea>
+            <button type="submit" class="btn mt-6">Create</button>
+          </form>
 
-      <!-- Create -->
-      <form method="POST" action="/admin/events/create" style="margin-bottom:1rem;">
-        <input name="id" placeholder="event id (slug)" required />
-        <input name="title" placeholder="title" required />
-        <input name="date" type="date" required />
-        <input name="time" type="time" placeholder="optional time" />
-        <input name="location" placeholder="location" />
-        <textarea name="description" placeholder="description"></textarea>
-        <button type="submit">Create</button>
-      </form>
+          <div class="divider"></div>
 
-      <!-- Collapsible manage list -->
-      <details>
-        <summary style="cursor:pointer; font-weight:600;">
-          Manage existing events (<%= events?.length || 0 %>)
-        </summary>
-
-        <!-- Optional quick filter -->
-        <input id="eventFilter" placeholder="Filter by title/location…" style="margin:.6rem 0; width:100%; max-width:420px;" oninput="
-          const q = this.value.toLowerCase();
-          document.querySelectorAll('.event-row').forEach(li=>{
-            const t = li.getAttribute('data-text');
-            li.style.display = t.includes(q) ? '' : 'none';
-          });
-        " />
-
-        <ul style="list-style:none; padding:0; margin:0;">
-          <% (events || []).forEach(ev => { %>
-            <li class="event-row"
-                data-text="<%= (ev.title + ' ' + (ev.location||'')).toLowerCase() %>"
-                style="border:1px solid #eee; border-radius:8px; padding:.75rem; margin:.5rem 0;">
-              <div style="display:flex; gap:.5rem; align-items:center; justify-content:space-between; flex-wrap:wrap;">
-                <div>
-                  <strong><a href="/events/<%= ev.id %>" target="_blank"><%= ev.title %></a></strong>
-                  <div style="font-size:.9rem; opacity:.85;">
-                    <%= ev.date %><%= ev.time ? (' · ' + ev.time) : '' %>
-                    <% if (ev.location) { %> · <%= ev.location %><% } %>
-                  </div>
-                </div>
-
-                <div style="display:flex; gap:.5rem;">
-                  <!-- Delete -->
-                  <form method="POST" action="/admin/events/<%= ev.id %>/delete" onsubmit="return confirm('Delete this event?');">
-                    <button type="submit">Delete</button>
-                  </form>
-
-                  <!-- Edit (per-item collapsible) -->
-                  <details>
-                    <summary style="cursor:pointer; padding:.4rem .6rem; border:1px solid #ccc; border-radius:6px;">Edit</summary>
-                    <form method="POST" action="/admin/events/<%= ev.id %>/update" style="margin-top:.5rem; max-width:520px;">
-                      <label>Title</label>
-                      <input name="title" value="<%= ev.title %>" required />
-                      <label>Date</label>
-                      <input name="date" type="date" value="<%= ev.date %>" required />
-                      <label>Time</label>
-                      <input name="time" type="time" value="<%= ev.time || '' %>" />
-                      <label>Location</label>
-                      <input name="location" value="<%= ev.location || '' %>" />
-                      <label>Description</label>
-                      <textarea name="description"><%= ev.description || '' %></textarea>
-
-                      <button type="submit" style="margin-top:.4rem;">Save Changes</button>
-                    </form>
-                  </details>
+          <!-- Manage -->
+          <div class="toolbar">
+            <details>
+              <summary>Manage existing (<%= challenges?.length || 0 %>)</summary>
+              <div class="inner">
+                <input id="challengeFilter" class="w-100 mt-6"
+                       placeholder="Filter by title… (live)"
+                       oninput="
+                         const q = this.value.toLowerCase();
+                         document.querySelectorAll('.challenge-row').forEach(li=>{
+                           const t = li.getAttribute('data-text') || '';
+                           li.classList.toggle('hidden', !t.includes(q));
+                         });
+                       " />
+                <div class="list mt-10">
+                  <% (challenges || []).forEach(ch => { %>
+                    <div class="row challenge-row" data-text="<%= (ch.title||'').toLowerCase() %>">
+                      <div>
+                        <div class="row-title"><a href="/challenges/<%= ch.id %>" target="_blank"><%= ch.title %></a></div>
+                        <div class="row-sub">ID: <%= ch.id %></div>
+                      </div>
+                      <div class="row-actions">
+                        <form method="POST" action="/admin/challenges/<%= ch.id %>/delete"
+                              onsubmit="return confirm('Delete this challenge?');">
+                          <button type="submit" class="btn danger">Delete</button>
+                        </form>
+                        <details>
+                          <summary>Edit</summary>
+                          <div class="inner">
+                            <form method="POST" action="/admin/challenges/<%= ch.id %>/update">
+                              <label class="mt-6">Title</label>
+                              <input name="title" value="<%= ch.title %>" required />
+                              <label class="mt-6">Description</label>
+                              <textarea name="description"><%= ch.description || '' %></textarea>
+                              <button type="submit" class="btn mt-6">Save Changes</button>
+                            </form>
+                          </div>
+                        </details>
+                      </div>
+                    </div>
+                  <% }) %>
                 </div>
               </div>
-            </li>
+            </details>
+          </div>
+        </article>
+
+        <!-- EVENTS -->
+        <article class="card">
+          <h3>Events</h3>
+          <div class="section-sub">Create new events or update existing ones.</div>
+
+          <!-- Create -->
+          <form method="POST" action="/admin/events/create" class="mt-6">
+            <div class="form-grid">
+              <input name="id" placeholder="event id (slug)" required />
+              <input name="title" placeholder="title" required />
+            </div>
+            <div class="form-grid mt-6">
+              <input name="date" type="date" required />
+              <input name="time" type="time" placeholder="optional time" />
+            </div>
+            <div class="form-grid mt-6">
+              <input name="location" placeholder="location (optional)" />
+              <input name="description" placeholder="short description (optional)" />
+            </div>
+            <button type="submit" class="btn mt-6">Create</button>
+          </form>
+
+          <div class="divider"></div>
+
+          <!-- Manage -->
+          <div class="toolbar">
+            <details>
+              <summary>Manage existing (<%= events?.length || 0 %>)</summary>
+              <div class="inner">
+                <input id="eventFilter" class="w-100 mt-6"
+                       placeholder="Filter by title/location… (live)"
+                       oninput="
+                         const q = this.value.toLowerCase();
+                         document.querySelectorAll('.event-row').forEach(li=>{
+                           const t = li.getAttribute('data-text') || '';
+                           li.classList.toggle('hidden', !t.includes(q));
+                         });
+                       " />
+                <div class="list mt-10">
+                  <% (events || []).forEach(ev => { %>
+                    <div class="row event-row"
+                         data-text="<%= ((ev.title||'') + ' ' + (ev.location||'')).toLowerCase() %>">
+                      <div>
+                        <div class="row-title"><a href="/events/<%= ev.id %>" target="_blank"><%= ev.title %></a></div>
+                        <div class="row-sub">
+                          <%= ev.date %><%= ev.time ? (' · ' + ev.time) : '' %>
+                          <% if (ev.location) { %> · <%= ev.location %><% } %>
+                        </div>
+                      </div>
+                      <div class="row-actions">
+                        <form method="POST" action="/admin/events/<%= ev.id %>/delete"
+                              onsubmit="return confirm('Delete this event?');">
+                          <button type="submit" class="btn danger">Delete</button>
+                        </form>
+                        <details>
+                          <summary>Edit</summary>
+                          <div class="inner">
+                            <form method="POST" action="/admin/events/<%= ev.id %>/update">
+                              <label class="mt-6">Title</label>
+                              <input name="title" value="<%= ev.title %>" required />
+                              <label class="mt-6">Date</label>
+                              <input name="date" type="date" value="<%= ev.date %>" required />
+                              <label class="mt-6">Time</label>
+                              <input name="time" type="time" value="<%= ev.time || '' %>" />
+                              <label class="mt-6">Location</label>
+                              <input name="location" value="<%= ev.location || '' %>" />
+                              <label class="mt-6">Description</label>
+                              <textarea name="description"><%= ev.description || '' %></textarea>
+                              <button type="submit" class="btn mt-6">Save Changes</button>
+                            </form>
+                          </div>
+                        </details>
+                      </div>
+                    </div>
+                  <% }) %>
+                </div>
+              </div>
+            </details>
+          </div>
+        </article>
+      </div>
+
+      <!-- RIGHT COLUMN (Quick Actions) -->
+      <aside class="card sticky">
+        <h3>Quick Actions</h3>
+        <div class="section-sub">Fast admin controls for users & guilds.</div>
+
+        <!-- Adjust User Points -->
+        <div class="divider"></div>
+        <h4 style="margin:0 0 6px;">Adjust User Points</h4>
+        <form method="POST" action="/admin/users/points">
+          <input name="username" placeholder="username (display or email)" list="userlist" required />
+          <input name="delta" type="number" placeholder="+/- points" required />
+          <button type="submit" class="btn mt-6 w-100">Apply</button>
+        </form>
+
+        <!-- Set User Role -->
+        <div class="divider"></div>
+        <h4 style="margin:0 0 6px;">Set User Role</h4>
+        <form method="POST" action="/admin/users/role">
+          <input name="username" placeholder="username (display or email)" list="userlist" required />
+          <select name="role">
+            <option value="user">user</option>
+            <option value="manager">manager</option>
+            <option value="admin">admin</option>
+          </select>
+          <button type="submit" class="btn mt-6 w-100">Save</button>
+        </form>
+
+        <!-- Adjust Guild Totals -->
+        <div class="divider"></div>
+        <h4 style="margin:0 0 6px;">Adjust Guild Totals</h4>
+        <form method="POST" action="/admin/guilds/points">
+          <select name="guild">
+            <option>Fire</option>
+            <option>Water</option>
+            <option>Earth</option>
+          </select>
+          <input name="delta" type="number" placeholder="+/- points" required />
+          <button type="submit" class="btn mt-6 w-100">Apply</button>
+        </form>
+
+        <datalist id="userlist">
+          <% Object.keys(allUsers || {}).forEach(u => { %>
+            <option value="<%= u %>"></option>
           <% }) %>
-        </ul>
-      </details>
+        </datalist>
+      </aside>
     </section>
-
-
-    <section class="card">
-      <h3>Adjust User Points</h3>
-      <form method="POST" action="/admin/users/points">
-        <input name="username" placeholder="username" list="userlist" required />
-        <input name="delta" type="number" placeholder="+/- points" required />
-        <button type="submit">Apply</button>
-      </form>
-      <datalist id="userlist">
-        <% Object.keys(allUsers).forEach(u => { %>
-          <option value="<%= u %>"></option>
-        <% }) %>
-      </datalist>
-    </section>
-
-    <section class="card">
-      <h3>Set User Role</h3>
-      <form method="POST" action="/admin/users/role">
-        <input name="username" placeholder="username" list="userlist" required />
-        <select name="role">
-          <option value="user">user</option>
-          <option value="manager">manager</option>
-          <option value="admin">admin</option>
-        </select>
-        <button type="submit">Save</button>
-      </form>
-    </section>
-
-    <section class="card">
-      <h3>Adjust Guild Totals</h3>
-      <form method="POST" action="/admin/guilds/points">
-        <select name="guild">
-          <option>Fire</option>
-          <option>Water</option>
-          <option>Earth</option>
-        </select>
-        <input name="delta" type="number" placeholder="+/- points" required />
-        <button type="submit">Apply</button>
-      </form>
-    </section>
-
-    <style>
-      .card { border:1px solid #ccc; padding:1rem; border-radius:8px; margin-bottom:1rem; }
-      input, select, textarea { display:block; margin:.5rem 0; width:100%; max-width:500px; }
-      button { margin-top:.5rem; }
-    </style>
   </main>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    // Live online count
+    const socket = io();
+    socket.on("updateOnline", (count) => {
+      const onlineEl = document.getElementById("onlineCount");
+      if (onlineEl) onlineEl.textContent = count;
+    });
+  </script>
 </body>
 </html>

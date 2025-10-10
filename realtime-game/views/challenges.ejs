@@ -6,31 +6,154 @@
   <title>Central Guild Challenges</title>
   <link rel="stylesheet" href="/styles.css" />
   <link rel="stylesheet" href="/css/navbar.css">
-</head>
-<script src="/socket.io/socket.io.js"></script>
-<script>
-  const socket = io();
-  socket.on("updateOnline", (count) => {
-    const onlineEl = document.getElementById("onlineCount");
-    if (onlineEl) {
-      onlineEl.textContent = count;
+  <script src="/socket.io/socket.io.js"></script>
+
+  <style>
+    :root {
+      --accent:#6e38ff;
+      --panel-bg:rgba(255,255,255,.9);
+      --panel-br:rgba(0,0,0,.08);
+      --ink:#0f0f14;
+      --muted:#6b6b6b;
+      --hover:#f7f3ff;
     }
-  });
-</script>
+    body.dark-mode{
+      --panel-bg:rgba(28,28,32,.92);
+      --panel-br:rgba(255,255,255,.08);
+      --ink:#f1f1f1;
+      --muted:#bdbdbd;
+      --hover:rgba(110,56,255,.18);
+    }
+
+    /* page wrapper */
+    .challenges-wrap{
+      max-width: 1100px;
+      width: min(1100px, 100% - 24px);
+      margin: 1.2rem auto 2.2rem;
+      display:flex;
+      flex-direction:column;
+      gap: 1rem;
+    }
+
+    .challenges-header{
+      background: var(--panel-bg);
+      border: 1px solid var(--panel-br);
+      border-radius: 16px;
+      padding: 1.2rem 1.4rem;
+      box-shadow: 0 10px 25px rgba(0,0,0,.08), 0 1px 0 rgba(255,255,255,.6) inset;
+      backdrop-filter: blur(8px);
+      display:flex; justify-content:space-between; align-items:center;
+      flex-wrap:wrap; gap:.5rem;
+    }
+    .challenges-header h2{
+      margin:0; font-size:1.5rem; font-weight:800; letter-spacing:.01em; color:var(--ink);
+    }
+    .challenges-header .chip{
+      background: rgba(110,56,255,.14);
+      border: 1px solid rgba(110,56,255,.35);
+      border-radius:999px;
+      padding:.4rem .8rem;
+      font-size:.9rem;
+    }
+
+    /* challenge cards grid */
+    .challenge-grid{
+      display:grid;
+      grid-template-columns: repeat(auto-fit,minmax(260px,1fr));
+      gap: 1rem;
+    }
+
+    .challenge-card{
+      background: var(--panel-bg);
+      border: 1px solid var(--panel-br);
+      border-radius: 16px;
+      padding: 1rem 1.2rem;
+      display:flex;
+      flex-direction:column;
+      justify-content:space-between;
+      color:var(--ink);
+      text-decoration:none;
+      transition: transform .15s ease, box-shadow .2s ease, border-color .2s ease, background .2s ease;
+      box-shadow: 0 10px 25px rgba(0,0,0,.05);
+      position:relative;
+      overflow:hidden;
+    }
+    .challenge-card::before{
+      content:"";
+      position:absolute; inset:0;
+      background: radial-gradient(600px 300px at top left, rgba(110,56,255,.08), transparent 70%);
+      opacity:0; transition: opacity .25s ease;
+      pointer-events:none;
+    }
+    .challenge-card:hover::before{ opacity:1; }
+    .challenge-card:hover{
+      transform: translateY(-4px);
+      border-color: rgba(110,56,255,.3);
+      box-shadow: 0 18px 36px rgba(110,56,255,.15);
+      background: var(--hover);
+    }
+
+    .challenge-card h3{
+      margin:.2rem 0 .4rem; font-size:1.1rem; font-weight:700;
+    }
+    .challenge-card p{
+      font-size:.9rem; line-height:1.5; color:var(--muted);
+      margin:0;
+      flex:1 1 auto;
+    }
+
+    .challenge-footer{
+      display:flex; justify-content:space-between; align-items:center; margin-top:.8rem;
+      font-size:.85rem;
+      color:var(--muted);
+    }
+    .challenge-footer .btn{
+      border:1px solid #6e38ff33; background:#6e38ff; color:#fff;
+      padding:.45rem .8rem; border-radius:10px;
+      box-shadow:0 6px 16px rgba(110,56,255,.35);
+      font-size:.85rem; text-decoration:none;
+    }
+    .challenge-footer .btn:hover{ filter:brightness(1.05); }
+
+    @media(max-width:700px){
+      .challenge-grid{ grid-template-columns:1fr; }
+    }
+  </style>
+</head>
+
 <body class="<%= guild %>">
+  <%- include('partials/navbar', { user, guild, points, role, online }) %>
 
-  <%- include('partials/navbar', { user, guild }) %>
+  <main class="challenges-wrap">
+    <div class="challenges-header">
+      <h2>Central Guild Challenges</h2>
+      <span class="chip">🟢 Online: <span id="onlineCount"><%= online %></span></span>
+    </div>
 
-  <main>
-    <h2>Central Guild Challenges</h2>
-
-    <% challenges.forEach(c => { %>
-      <div class="challenge-card" style="margin-bottom: 1rem; padding: 1rem; border: 1px solid #ccc; border-radius: 8px;">
-        <a href="/challenges/<%= c.id %>" style="font-size: 1.2rem; font-weight: bold;"><%= c.title %></a>
-        <p><%= c.description %></p>
-      </div>
-    <% }) %>
+    <section class="challenge-grid">
+      <% if (!challenges || challenges.length === 0) { %>
+        <p style="text-align:center;opacity:.8;">No challenges posted yet.</p>
+      <% } else { %>
+        <% challenges.forEach(c => { %>
+          <a href="/challenges/<%= c.id %>" class="challenge-card">
+            <h3><%= c.title %></h3>
+            <p><%= c.description && c.description.trim().length ? c.description : "No description provided." %></p>
+            <div class="challenge-footer">
+              <span>#<%= c.id %></span>
+              <span class="btn">View</span>
+            </div>
+          </a>
+        <% }) %>
+      <% } %>
+    </section>
   </main>
 
+  <script>
+    const socket = io();
+    socket.on("updateOnline", (count)=>{
+      const el=document.getElementById("onlineCount");
+      if(el) el.textContent=count;
+    });
+  </script>
 </body>
 </html>
