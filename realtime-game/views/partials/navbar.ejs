@@ -53,12 +53,20 @@
         document.body.classList.add('dark-mode');
       }
 
-      // Burger menu toggle
       const burger = document.getElementById('burger');
       const navLinks = document.getElementById('nav-links');
+
+      // Ensure collapsed on load
+      if (navLinks) navLinks.classList.remove('show');
+
       if (burger && navLinks) {
         burger.addEventListener('click', () => {
           navLinks.classList.toggle('show');
+        });
+
+        // Auto-close when switching to desktop to avoid "always open" issue
+        window.addEventListener('resize', () => {
+          if (window.innerWidth > 980) navLinks.classList.remove('show');
         });
       }
 
