@@ -2,13 +2,16 @@
   <div class="navbar-header">
     <div class="navbar-logo" style="display:flex; align-items:center; gap:.5rem;">
       <% if (user) { %>
-        <img
-          src="<%= avatarUrl %>"
-          alt="avatar"
-          class="nav-avatar <%= isDefaultAvatar ? 'avatar--default' : '' %>"
-          style="width:32px;height:32px;border-radius:50%;object-fit:cover;"
-        />
+        <a href="/profile" class="nav-avatar-link" title="View Profile">
+          <img
+            src="<%= avatarUrl %>"
+            alt="avatar"
+            class="nav-avatar <%= isDefaultAvatar ? 'avatar--default' : '' %>"
+            style="width:32px;height:32px;border-radius:50%;object-fit:cover;"
+          />
+        </a>
       <% } %>
+
 
       <% if (typeof points !== 'undefined') { %>
         <span class="user-points">

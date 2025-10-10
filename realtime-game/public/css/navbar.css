@@ -93,3 +93,12 @@ body.dark-mode .navbar {
 body.dark-mode .navbar-links a:hover {
   background-color: #444;
 }
+
+.nav-avatar-link {
+  display: inline-block;
+  transition: transform 0.15s ease;
+}
+.nav-avatar-link:hover {
+  transform: scale(1.2);
+  cursor: pointer;
+}

@@ -332,7 +332,7 @@ body.Fire  .avatar--default { filter: hue-rotate(140deg) saturate(1.6) brightnes
 body.Water .avatar--default { filter: hue-rotate(10deg) saturate(1.8) brightness(1.1); }
 body.Earth .avatar--default { filter: hue-rotate(240deg) saturate(1.5) brightness(1.1); }
 
-body.Fire  .nav-avatar { box-shadow: 0 0 0 2px rgba(0, 106, 255, 0.65); }
+body.Fire  .nav-avatar { box-shadow: 0 0 0 2px rgba(255, 0, 64, 0.65); }
 body.Water .nav-avatar { box-shadow: 0 0 0 2px rgba(42,167,255,.65); }
 body.Earth .nav-avatar { box-shadow: 0 0 0 2px rgba(0, 191, 255, 0.65); }
 

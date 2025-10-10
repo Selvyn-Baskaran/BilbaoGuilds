@@ -630,6 +630,35 @@ app.post("/admin/events/:id/update", ensureAdmin, (req, res) => {
   res.redirect("/admin");
 });
 
+// --- Add/Replace Poster ---
+app.post("/admin/events/:id/poster", ensureAdmin, upload.single("poster"), (req, res) => {
+  if (!req.file) return res.status(400).send("No poster uploaded");
+  const events = readJsonOrDefault("./events.json", []);
+  const idx = events.findIndex(e => String(e.id) === String(req.params.id));
+  if (idx === -1) return res.status(404).send("Event not found");
+
+  events[idx].poster = `/uploads/${req.file.filename}`; // web path
+  writeJson("./events.json", events);
+  res.redirect(`/events/${req.params.id}`);
+});
+
+// --- Remove Poster ---
+app.post("/admin/events/:id/poster/delete", ensureAdmin, (req, res) => {
+  const events = readJsonOrDefault("./events.json", []);
+  const idx = events.findIndex(e => String(e.id) === String(req.params.id));
+  if (idx === -1) return res.status(404).send("Event not found");
+
+  // optionally unlink old file (safe: only unlink if it looks like an upload)
+  const old = events[idx].poster;
+  if (old && old.startsWith("/uploads/")) {
+    try { fs.unlinkSync(path.join(__dirname, "public", old)); } catch {}
+  }
+  events[idx].poster = null;
+  writeJson("./events.json", events);
+  res.redirect(`/events/${req.params.id}`);
+});
+
+
 
 
 // Adjust user points
