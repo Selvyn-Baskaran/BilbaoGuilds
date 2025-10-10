@@ -6,45 +6,309 @@
   <title>Home</title>
   <link rel="stylesheet" href="/styles.css">
   <link rel="stylesheet" href="/css/navbar.css">
+
   <style>
-    .landing {
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      height: 80vh;
-      text-align: center;
-      padding: 2rem;
+    :root{
+      --ink:#0f0f14;
+      --muted:#6b6b6b;
+      --panel:rgba(255,255,255,.9);
+      --panel-br:rgba(0,0,0,.08);
+      --accent:#6e38ff;
+      --pill:#f7f3ff;
     }
-    .landing h1 { font-size: 2.5rem; margin-bottom: 1rem; }
-    .landing p { font-size: 1.2rem; max-width: 600px; margin-bottom: 2rem; }
-    .landing a {
-      display: inline-block;
-      padding: 0.75rem 1.5rem;
-      font-size: 1rem;
-      background-color: #444;
-      color: white;
-      text-decoration: none;
-      border-radius: 8px;
-      transition: background-color 0.2s;
+    body.dark-mode{
+      --ink:#f1f1f1;
+      --muted:#bdbdbd;
+      --panel:rgba(28,28,32,.92);
+      --panel-br:rgba(255,255,255,.10);
+      --pill:rgba(110,56,255,.18);
     }
-    .landing a:hover { background-color: #666; }
+
+    .home-wrap{
+      max-width: 1100px;
+      width: min(1100px, 100% - 24px);
+      margin: 14px auto 28px;
+      display: grid;
+      gap: 12px;
+    }
+
+    /* HERO */
+    .hero{
+      background: var(--panel);
+      border: 1px solid var(--panel-br);
+      border-radius: 18px;
+      padding: 18px;
+      display:grid; grid-template-columns: 1fr auto; gap:12px; align-items:center;
+      box-shadow: 0 12px 30px rgba(0,0,0,.08), 0 1px 0 rgba(255,255,255,.6) inset;
+      backdrop-filter: blur(6px);
+    }
+    .hero h1{ margin:0 0 6px; font-size: clamp(1.4rem, 2vw + .6rem, 2rem); font-weight: 900; color:var(--ink); }
+    .hero p{ margin:0; color:var(--muted); }
+    .hero-actions{
+      display:flex; gap:10px; flex-wrap:wrap; align-items:center; justify-self:end;
+    }
+    .btn{
+      display:inline-flex; align-items:center; gap:.45rem;
+      padding:.65rem .95rem; border-radius:12px; text-decoration:none;
+      border:1px solid #6e38ff33; background:#6e38ff; color:#fff;
+      box-shadow: 0 8px 18px rgba(110,56,255,.35);
+    }
+    .btn:hover{ filter:brightness(1.05); }
+    .btn.ghost{
+      background:transparent; color:var(--accent); border:1px solid var(--accent); box-shadow:none;
+    }
+
+    /* GRID */
+    .grid{
+      display:grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 12px;
+      align-items: start;
+    }
+    @media (max-width: 980px){ .grid{ grid-template-columns: 1fr; } }
+
+    /* CARDS */
+    .card{
+      background: var(--panel);
+      border: 1px solid var(--panel-br);
+      border-radius: 16px;
+      padding: 14px;
+      box-shadow: 0 10px 25px rgba(0,0,0,.08), 0 1px 0 rgba(255,255,255,.6) inset;
+      color: var(--ink);
+    }
+    .card h3{ margin:0 0 8px; font-weight: 800; }
+    .divider{ height:1px; background: var(--panel-br); margin: 10px 0; }
+
+    /* QUICK START */
+    .quick{
+      display:grid; grid-template-columns: repeat(3, minmax(0,1fr));
+      gap:10px;
+    }
+    @media (max-width: 760px){ .quick{ grid-template-columns: 1fr; } }
+    .tile{
+      border:1px solid var(--panel-br);
+      border-radius:14px;
+      padding:12px;
+      text-decoration:none; color:inherit;
+      background: linear-gradient(180deg, #fff, #fafafa);
+      box-shadow: 0 6px 14px rgba(0,0,0,.06);
+      transition: border-color .15s ease, box-shadow .2s ease, transform .06s ease;
+    }
+    body.dark-mode .tile{ background: linear-gradient(180deg, #1f1f1f, #1b1b1b); }
+    .tile:hover{ border-color: rgba(110,56,255,.35); box-shadow: 0 12px 22px rgba(110,56,255,.18); transform: translateY(-1px); }
+    .tile h4{ margin:0 0 6px; font-weight:800; }
+    .muted{ color: var(--muted); }
+
+    /* UPCOMING EVENTS MINI */
+    .events-mini .item{
+      display:flex; align-items:center; justify-content:space-between; gap:8px;
+      padding:10px; border:1px solid var(--panel-br); border-radius:12px;
+      background: linear-gradient(180deg, #fff, #fafafa);
+    }
+    body.dark-mode .events-mini .item{ background: linear-gradient(180deg, #1f1f1f, #1b1b1b); }
+    .events-mini .meta{ display:flex; flex-direction:column; }
+    .events-mini .title{ font-weight:700; }
+    .events-mini .when{ font-size:.9rem; color:var(--muted); }
+    .events-mini .cta{
+      text-decoration:none; padding:.4rem .65rem; border-radius:10px;
+      background:#6e38ff; color:#fff; border:1px solid #6e38ff33;
+      box-shadow:0 6px 16px rgba(110,56,255,.35);
+    }
+
+    /* LEADER SNAPSHOT (static) */
+    .leader{ display:flex; flex-direction:column; gap:10px; align-items:flex-start; }
+    .leader .badge{
+      display:inline-flex; align-items:center; gap:.6rem;
+      padding:.55rem .8rem; border-radius:999px;
+      background: rgba(110,56,255,.14);
+      border:1px solid rgba(110,56,255,.35);
+      font-weight:800;
+    }
+    .guild-row{
+      display:flex; gap:8px; align-items:center; flex-wrap:wrap;
+    }
+    .guild-chip{
+      display:inline-flex; align-items:center; gap:.4rem;
+      padding:.35rem .6rem; border-radius:999px; border:1px solid var(--panel-br);
+      background: linear-gradient(180deg, #fff, #fafafa);
+    }
+    body.dark-mode .guild-chip{ background: linear-gradient(180deg, #1f1f1f, #1b1b1b); }
+
+    /* STATS MINI */
+    .stats{
+      display:grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap:10px;
+    }
+    @media (max-width: 760px){ .stats{ grid-template-columns: 1fr; } }
+    .stat{
+      background: linear-gradient(180deg, #fff, #fafafa);
+      border: 1px solid var(--panel-br);
+      border-radius: 12px;
+      padding: 12px;
+      box-shadow: 0 6px 14px rgba(0,0,0,.06);
+    }
+    body.dark-mode .stat{ background: linear-gradient(180deg, #1f1f1f, #1b1b1b); }
+    .stat .label{ font-size:.9rem; color:var(--muted); }
+    .stat .value{ font-size:1.3rem; font-weight:800; }
+
+    /* Name overflow fix */
+    .stat .value.name{
+      max-width: 100%;
+      font-size: clamp(0.95rem, 2.2vw, 1.1rem);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
   </style>
 </head>
 <body class="<%= guild %>">
 
-  <%- include('partials/navbar', { points, user, online }) %>
+  <%- include('partials/navbar', { points, user, online, guild, role }) %>
 
-  <main class="landing">
-    <h1>Welcome to Bilbao Guilds</h1>
-    <p>Unite with your Guild. Complete The Guild Quests. Climb the ranks and claim victory. Join the fun and prove your Guild is the best!</p>
+  <main class="home-wrap">
+    <!-- HERO -->
+    <section class="hero">
+      <div>
+        <h1>Welcome to Bilbao Guilds</h1>
+        <p>Unite with your Guild. Complete quests. Climb the ranks and claim victory.</p>
+      </div>
+      <div class="hero-actions">
+        <% if (user) { %>
+          <a class="btn" href="/challenges">View Challenges</a>
+          <a class="btn ghost" href="/events">Upcoming Events</a>
+        <% } else { %>
+          <a class="btn" href="/login.html">Log In to Begin</a>
+        <% } %>
+      </div>
+    </section>
 
-    <% if (user) { %>
-      <a href="/challenges">View Challenges</a>
-    <% } else { %>
-      <a href="/login.html">Log In to Begin</a>
-    <% } %>
+    <!-- CONTENT GRID -->
+    <section class="grid">
+      <!-- LEFT: Quick tiles + events -->
+      <div class="left" style="display:flex; flex-direction:column; gap:12px;">
+        <article class="card">
+          <h3>Quick Access</h3>
+          <div class="quick">
+            <a class="tile" href="/challenges">
+              <h4>Challenges</h4>
+              <div class="muted">Start or continue a quest.</div>
+            </a>
+            <a class="tile" href="/guild-chat">
+              <h4>Guild Chat</h4>
+              <div class="muted">Plan, brag, and coordinate.</div>
+            </a>
+            <a class="tile" href="/leaderboard">
+              <h4>Leaderboard</h4>
+              <div class="muted">See who’s on top.</div>
+            </a>
+          </div>
+        </article>
+
+        <article class="card events-mini">
+          <h3>Upcoming Events</h3>
+          <div id="eventsList" style="display:grid; gap:8px;">
+            <div class="muted" id="eventsFallback">
+              Can’t load events preview.
+              <a href="/events" class="btn ghost" style="margin-left:6px;">Open Events</a>
+            </div>
+          </div>
+        </article>
+      </div>
+
+      <!-- RIGHT: Leader (static) + stats -->
+      <aside class="right" style="display:flex; flex-direction:column; gap:12px;">
+        <article class="card leader">
+          <h3>Guilds</h3>
+          <!-- Static badge (no dynamic fetch) -->
+          <span class="badge">🏆 Top Guild</span>
+          <div class="guild-row">
+            <span class="guild-chip">🔥 Fire</span>
+            <span class="guild-chip">💧 Water</span>
+            <span class="guild-chip">🌿 Earth</span>
+          </div>
+          <a class="btn ghost" href="/leaderboard" style="width:fit-content;">Full Leaderboard</a>
+        </article>
+
+        <article class="card">
+          <h3>Stats</h3>
+          <div class="stats">
+            <div class="stat" title="<%= user ? user : 'Guest' %>">
+              <div class="label">You</div>
+              <div class="value name"><%= user ? user : 'Guest' %></div>
+            </div>
+            <div class="stat">
+              <div class="label">Your Points</div>
+              <div class="value"><%= points || 0 %></div>
+            </div>
+            <div class="stat">
+              <div class="label">Online</div>
+              <div class="value"><span id="onlineCount"><%= typeof online !== 'undefined' ? online : 0 %></span></div>
+            </div>
+          </div>
+        </article>
+      </aside>
+    </section>
   </main>
 
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    // Live online count
+    const socket = io();
+    socket.on("updateOnline", (count) => {
+      const el = document.getElementById("onlineCount");
+      if (el) el.textContent = count;
+    });
+
+    // --- Upcoming events preview (graceful fallback if /events.json not public) ---
+    (async function loadEvents(){
+      const list = document.getElementById('eventsList');
+      const fallback = document.getElementById('eventsFallback');
+      try {
+        const res = await fetch('/events.json', { cache:'no-store' });
+        if (!res.ok) throw new Error('not served');
+        const events = await res.json();
+
+        const today = new Date();
+        const toKey = (d)=> d.toISOString().slice(0,10);
+        const norm = (s)=>{
+          if (!s) return null;
+          const d = new Date(s);
+          if (Number.isNaN(d.getTime())) return null;
+          return toKey(new Date(d.getFullYear(), d.getMonth(), d.getDate()));
+        };
+        const todayKey = toKey(new Date(today.getFullYear(), today.getMonth(), today.getDate()));
+
+        const upcoming = events
+          .map(ev => ({ key: norm(ev.date || ev.start || ev.when), ev }))
+          .filter(x => x.key && x.key >= todayKey)
+          .sort((a,b)=> a.key.localeCompare(b.key))
+          .slice(0,3)
+          .map(x => x.ev);
+
+        if (!upcoming.length) {
+          fallback.innerHTML = 'No upcoming events. <a class="btn ghost" href="/events" style="margin-left:6px;">Open Events</a>';
+          return;
+        }
+
+        fallback.remove();
+        list.innerHTML = '';
+        upcoming.forEach(e => {
+          const when = [e.date, e.time].filter(Boolean).join(' · ');
+          const loc = e.location ? ` @ ${e.location}` : '';
+          const div = document.createElement('div');
+          div.className = 'item';
+          div.innerHTML = `
+            <div class="meta">
+              <span class="title">${e.title}</span>
+              <span class="when">${when}${loc}</span>
+            </div>
+            <a class="cta" href="/events/${e.id}">View</a>
+          `;
+          list.appendChild(div);
+        });
+      } catch {
+        // leave fallback visible
+      }
+    })();
+  </script>
 </body>
 </html>
