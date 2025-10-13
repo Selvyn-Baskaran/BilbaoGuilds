@@ -605,6 +605,10 @@ function handlerAdjustGuildTotals(req, res) {
   }
 }
 
+app.get("/announcements.json", (req, res) => {
+  const anns = readJsonOrDefault("./announcements.json", []);
+  res.json(anns);
+});
 
 
 // Admin portal
@@ -613,6 +617,8 @@ app.get("/admin", ensureAdmin, (req, res) => {
   const guildTotals = readJsonOrDefault(GUILDS_FILE, { Fire: 0, Water: 0, Earth: 0 });
   const challenges = readJsonOrDefault(CHALLENGES_FILE, []);
   const events      = readJsonOrDefault("./events.json", []);
+    const announcements = readJsonOrDefault("./announcements.json", []);
+
 
   res.render("admin", {
     user:   req.session.user,
@@ -624,6 +630,7 @@ app.get("/admin", ensureAdmin, (req, res) => {
     guildTotals,
     challenges,
     events,
+    announcements,
   });
 });
 
@@ -790,6 +797,42 @@ app.post("/admin/guilds/points", ensureAdmin, (req, res) => {
 
   res.redirect("/admin");
 });
+
+const ANNOUNCEMENTS_FILE = "./announcements.json";
+
+// --- ANNOUNCEMENTS ADMIN ---
+
+// Create announcement
+app.post("/admin/announcements/create", ensureAdmin, (req, res) => {
+  const { id, title, date, tag, note, href } = req.body;
+  if (!id || !title) return res.status(400).send("id and title required");
+
+  const anns = readJsonOrDefault(ANNOUNCEMENTS_FILE, []);
+  if (anns.some(a => String(a.id) === String(id))) {
+    return res.status(400).send("ID already exists");
+  }
+
+  anns.push({
+    id: String(id),
+    title: String(title),
+    date: String(date || ""),
+    tag: String(tag || "info"),
+    note: String(note || ""),
+    href: String(href || "")
+  });
+
+  writeJson(ANNOUNCEMENTS_FILE, anns);
+  res.redirect("/admin");
+});
+
+// Delete announcement
+app.post("/admin/announcements/:id/delete", ensureAdmin, (req, res) => {
+  const anns = readJsonOrDefault(ANNOUNCEMENTS_FILE, []);
+  const filtered = anns.filter(a => String(a.id) !== String(req.params.id));
+  writeJson(ANNOUNCEMENTS_FILE, filtered);
+  res.redirect("/admin");
+});
+
 
 
 

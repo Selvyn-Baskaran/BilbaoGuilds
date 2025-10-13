@@ -1,4 +1,31 @@
 [
-  { "title": "25/26 Season is LIVE!", "date": "2025-10-06", "note": "Kickoff week", "href": "/challenges", "tag": "new" },
-  { "title": "Freshmen’ Quest Results", "date": "2025-10-07", "note": "Earth 10 · Water 5 · Fire 0", "href": "/leaderboard", "tag": "info" }
+  {
+    "title": "25/26 Season is LIVE!",
+    "date": "2025-10-06",
+    "note": "Kickoff week",
+    "href": "/challenges",
+    "tag": "new"
+  },
+  {
+    "title": "Freshmen’ Quest Results",
+    "date": "2025-10-07",
+    "note": "Earth 10 · Water 5 · Fire 0",
+    "href": "/leaderboard",
+    "tag": "info"
+  },
+  {
+    "id": "WEBSITE",
+    "title": "NEW WEBSITE HELLO",
+    "date": "2025-10-20",
+    "tag": "new",
+    "note": "Say hello to our brand new Guilds Website",
+    "href": ""
+  },
+  {
+    "title": "Check out TV's on Campus for Leaderboard updates and event notifications",
+    "date": "ALL THE TIME",
+    "note": "Cafetria, Hallways",
+    "href": "/events",
+    "tag": "update"
+  }
 ]

@@ -404,7 +404,7 @@
       };
 
       try {
-        const res = await fetch('/announcements.json', { cache: 'no-store' });
+        const res = await fetch('../announcements.json', { cache: 'no-store' });
         if (!res.ok) throw 0;
         const anns = await res.json();
         // expect array of { title, date, note?, href?, tag? }
@@ -418,20 +418,6 @@
             note: "Freshmen’ Quest results - Earth 10, Water 5, Fire 0",
             href: "/leaderboard",
             tag: "new"
-          },
-          {
-            title: "Quests are BACK!!!",
-            date: "👀",
-            note: "Watch Teams for updates",
-            href: "/challenges",
-            tag: "info"
-          },
-          {
-            title: "Check out TV's on Campus for Leaderboard updates and event notifications",
-            date: "ALL THE TIME",
-            note: "Cafetria, Hallways",
-            href: "/events",
-            tag: "update"
           }
         ]);
       }

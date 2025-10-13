@@ -360,6 +360,65 @@
             </details>
           </div>
         </article>
+
+        <!-- ANNOUNCEMENTS -->
+        <article class="card">
+          <h3>Announcements</h3>
+          <div class="section-sub">Post updates visible on the homepage.</div>
+
+          <!-- Create -->
+          <% if (role === 'admin') { %>
+          <form method="POST" action="/admin/announcements/create" class="mt-6">
+            <div class="form-grid">
+              <input name="id" placeholder="announcement id (slug)" required />
+              <input name="title" placeholder="title" required />
+            </div>
+            <div class="form-grid mt-6">
+              <input name="date" type="date" />
+              <select name="tag">
+                <option value="new">new</option>
+                <option value="update">update</option>
+                <option value="info" selected>info</option>
+              </select>
+            </div>
+            <input name="note" placeholder="note (optional)" class="mt-6" />
+            <input name="href" placeholder="link (optional)" class="mt-6" />
+            <button type="submit" class="btn mt-6">Create</button>
+          </form>
+          <% } %>
+
+          <div class="divider"></div>
+
+          <!-- Manage -->
+          <details>
+            <summary>Manage existing (<%= announcements?.length || 0 %>)</summary>
+            <div class="inner mt-6">
+              <div class="list">
+                <% (announcements || []).forEach(a => { %>
+                  <div class="row">
+                    <div>
+                      <div class="row-title"><%= a.title %></div>
+                      <div class="row-sub">
+                        <%= a.date || 'No date' %>
+                        <% if (a.tag) { %> · <%= a.tag %><% } %>
+                        <% if (a.note) { %> · <%= a.note %><% } %>
+                      </div>
+                    </div>
+                    <% if (role === 'admin') { %>
+                    <div class="row-actions">
+                      <form method="POST" action="/admin/announcements/<%= a.id %>/delete"
+                            onsubmit="return confirm('Delete this announcement?');">
+                        <button type="submit" class="btn danger">Delete</button>
+                      </form>
+                    </div>
+                    <% } %>
+                  </div>
+                <% }) %>
+              </div>
+            </div>
+          </details>
+        </article>
+
       </div>
 
       <!-- RIGHT COLUMN (Quick Actions) -->
