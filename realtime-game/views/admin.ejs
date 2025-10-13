@@ -7,6 +7,7 @@
   <link rel="stylesheet" href="/styles.css"/>
   <link rel="stylesheet" href="/css/navbar.css">
 
+
   <style>
     :root{
       --ink:#0f0f14;
@@ -176,6 +177,9 @@
 
 <body class="<%= guild %>">
   <%- include('partials/navbar', { user, guild, role, online }) %>
+
+  <% const isAdmin = role === 'admin'; const isManager = role === 'manager'; %>
+
 
   <main class="admin-wrap">
     <!-- HERO -->
@@ -363,40 +367,46 @@
         <h3>Quick Actions</h3>
         <div class="section-sub">Fast admin controls for users & guilds.</div>
 
-        <!-- Adjust User Points -->
-        <div class="divider"></div>
-        <h4 style="margin:0 0 6px;">Adjust User Points</h4>
-        <form method="POST" action="/admin/users/points">
-          <input name="username" placeholder="username (display or email)" list="userlist" required />
-          <input name="delta" type="number" placeholder="+/- points" required />
-          <button type="submit" class="btn mt-6 w-100">Apply</button>
-        </form>
+        <!-- Adjust User Points (ADMIN ONLY) -->
+        <% if (isAdmin) { %>
+          <div class="divider"></div>
+          <h4 style="margin:0 0 6px;">Adjust User Points</h4>
+          <form method="POST" action="/admin/users/points">
+            <input name="username" placeholder="username (display or email)" list="userlist" required />
+            <input name="delta" type="number" placeholder="+/- points" required />
+            <button type="submit" class="btn mt-6 w-100">Apply</button>
+          </form>
+        <% } %>
 
-        <!-- Set User Role -->
-        <div class="divider"></div>
-        <h4 style="margin:0 0 6px;">Set User Role</h4>
-        <form method="POST" action="/admin/users/role">
-          <input name="username" placeholder="username (display or email)" list="userlist" required />
-          <select name="role">
-            <option value="user">user</option>
-            <option value="manager">manager</option>
-            <option value="admin">admin</option>
-          </select>
-          <button type="submit" class="btn mt-6 w-100">Save</button>
-        </form>
+        <!-- Set User Role (ADMIN ONLY) -->
+        <% if (isAdmin) { %>
+          <div class="divider"></div>
+          <h4 style="margin:0 0 6px;">Set User Role</h4>
+          <form method="POST" action="/admin/users/role">
+            <input name="username" placeholder="username (display or email)" list="userlist" required />
+            <select name="role">
+              <option value="user">user</option>
+              <option value="manager">manager</option>
+              <option value="admin">admin</option>
+            </select>
+            <button type="submit" class="btn mt-6 w-100">Save</button>
+          </form>
+        <% } %>
 
-        <!-- Adjust Guild Totals -->
-        <div class="divider"></div>
-        <h4 style="margin:0 0 6px;">Adjust Guild Totals</h4>
-        <form method="POST" action="/admin/guilds/points">
-          <select name="guild">
-            <option>Fire</option>
-            <option>Water</option>
-            <option>Earth</option>
-          </select>
-          <input name="delta" type="number" placeholder="+/- points" required />
-          <button type="submit" class="btn mt-6 w-100">Apply</button>
-        </form>
+        <!-- Adjust Guild Totals (ADMIN ONLY) -->
+        <% if (isAdmin) { %>
+          <div class="divider"></div>
+          <h4 style="margin:0 0 6px;">Adjust Guild Totals</h4>
+          <form method="POST" action="/admin/guilds/points">
+            <select name="guild">
+              <option>Fire</option>
+              <option>Water</option>
+              <option>Earth</option>
+            </select>
+            <input name="delta" type="number" placeholder="+/- points" required />
+            <button type="submit" class="btn mt-6 w-100">Apply</button>
+          </form>
+        <% } %>
 
         <datalist id="userlist">
           <% Object.keys(allUsers || {}).forEach(u => { %>

@@ -67,6 +67,8 @@
     }
     @media (max-width: 980px){ .grid{ grid-template-columns: 1fr; } }
 
+    
+
     /* CARDS */
     .card{
       background: var(--panel);
@@ -158,6 +160,50 @@
       overflow: hidden;
       text-overflow: ellipsis;
     }
+
+        /* ANNOUNCEMENTS */
+    .ann {
+      padding: 0; overflow: hidden; border-radius: 16px;
+      background:
+        radial-gradient(60% 120% at 100% 0%, rgba(110,56,255,.15), transparent 40%),
+        radial-gradient(80% 140% at 0% 100%, rgba(110,56,255,.12), transparent 45%),
+        var(--panel);
+      border: 1px solid var(--panel-br);
+      box-shadow: 0 12px 30px rgba(0,0,0,.08), 0 1px 0 rgba(255,255,255,.6) inset;
+    }
+    .ann-head{
+      display:flex; align-items:center; gap:.6rem; padding:12px 14px;
+      background: linear-gradient(90deg, rgba(110,56,255,.22), rgba(110,56,255,.08));
+      border-bottom:1px solid var(--panel-br);
+    }
+    .ann-head h3{ margin:0; font-weight:900; color:var(--ink); }
+    .ann-head .spark{ font-size:1.2rem; }
+
+    .ann-list{ list-style:none; margin:0; padding:10px; display:grid; gap:8px; }
+    .ann-item{
+      display:grid; grid-template-columns: auto 1fr auto; gap:10px; align-items:center;
+      padding:10px; border:1px solid var(--panel-br); border-radius:12px;
+      background: linear-gradient(180deg, #fff, #fafafa);
+    }
+    body.dark-mode .ann-item{ background: linear-gradient(180deg, #1f1f1f, #1b1b1b); }
+    .ann-item .title{ font-weight:800; color:var(--ink); }
+    .ann-item .meta{ font-size:.9rem; color:var(--muted); }
+    .ann-item .cta{
+      text-decoration:none; padding:.45rem .7rem; border-radius:10px;
+      background:#6e38ff; color:#fff; border:1px solid #6e38ff33;
+      box-shadow:0 6px 16px rgba(110,56,255,.35);
+    }
+    .tag{
+      font-size:.75rem; font-weight:800; letter-spacing:.02em;
+      padding:.25rem .5rem; border-radius:999px; border:1px solid var(--panel-br);
+      background: var(--pill); color: var(--accent);
+    }
+    .tag.new{ background: rgba(110,56,255,.16); color:#6e38ff; border-color: rgba(110,56,255,.35); }
+    .tag.update{ background: rgba(255,193,7,.18); color:#a66b00; border-color: rgba(255,193,7,.4); }
+    .tag.info{ background: rgba(99,102,241,.16); color:#6366f1; border-color: rgba(99,102,241,.35); }
+
+
+
   </style>
 </head>
 <body class="<%= guild %>">
@@ -180,6 +226,25 @@
         <% } %>
       </div>
     </section>
+
+        <!-- ANNOUNCEMENTS -->
+    <section class="card ann">
+      <div class="ann-head">
+        <span class="spark">✨</span>
+        <h3>Announcements</h3>
+      </div>
+      <ul class="ann-list" id="annList">
+        <li class="ann-item" id="annFallback">
+          <span class="tag info">INFO</span>
+          <div>
+            <div class="title">No announcements yet</div>
+            <div class="meta">Check back soon for updates.</div>
+          </div>
+          <a class="cta" href="/challenges">View Challenges</a>
+        </li>
+      </ul>
+    </section>
+
 
     <!-- CONTENT GRID -->
     <section class="grid">
@@ -310,5 +375,68 @@
       }
     })();
   </script>
+
+  <script>
+    // --- Announcements preview (tries /announcements.json, falls back to sample) ---
+    (async function loadAnnouncements(){
+      const list = document.getElementById('annList');
+      const fallback = document.getElementById('annFallback');
+
+      const render = (items)=>{
+        if (!items?.length) return;
+        fallback?.remove();
+        list.innerHTML = '';
+        items.slice(0,4).forEach(a=>{
+          const li = document.createElement('li');
+          li.className = 'ann-item';
+          const tag = a.tag || 'info';
+          const safe = s => (s||'').replace(/[<>&]/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;'}[c]));
+          li.innerHTML = `
+            <span class="tag ${tag.toLowerCase()}">${safe(tag.toUpperCase())}</span>
+            <div>
+              <div class="title">${safe(a.title)}</div>
+              <div class="meta">${[a.date, a.note].filter(Boolean).map(safe).join(' · ')}</div>
+            </div>
+            ${a.href ? `<a class="cta" href="${safe(a.href)}">Open</a>` : `<span></span>`}
+          `;
+          list.appendChild(li);
+        });
+      };
+
+      try {
+        const res = await fetch('/announcements.json', { cache: 'no-store' });
+        if (!res.ok) throw 0;
+        const anns = await res.json();
+        // expect array of { title, date, note?, href?, tag? }
+        render(anns);
+      } catch {
+        // Fallback sample content (edit or remove as you like)
+        render([
+          {
+            title: "25/26 Season is LIVE!",
+            date: "Oct 6",
+            note: "Freshmen’ Quest results - Earth 10, Water 5, Fire 0",
+            href: "/leaderboard",
+            tag: "new"
+          },
+          {
+            title: "Quests are BACK!!!",
+            date: "👀",
+            note: "Watch Teams for updates",
+            href: "/challenges",
+            tag: "info"
+          },
+          {
+            title: "Check out TV's on Campus for Leaderboard updates and event notifications",
+            date: "ALL THE TIME",
+            note: "Cafetria, Hallways",
+            href: "/events",
+            tag: "update"
+          }
+        ]);
+      }
+    })();
+  </script>
+
 </body>
 </html>

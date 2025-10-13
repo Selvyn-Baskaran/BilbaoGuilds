@@ -197,6 +197,15 @@ function ensureAdmin(req, res, next) {
   return res.status(403).send("Forbidden: admin only");
 }
 
+// body parser (if not already present)
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
+
+// small I/O helpers
+const readJSON = (p) => JSON.parse(fs.readFileSync(p, "utf-8"));
+const writeJSON = (p, obj) => fs.writeFileSync(p, JSON.stringify(obj, null, 2));
+
+
 app.use((req, res, next) => {
   if (req.user) {
     console.log("AAD profile snapshot:", {
@@ -522,6 +531,80 @@ app.post("/profile", requireLogin, upload.single("avatar"), (req, res) => {
   writeJson(USERS_FILE, allUsers);
   res.redirect("/profile");
 });
+
+// ----- ADMIN-ONLY HANDLERS -----
+
+// Adjust a single user's points: { username, delta }
+function handlerAdjustUserPoints(req, res) {
+  try {
+    const { username, delta } = req.body;
+    const d = parseInt(delta, 10) || 0;
+    if (!username || !Number.isFinite(d)) return res.status(400).send("Bad request");
+
+    const users = readJSON("./users.json");
+
+    // Resolve by exact email key OR by case-insensitive key match
+    let key = users[username] ? username : null;
+    if (!key) {
+      const uname = String(username).toLowerCase();
+      key = Object.keys(users).find(k => k.toLowerCase() === uname) || null;
+    }
+    if (!key) return res.status(404).send("User not found");
+
+    users[key].points = (users[key].points || 0) + d;
+    writeJSON("./users.json", users);
+    return res.redirect("/admin");
+  } catch (e) {
+    console.error("handlerAdjustUserPoints error:", e);
+    return res.status(500).send("Server error");
+  }
+}
+
+// Set a user's role: { username, role }
+function handlerSetUserRole(req, res) {
+  try {
+    const { username, role } = req.body;
+    const allowed = new Set(["user", "manager", "admin"]);
+    if (!username || !allowed.has(role)) return res.status(400).send("Bad request");
+
+    const users = readJSON("./users.json");
+
+    // Resolve by exact email key OR by case-insensitive key match
+    let key = users[username] ? username : null;
+    if (!key) {
+      const uname = String(username).toLowerCase();
+      key = Object.keys(users).find(k => k.toLowerCase() === uname) || null;
+    }
+    if (!key) return res.status(404).send("User not found");
+
+    users[key].role = role;
+    writeJSON("./users.json", users);
+    return res.redirect("/admin");
+  } catch (e) {
+    console.error("handlerSetUserRole error:", e);
+    return res.status(500).send("Server error");
+  }
+}
+
+// Adjust guild totals: { guild, delta }
+function handlerAdjustGuildTotals(req, res) {
+  try {
+    const { guild, delta } = req.body;
+    const d = parseInt(delta, 10) || 0;
+    if (!guild || !Number.isFinite(d)) return res.status(400).send("Bad request");
+
+    const guilds = readJSON("./guilds.json");
+    if (!(guild in guilds)) return res.status(404).send("Guild not found");
+
+    guilds[guild] = (guilds[guild] || 0) + d;
+    writeJSON("./guilds.json", guilds);
+    return res.redirect("/admin");
+  } catch (e) {
+    console.error("handlerAdjustGuildTotals error:", e);
+    return res.status(500).send("Server error");
+  }
+}
+
 
 
 // Admin portal
