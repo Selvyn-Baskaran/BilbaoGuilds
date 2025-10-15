@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Help & Info</title>
+  <link rel="stylesheet" href="/styles.css"/>
+  <link rel="stylesheet" href="/css/navbar.css"/>
+  <style>
+    /* THEME */
+    :root{
+      --ink:#0f0f14;
+      --muted:#6b6b6b;
+      --panel:rgba(255,255,255,.9);
+      --panel-br:rgba(0,0,0,.08);
+      --accent:#6e38ff;               /* purple */
+      --accent-2:#9d81ff;             /* lighter purple */
+      --pill:#f7f3ff;
+      --glow:0 18px 40px rgba(110,56,255,.25);
+    }
+    body.dark-mode{
+      --ink:#f1f1f1;
+      --muted:#bdbdbd;
+      --panel:rgba(28,28,32,.92);
+      --panel-br:rgba(255,255,255,.12);
+      --pill:rgba(110,56,255,.18);
+      --glow:0 18px 40px rgba(110,56,255,.35);
+    }
+
+    /* LAYOUT */
+    .wrap{max-width:1200px;width:min(1200px,100% - 24px);margin:16px auto 28px;display:grid;gap:14px}
+    .grid{display:grid;grid-template-columns:1fr 380px;gap:14px;align-items:start}
+    @media (max-width: 1020px){ .grid{grid-template-columns:1fr} }
+
+    .card{
+      background:var(--panel);
+      border:1px solid var(--panel-br);
+      border-radius:16px;
+      padding:14px;
+      color:var(--ink);
+      box-shadow:0 10px 25px rgba(0,0,0,.08), 0 1px 0 rgba(255,255,255,.6) inset;
+      backdrop-filter: blur(6px);
+    }
+
+    /* TOP BAR */
+    .hero{
+      display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;
+      padding:12px 14px;
+      border-radius:16px;
+      background: linear-gradient(135deg, rgba(110,56,255,.16), rgba(110,56,255,.06));
+      border:1px solid rgba(110,56,255,.25);
+      box-shadow: var(--glow);
+    }
+    .hero h2{margin:0;font-weight:900;letter-spacing:.2px}
+    .pill{display:inline-flex;align-items:center;gap:.4rem;padding:.35rem .6rem;border-radius:999px;background:var(--pill);border:1px solid rgba(110,56,255,.35);font-size:.9rem}
+
+    /* TABS */
+    .tabs{
+      display:flex; gap:8px; align-items:center; flex-wrap:wrap;
+      background: var(--panel);
+      border:1px solid var(--panel-br);
+      padding:8px;
+      border-radius:12px;
+    }
+    .tab{
+      appearance:none; border:none; background:transparent;
+      padding:.55rem .9rem; border-radius:10px; cursor:pointer; font-weight:700; color:var(--muted);
+    }
+    .tab.active{
+      color:#fff; background:linear-gradient(180deg, var(--accent), var(--accent-2));
+      box-shadow:0 8px 22px rgba(110,56,255,.35);
+    }
+
+    /* ABOUT SECTION */
+    .about{
+      display:grid; grid-template-columns:1.1fr .9fr; gap:12px; align-items:stretch;
+    }
+    @media (max-width: 880px){ .about{ grid-template-columns:1fr; } }
+
+    .about .feature{
+      border-radius:14px; padding:12px;
+      background:linear-gradient(180deg,#fff, #fafafa);
+      border:1px solid var(--panel-br);
+    }
+    body.dark-mode .about .feature{
+      background:linear-gradient(180deg,#1f1f1f, #1b1b1b);
+    }
+    .feature h4{margin:0 0 6px; font-weight:800}
+    .feature p{margin:0; color:var(--muted)}
+
+    .callout{
+      border-radius:14px; padding:14px;
+      background: linear-gradient(145deg, rgba(110,56,255,.14), rgba(110,56,255,.06));
+      border:1px solid rgba(110,56,255,.25);
+      box-shadow: var(--glow);
+    }
+
+    /* FAQ CARDS */
+    .faq-grid{display:grid; grid-template-columns:1fr 1fr; gap:10px}
+    @media (max-width: 880px){ .faq-grid{ grid-template-columns:1fr } }
+    .qcard{
+      border:1px solid var(--panel-br); border-radius:14px; padding:12px;
+      background:linear-gradient(180deg,#fff, #f8f8ff);
+      transition: box-shadow .2s ease, border-color .15s ease;
+    }
+    body.dark-mode .qcard{
+      background:linear-gradient(180deg,#1f1f1f, #1a1823);
+    }
+    .qcard:hover{
+      border-color: rgba(110,56,255,.35);
+      box-shadow: var(--glow);
+    }
+    .q{display:flex; align-items:center; gap:.6rem; font-weight:800; margin:0 0 6px}
+    .a{color:var(--muted); margin:0}
+
+    /* FORM (SIDEBAR) */
+    .side{
+      position:sticky; top:12px;
+      border:1px solid rgba(110,56,255,.25);
+      background: linear-gradient(180deg, rgba(110,56,255,.10), rgba(110,56,255,.04));
+      box-shadow: var(--glow);
+    }
+    label{display:block; font-weight:700; margin-top:10px}
+    input, textarea, select{
+      width:100%; padding:.7rem .85rem; border-radius:12px;
+      border:1px solid var(--panel-br); background:var(--panel); color:var(--ink);
+    }
+    textarea{min-height:110px}
+    .btn{
+      display:inline-flex; align-items:center; gap:.45rem;
+      padding:.7rem 1rem; border-radius:12px; border:1px solid #6e38ff33;
+      background: linear-gradient(180deg, var(--accent), var(--accent-2)); color:#fff;
+      box-shadow:0 12px 28px rgba(110,56,255,.35); cursor:pointer; font-weight:800;
+    }
+    .btn:hover{ filter:brightness(1.05) }
+
+    .meta{display:flex; gap:8px; flex-wrap:wrap; color:var(--muted); font-size:.9rem}
+
+    /* ADMIN TICKETS */
+    .tickets{display:grid; gap:10px}
+    .ticket{
+      border:1px solid var(--panel-br); border-radius:14px; padding:12px; background:var(--panel);
+      transition: box-shadow .2s ease, border-color .15s ease;
+    }
+    .ticket:hover{ border-color: rgba(110,56,255,.35); box-shadow: var(--glow); }
+    .t-head{display:flex; align-items:center; justify-content:space-between; gap:8px; flex-wrap:wrap}
+    .status{padding:.25rem .6rem; border-radius:999px; font-size:.85rem; border:1px solid var(--panel-br); background:#fff2}
+    .danger{background:#e25151; border-color:#e25151}
+  </style>
+</head>
+<body class="<%= guild %>">
+  <%- include('partials/navbar', { user, guild, points, online }) %>
+
+  <main class="wrap">
+    <!-- TOP -->
+    <section class="hero">
+      <h2>Help & Info</h2>
+      <span class="pill">🟢 Online: <b id="onlineCount"><%= online %></b></span>
+    </section>
+
+    <section class="grid">
+      <!-- MAIN -->
+      <div class="left">
+        <!-- TABS -->
+        <div class="tabs card">
+          <button class="tab active" data-tab="about">About</button>
+          <button class="tab" data-tab="faq">FAQ</button>
+        </div>
+
+        <!-- ABOUT -->
+        <article id="tab-about" class="card" style="margin-top:10px;">
+          <div class="about">
+            <div class="feature">
+              <h4>What is Guilds?</h4>
+              <p>Guilds is a community system at DigiPen Bilbao where students join <b>Fire</b>, <b>Water</b>, or <b>Earth</b> and earn points via events and challenges. Points add to your guild’s season total on the leaderboard.</p>
+              <div class="meta" style="margin-top:8px">
+                <span class="pill">🔥 Fire</span>
+                <span class="pill">💧 Water</span>
+                <span class="pill">🌿 Earth</span>
+              </div>
+            </div>
+            <div class="feature">
+              <h4>How it works</h4>
+              <p>Log in with your DigiPen account to access Challenges, Events, and Guild Chat. Complete activities to earn points for your guild. Admins/Managers post new challenges and events throughout the season.</p>
+            </div>
+            <div class="callout" style="grid-column:1 / -1;">
+              <h4 style="margin:0 0 6px;">Pro tips</h4>
+              <ul style="margin:0; padding-left:1.1rem; color:var(--ink)">
+                <li>Check <b>Events</b> for the calendar and “Upcoming” list.</li>
+                <li>Open any challenge to discuss or attach proof when required.</li>
+                <li>If your guild/points look wrong, use the Help form → we’ll fix it.</li>
+              </ul>
+            </div>
+          </div>
+        </article>
+
+        <!-- FAQ -->
+        <article id="tab-faq" class="card" style="margin-top:10px; display:none;">
+          <div class="pill" style="margin-bottom:10px; background:rgba(110,56,255,.16); border-color:rgba(110,56,255,.35)">💜 FAQ</div>
+          <div class="faq-grid">
+            <div class="qcard">
+              <p class="q">🔐 How do I log in?</p>
+              <p class="a">Use the <b>Log In</b> button in the navbar. You’ll be redirected to Microsoft (DigiPen) login.</p>
+            </div>
+            <div class="qcard">
+              <p class="q">🏷️ My guild or points are wrong</p>
+              <p class="a">Log out & in once. If it persists, submit a Help request with your DigiPen email and details.</p>
+            </div>
+            <div class="qcard">
+              <p class="q">📅 Where are upcoming events?</p>
+              <p class="a">Open the <b>Events</b> page for the monthly calendar and the “Upcoming” list.</p>
+            </div>
+            <div class="qcard">
+              <p class="q">🐞 How do I report a bug?</p>
+              <p class="a">Use the Help form on the right. We’ll track it below (admins see open tickets) and mark it resolved when fixed.</p>
+            </div>
+          </div>
+        </article>
+
+        <!-- ADMIN TICKETS -->
+        <% if (role === 'admin') { %>
+        <article class="card" style="margin-top:10px;">
+          <h3 style="margin:0 0 8px;">Open Help Requests</h3>
+          <div class="tickets">
+            <% (helpOpen || []).forEach(h => { %>
+              <div class="ticket">
+                <div class="t-head">
+                  <div>
+                    <strong><%= h.email || 'unknown@digipen.edu' %></strong>
+                    <div class="meta">
+                      <span>ID: <%= h.id %></span>
+                      <span>Submitted: <%= new Date(h.createdAt).toLocaleString() %></span>
+                      <% if (h.guild) { %><span>Guild: <%= h.guild %></span><% } %>
+                    </div>
+                  </div>
+                  <form method="POST" action="/admin/help/<%= h.id %>/resolve" onsubmit="return confirm('Mark as resolved?');">
+                    <button type="submit" class="btn">Mark Resolved</button>
+                  </form>
+                </div>
+                <p style="margin:.6rem 0 0; color:var(--ink)"><%= h.message %></p>
+              </div>
+            <% }) %>
+            <% if (!(helpOpen && helpOpen.length)) { %>
+              <p style="color:var(--muted)">No active help requests 🎉</p>
+            <% } %>
+          </div>
+
+          <% if (helpResolved && helpResolved.length) { %>
+            <div class="divider" style="height:1px;background:var(--panel-br);margin:12px 0;"></div>
+            <h4 style="margin:0 0 8px;">Recently Resolved</h4>
+            <div class="tickets">
+              <% helpResolved.slice(0, 8).forEach(h => { %>
+                <div class="ticket">
+                  <div class="t-head">
+                    <div>
+                      <strong><%= h.email || 'unknown@digipen.edu' %></strong>
+                      <div class="meta">
+                        <span>ID: <%= h.id %></span>
+                        <span>Resolved: <%= new Date(h.resolvedAt).toLocaleString() %></span>
+                      </div>
+                    </div>
+                    <span class="status">Resolved</span>
+                  </div>
+                  <p style="margin:.6rem 0 0; color:var(--ink)"><%= h.message %></p>
+                </div>
+              <% }) %>
+            </div>
+          <% } %>
+        </article>
+        <% } %>
+      </div>
+
+      <!-- SIDEBAR -->
+      <aside class="card side">
+        <h3 style="margin:0 0 8px;">Need Help?</h3>
+        <p style="margin:0 0 10px; color:var(--muted)">Tell us what’s wrong. We’ll look into it ASAP.</p>
+        <form method="POST" action="/help/submit">
+          <label>Your Email</label>
+          <input name="email" value="<%= email || '' %>" placeholder="you@digipen.edu" />
+          <label>Message</label>
+          <textarea name="message" placeholder="Describe the issue" required></textarea>
+          <button type="submit" class="btn" style="margin-top:10px">Send Request</button>
+        </form>
+        <% if (sent) { %>
+          <div class="pill" style="margin-top:10px; color:#0a0; border-color:rgba(0,128,0,.35); background:rgba(0,128,0,.14);">
+            ✅ Thanks! Your message was submitted.
+          </div>
+        <% } %>
+      </aside>
+    </section>
+  </main>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const socket = io();
+    socket.on("updateOnline", (count) => {
+      const el = document.getElementById("onlineCount");
+      if (el) el.textContent = count;
+    });
+
+    // Tabs
+    const tabs = document.querySelectorAll(".tab");
+    const panels = {
+      about: document.getElementById("tab-about"),
+      faq: document.getElementById("tab-faq"),
+    };
+    tabs.forEach(btn=>{
+      btn.addEventListener("click", ()=>{
+        tabs.forEach(b=>b.classList.remove("active"));
+        btn.classList.add("active");
+        const key = btn.dataset.tab;
+        Object.keys(panels).forEach(k=>{
+          panels[k].style.display = (k===key) ? "" : "none";
+        });
+      });
+    });
+  </script>
+</body>
+</html>

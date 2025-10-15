@@ -88,5 +88,42 @@
       Sign in with Microsoft
     </a>
   </div>
+
+<a href="/help" class="help-tab">💜 Need Help?</a>
+
+<style>
+  .help-tab {
+    position: fixed;
+    bottom: 22px;
+    left: 22px;
+    z-index: 100;
+    background: linear-gradient(135deg, #6e38ff, #9d81ff);
+    color: #fff;
+    font-weight: 700;
+    padding: 0.7rem 1.2rem;
+    border-radius: 999px;
+    box-shadow: 0 8px 25px rgba(110,56,255,.4);
+    text-decoration: none;
+    font-size: 0.95rem;
+    letter-spacing: 0.2px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+    opacity: 0.9;
+  }
+
+  .help-tab:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 30px rgba(110,56,255,.55);
+    opacity: 1;
+  }
+
+  body.dark-mode .help-tab {
+    background: linear-gradient(135deg, #8059ff, #a990ff);
+    color: #fff;
+    box-shadow: 0 8px 25px rgba(128,89,255,.45);
+  }
+</style>
+
+
+
 </body>
 </html>

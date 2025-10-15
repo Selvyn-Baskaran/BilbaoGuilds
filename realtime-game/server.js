@@ -129,6 +129,8 @@ function readJsonOrDefault(file, fallback) {
 }
 
 
+const HELP_FILE = "./help.json";
+
 // --- Routes ---
 app.get("/", (req, res) => {
   res.redirect("/login.html");
@@ -804,35 +806,111 @@ const ANNOUNCEMENTS_FILE = "./announcements.json";
 
 // Create announcement
 app.post("/admin/announcements/create", ensureAdmin, (req, res) => {
-  const { id, title, date, tag, note, href } = req.body;
-  if (!id || !title) return res.status(400).send("id and title required");
+  // sanitize + safe defaults
+  const rawId = (req.body.id || "").trim();
+  const safeId = rawId || `ann-${Date.now()}`;  // fallback unique id if empty
+  const title = (req.body.title || "").trim();
+  const date = req.body.date || "";
+  const tag = req.body.tag || "info";
+  const note = req.body.note || "";
+  const href = req.body.href || "";
+
+  if (!title) return res.status(400).send("title required");
 
   const anns = readJsonOrDefault(ANNOUNCEMENTS_FILE, []);
-  if (anns.some(a => String(a.id) === String(id))) {
+
+  // prevent duplicate IDs
+  if (anns.some(a => String(a.id) === String(safeId))) {
     return res.status(400).send("ID already exists");
   }
 
   anns.push({
-    id: String(id),
-    title: String(title),
-    date: String(date || ""),
-    tag: String(tag || "info"),
-    note: String(note || ""),
-    href: String(href || "")
+    id: safeId,
+    title,
+    date,
+    tag,
+    note,
+    href
   });
 
   writeJson(ANNOUNCEMENTS_FILE, anns);
   res.redirect("/admin");
 });
 
+
 // Delete announcement
 app.post("/admin/announcements/:id/delete", ensureAdmin, (req, res) => {
+  const id = req.params.id || req.body.id;
+  if (!id) return res.status(400).send("Missing announcement id");
+
   const anns = readJsonOrDefault(ANNOUNCEMENTS_FILE, []);
-  const filtered = anns.filter(a => String(a.id) !== String(req.params.id));
+  const filtered = anns.filter(a => String(a.id) !== String(id));
   writeJson(ANNOUNCEMENTS_FILE, filtered);
   res.redirect("/admin");
 });
 
+
+
+// Help Page
+app.get("/help", (req, res) => {
+  const role = req.session.role || "user";
+  const email = req.session.email || "";
+
+  const all = readJsonOrDefault(HELP_FILE, []);
+  // split open vs resolved
+  const helpOpen = all.filter(h => h.status !== "resolved");
+  const helpResolved = all.filter(h => h.status === "resolved")
+                          .sort((a,b) => (b.resolvedAt||0) - (a.resolvedAt||0));
+
+  res.render("help", {
+    user: req.session.user,
+    email, // prefill
+    guild: req.session.guild || "Fire",
+    points: req.session.points || 0,
+    role,
+    online: totalOnline,
+    sent: req.query.sent === "1",
+    // admin-only lists (but we still pass—help.ejs hides unless admin)
+    helpOpen,
+    helpResolved
+  });
+});
+
+// POST /help/submit
+app.post("/help/submit", (req, res) => {
+  const all = readJsonOrDefault(HELP_FILE, []);
+  const id = `help-${Date.now()}-${Math.random().toString(36).slice(2,7)}`;
+  const email = (req.body.email || req.session.email || "").trim();
+  const message = (req.body.message || "").trim();
+
+  if (!message) return res.status(400).send("Message is required");
+
+  all.push({
+    id,
+    email,
+    user: req.session.user || null,
+    guild: req.session.guild || null,
+    message,
+    status: "open",
+    createdAt: Date.now()
+  });
+
+  writeJson(HELP_FILE, all);
+  res.redirect("/help?sent=1");
+});
+
+// POST /admin/help/:id/resolve
+app.post("/admin/help/:id/resolve", ensureAdmin, (req, res) => {
+  const all = readJsonOrDefault(HELP_FILE, []);
+  const idx = all.findIndex(h => String(h.id) === String(req.params.id));
+  if (idx === -1) return res.status(404).send("Help item not found");
+
+  all[idx].status = "resolved";
+  all[idx].resolvedAt = Date.now();
+  writeJson(HELP_FILE, all);
+
+  res.redirect("/help");
+});
 
 
 

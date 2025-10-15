@@ -406,10 +406,14 @@
                     </div>
                     <% if (role === 'admin') { %>
                     <div class="row-actions">
-                      <form method="POST" action="/admin/announcements/<%= a.id %>/delete"
-                            onsubmit="return confirm('Delete this announcement?');">
-                        <button type="submit" class="btn danger">Delete</button>
-                      </form>
+                      <% if (a.id) { %>
+                        <form method="POST" action="/admin/announcements/<%= a.id %>/delete"
+                              onsubmit="return confirm('Delete this announcement?');">
+                          <button type="submit" class="btn danger">Delete</button>
+                        </form>
+                      <% } else { %>
+                        <span class="row-sub" style="color:#e25151">Missing ID — fix in announcements.json</span>
+                      <% } %>
                     </div>
                     <% } %>
                   </div>
