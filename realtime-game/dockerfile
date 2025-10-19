@@ -1,0 +1,38 @@
+# ---------- Build stage ----------
+FROM node:20-alpine AS build
+WORKDIR /app
+ENV NODE_ENV=production
+
+# Install deps first (uses lockfile for repeatable builds)
+COPY package*.json ./
+RUN npm ci --omit=dev
+
+# Copy app source
+COPY . .
+
+# ---------- Runtime stage ----------
+FROM node:20-alpine
+WORKDIR /app
+ENV NODE_ENV=production
+# Ensure timezone if needed:
+# ENV TZ=Europe/London
+
+# Copy node_modules and app
+COPY --from=build /app/node_modules ./node_modules
+COPY --from=build /app ./
+
+# Create non-root user
+RUN addgroup -S app && adduser -S app -G app \
+  && mkdir -p /app/public/uploads \
+  && chown -R app:app /app
+USER app
+
+# Expose your Node port
+EXPOSE 3000
+
+# Optional: healthcheck (expects curl in base; add if needed)
+# RUN apk add --no-cache curl
+# HEALTHCHECK --interval=30s --timeout=5s --start-period=20s CMD curl -f http://localhost:3000/session-check || exit 1
+
+# Start the server
+CMD ["node", "server.js"]

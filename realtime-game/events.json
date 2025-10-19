@@ -24,5 +24,39 @@
     "time": "",
     "location": "DIGIPEN",
     "description": "Wear your pyjamas to DigiPen to earn guild points. Additionally bring a pillow to battle against other armed pillow fighters! 🤺⚔️"
+  },
+  {
+    "id": "Pumpkin",
+    "title": "Pumkin Carving",
+    "date": "2025-10-29",
+    "time": "",
+    "location": "",
+    "description": "Lets see who can carve the coolest pumpkinss",
+    "poster": "/uploads/1760907780054-nbsunx8hm0d.jpg"
+  },
+  {
+    "id": "COSTUME",
+    "title": "Costume Contest 2025",
+    "date": "2025-10-30",
+    "time": "",
+    "location": "",
+    "description": "Dress up in your coolest or most gruesome costumes, individuals and groups accepted, there WILL BE PRIZESS"
+  },
+  {
+    "id": "backpack",
+    "title": "BACKPACK DAY",
+    "date": "2025-10-29",
+    "time": "",
+    "location": "",
+    "description": "Anything but a backpack day, yes anything, buckets, crates, microwaves, just be safe on your commute :)"
+  },
+  {
+    "id": "Halloweek",
+    "title": "HALLOWEEK BEGINS",
+    "date": "2025-10-27",
+    "time": "",
+    "location": "",
+    "description": "HALLOWEEEK BEGINS DRAGONS, BE READY FOR SOME SPOOKY MAYHEM!!!",
+    "poster": "/uploads/1760907752600-q17qoyygl0r.jpg"
   }
 ]

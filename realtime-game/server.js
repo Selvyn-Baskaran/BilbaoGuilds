@@ -7,9 +7,11 @@ const sharedSession = require("express-socket.io-session");
 const fs = require("fs");
 const passport = require("passport");
 const OIDCStrategy = require("passport-azure-ad").OIDCStrategy;
+require("dotenv").config();
 
 
 const app = express();
+app.set("trust proxy", 1);
 const server = http.createServer(app);
 const { Server } = require("socket.io");
 const io = new Server(server);
@@ -19,14 +21,34 @@ app.set("view engine", "ejs");
 
 // --- Sessions (unchanged style; this was working for you) ---
 const sessionMiddleware = session({
-  secret: "replace-this-with-a-strong-secret",
+  name: "guilds.sid",
+  secret: process.env.SESSION_SECRET,
   resave: false,
   saveUninitialized: false,
+  cookie: {
+    secure: true,        // you are on HTTPS + app.set("trust proxy", 1)
+    sameSite: "none"     // <-- allow cross-site POST to send the cookie
+    // domain: ".finalgames.org", // optional if you later need subdomain sharing
+  },
 });
 app.use(express.static("public", { index: "login.html" }));
 app.use(express.urlencoded({ extended: true }));
 app.use(sessionMiddleware);
 io.use(sharedSession(sessionMiddleware, { autoSave: true }));
+
+function requireLogin(req, res, next) {
+  if (!req.session.user) return res.redirect("/auth/microsoft");
+  next();
+}
+
+
+
+
+// // simple login guard
+// function requireLogin(req, res, next) {
+//   if (!req.session.user) return res.redirect("/login.html");
+//   next();
+// }
 
 // --- Passport setup (kept your config) ---
 app.use(passport.initialize());
@@ -42,30 +64,56 @@ app.use((req, res, next) => {
   next();
 });
 
+const callbackURL = `${process.env.BASE_URL.replace(/\/+$/, "")}/auth/microsoft/callback`;
 
-// Azure AD OIDC Strategy (left as you had it, including validateIssuer dup)
-passport.use(
-  new OIDCStrategy(
-    {
-      identityMetadata:
-        "https://login.microsoftonline.com/common/v2.0/.well-known/openid-configuration",
-      clientID: "5418c944-d78f-485b-bbde-45b77a4110e6",
-      responseType: "code",
-      responseMode: "form_post",
-      redirectUrl: "http://localhost:3000/auth/microsoft/callback",
-      allowHttpForRedirectUrl: true,
-      clientSecret: "xeR8Q~zuitUbPsXPG.ZfImBoWyvpKkd5y6S-McyW",
-      scope: ["profile", "email", "openid"],
-      validateIssuer: true,
-      // note: you also had validateIssuer:false later; leaving as-is since this was logging you in
-      validateIssuer: false,
-      issuer: null,
-    },
-    function (iss, sub, profile, accessToken, refreshToken, done) {
-      return done(null, profile);
-    }
-  )
-);
+passport.use(new OIDCStrategy(
+  {
+    // Use your actual tenant instead of "common" (more reliable issuer validation)
+    identityMetadata: "https://login.microsoftonline.com/organizations/v2.0/.well-known/openid-configuration",
+
+    clientID: process.env.AZURE_CLIENT_ID,
+    clientSecret: process.env.AZURE_CLIENT_SECRET,
+
+    // Keep POST callback since your route is POST (responseMode=form_post)
+    responseType: "code",
+    responseMode: "form_post",
+    redirectUrl: callbackURL,
+
+    // Only allow HTTP for localhost dev. With a real domain it must be HTTPS.
+    allowHttpForRedirectUrl: false,
+
+    scope: ["openid", "profile", "email"],
+    validateIssuer: false
+  },
+  (iss, sub, profile, accessToken, refreshToken, done) => done(null, profile)
+));
+
+
+
+
+//Azure AD OIDC Strategy (left as you had it, including validateIssuer dup)
+// passport.use(
+//   new OIDCStrategy(
+//     {
+//       identityMetadata:
+//         "https://login.microsoftonline.com/common/v2.0/.well-known/openid-configuration",
+//       clientID: "5418c944-d78f-485b-bbde-45b77a4110e6",
+//       responseType: "code",
+//       responseMode: "form_post",
+//       redirectUrl: "http://localhost:3000/auth/microsoft/callback",
+//       allowHttpForRedirectUrl: true,
+//       clientSecret: "xeR8Q~zuitUbPsXPG.ZfImBoWyvpKkd5y6S-McyW",
+//       scope: ["profile", "email", "openid"],
+//       validateIssuer: true,
+//       // note: you also had validateIssuer:false later; leaving as-is since this was logging you in
+//       validateIssuer: false,
+//       issuer: null,
+//     },
+//     function (iss, sub, profile, accessToken, refreshToken, done) {
+//       return done(null, profile);
+//     }
+//   )
+// );
 
 passport.serializeUser((user, done) => done(null, user));
 passport.deserializeUser((obj, done) => done(null, obj));
@@ -81,11 +129,7 @@ app.use((req, res, next) => {
 });
 
 
-// simple login guard
-function requireLogin(req, res, next) {
-  if (!req.session.user) return res.redirect("/login.html");
-  next();
-}
+
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, path.join(__dirname, "public/uploads")),
@@ -121,12 +165,7 @@ const EVENTS_FILE = "./events.json";
 function writeJson(file, obj) {
   fs.writeFileSync(file, JSON.stringify(obj, null, 2));
 }
-function readJsonOrDefault(file, fallback) {
-  try {
-    if (fs.existsSync(file)) return JSON.parse(fs.readFileSync(file, "utf-8"));
-  } catch (_) {}
-  return fallback;
-}
+
 
 
 const HELP_FILE = "./help.json";
@@ -137,7 +176,13 @@ app.get("/", (req, res) => {
 });
 
 // Start Microsoft login
-app.get("/auth/microsoft", passport.authenticate("azuread-openidconnect"));
+// app.get("/auth/microsoft", passport.authenticate("azuread-openidconnect"));
+
+app.get("/auth/microsoft",
+  passport.authenticate("azuread-openidconnect", {
+    prompt: "select_account"
+  })
+);
 
 // Microsoft login callback (kept your original, but add safe defaults)
 app.post(

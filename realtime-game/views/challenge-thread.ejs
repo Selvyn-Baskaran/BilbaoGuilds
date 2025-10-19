@@ -192,6 +192,16 @@
     .post-btn:hover{ filter:brightness(1.05); }
   </style>
 </head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<script>
+  // Default to dark when nothing saved yet
+  const dm = localStorage.getItem('darkMode');
+  if (dm === 'enabled' || dm === null) {
+    document.documentElement.classList.add('dark-mode');
+    if (dm === null) localStorage.setItem('darkMode','enabled');
+  }
+</script>
 <body class="<%= guild %>">
 
   <%- include('partials/navbar', { user, guild, points, online }) %>

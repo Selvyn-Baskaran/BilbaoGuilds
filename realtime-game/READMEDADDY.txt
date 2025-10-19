@@ -10,6 +10,10 @@ Compile lines
 
     # and then anyone with the link it gives can open the website.
 
+    # run on guilds.finalgames.org
+        cloudflared tunnel run guilds-gateway
+
+
 
 - Things to do -
 

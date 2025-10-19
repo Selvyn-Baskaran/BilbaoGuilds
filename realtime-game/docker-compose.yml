@@ -1,0 +1,22 @@
+version: "3.9"
+services:
+  guilds:
+    build: .
+    image: finalgames/guilds:latest
+    restart: unless-stopped
+    environment:
+      NODE_ENV: "production"
+      PORT: "3000"
+      BASE_URL: "https://guilds.finalgames.org"
+      AZURE_CLIENT_ID: "${AZURE_CLIENT_ID}"
+      AZURE_CLIENT_SECRET: "${AZURE_CLIENT_SECRET}"
+      SESSION_SECRET: "${SESSION_SECRET}"
+      TENANT_ID: "${TENANT_ID}"
+    ports:
+      - "3000:3000"          # if you’re proxying with Nginx/Caddy, you can instead use an internal network
+    volumes:
+      - ./users.json:/app/users.json
+      - ./challenges.json:/app/challenges.json
+      - ./guilds.json:/app/guilds.json
+      - ./public/uploads:/app/public/uploads
+    # If you sit behind a reverse proxy (recommended), keep trust proxy on in server.js (you already have it).
