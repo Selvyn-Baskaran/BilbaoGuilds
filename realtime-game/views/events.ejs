@@ -4,250 +4,216 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Events</title>
+
+  <!-- No-flash dark mode: default to dark if unset -->
+  <script>
+    (function(){
+      const dm = localStorage.getItem('darkMode');
+      if (dm === 'enabled' || dm === null) {
+        document.documentElement.classList.add('dark-mode');
+        if (dm === null) localStorage.setItem('darkMode','enabled');
+      }
+    })();
+  </script>
+
+  <!-- Global stylesheets -->
   <link rel="stylesheet" href="/styles.css"/>
   <link rel="stylesheet" href="/css/navbar.css">
 
+  <!-- Page-scoped styles (trimmed + consistent) -->
   <style>
-    /* ====== COMPACT, NO-SCROLL, NO-OVERLAP CALENDAR ====== */
+  :root { --nav-h: 64px; } /* will be updated by JS below */
 
-/* Will be set precisely by the tiny JS at the bottom */
-:root { --nav-h: 64px; }
-
-/* Tunables for compactness */
-:root {
-  --gap: 10px;
-  --card-pad: 8px;
-  --cell-pad: 8px;
-  --grid-gap: 8px;
-  --sidebar-w: 300px;
-}
-
-/* Layout: fill viewport below navbar (desktop) */
-.events-page {
-  max-width: 1200px;
-  width: min(1200px, 100% - 24px);
-  margin: 8px auto;
-  height: calc(100svh - var(--nav-h) - 12px); /* svh handles browser UI better */
-  display: grid;
-  grid-template-columns: 1fr var(--sidebar-w);
-  gap: var(--gap);
-  overflow: hidden; /* no page scroll */
-  align-items: stretch;
-}
-@media (max-width: 980px) {
-  .events-page {
-    grid-template-columns: 1fr;
-    height: auto;           /* mobile can scroll naturally */
-    overflow: visible;
+  /* Tunables */
+  :root {
+    --gap: 10px;
+    --card-pad: 8px;
+    --cell-pad: 8px;
+    --grid-gap: 8px;
+    --sidebar-w: 300px;
+    --day-min-h: 120px;
   }
-}
 
-/* Cards */
-.calendar-card, .side-card {
-  background: linear-gradient(180deg, rgba(255,255,255,.9), rgba(255,255,255,.85));
-  border: 1px solid rgba(0,0,0,.08);
-  border-radius: 14px;
-  padding: var(--card-pad);
-  box-shadow: 0 10px 25px rgba(0,0,0,.08), 0 1px 0 rgba(255,255,255,.7) inset;
-  backdrop-filter: blur(6px);
-}
+  /* Layout under navbar */
+  .events-page {
+    max-width: 1200px;
+    width: min(1200px, 100% - 24px);
+    margin: 8px auto;
+    height: calc(100svh - var(--nav-h) - 12px);
+    display: grid;
+    grid-template-columns: 1fr var(--sidebar-w);
+    gap: var(--gap);
+    align-items: stretch;
+    overflow: hidden; /* desktop: keep page from scrolling; children scroll when needed */
+  }
+  @media (max-width: 980px) {
+    .events-page {
+      grid-template-columns: 1fr;
+      height: auto;
+      overflow: visible;
+    }
+  }
 
-/* Calendar column fills; internal overflow managed */
-.calendar-card {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  overflow: hidden;
-}
+  /* Cards */
+  .calendar-card, .side-card {
+    background: linear-gradient(180deg, rgba(255,255,255,.9), rgba(255,255,255,.85));
+    border: 1px solid rgba(0,0,0,.08);
+    border-radius: 14px;
+    padding: var(--card-pad);
+    box-shadow: 0 10px 25px rgba(0,0,0,.08), 0 1px 0 rgba(255,255,255,.7) inset;
+    backdrop-filter: blur(6px);
+  }
+  html.dark-mode .calendar-card,
+  html.dark-mode .side-card {
+    background: linear-gradient(180deg, rgba(30,30,30,.9), rgba(26,26,26,.9));
+    border-color: rgba(255,255,255,.06);
+    box-shadow: 0 10px 25px rgba(0,0,0,.35), 0 1px 0 rgba(255,255,255,.05) inset;
+  }
 
-/* Header + weekdays fixed; grid takes remainder */
-.calendar-header {
-  flex: 0 0 auto;
-  margin-bottom: 6px;
-  display: flex; justify-content: space-between; align-items: center;
-}
-.calendar-header h2 { margin: 0; font-size: 1.1rem; }
+  .calendar-card {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 0; /* allow child grid to shrink */
+    overflow: hidden;
+  }
 
-.calendar-nav a {
-  background: #0f0f14;
-  color: #fff;
-  border: 1px solid rgba(255,255,255,.15);
-  border-radius: 10px;
-  padding: .42rem .65rem;
-  text-decoration: none;
-  box-shadow: 0 1px 1px rgba(0,0,0,.12);
-}
-.calendar-nav a:hover { opacity: .95; }
+  /* Header + weekdays */
+  .calendar-header {
+    flex: 0 0 auto;
+    margin-bottom: 6px;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .calendar-header h2 { margin: 0; font-size: 1.1rem; }
+  .calendar-nav a {
+    background: #0f0f14;
+    color: #fff;
+    border: 1px solid rgba(255,255,255,.15);
+    border-radius: 10px;
+    padding: .42rem .65rem;
+    text-decoration: none;
+    box-shadow: 0 1px 1px rgba(0,0,0,.12);
+  }
+  .calendar-nav a:hover { opacity: .95; }
 
-.weekday-grid {
-  flex: 0 0 auto;
-  display: grid;
-  grid-template-columns: repeat(7, minmax(0,1fr));
-  gap: var(--grid-gap);
-  margin-bottom: 6px;
-}
-.weekday { text-align: center; font-weight: 700; opacity: .78; font-size: .85rem; letter-spacing: .01em; }
+  .weekday-grid {
+    flex: 0 0 auto;
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0,1fr));
+    gap: var(--grid-gap);
+    margin-bottom: 6px;
+  }
+  .weekday { text-align: center; font-weight: 700; opacity: .78; font-size: .85rem; letter-spacing: .01em; }
 
-/* The month grid: exactly 6 equal rows; no internal growth allowed */
-.calendar-grid {
-  flex: 1 1 auto;
-  min-height: 0;            /* allow shrinking inside flex parent */
-  display: grid;
-  grid-template-columns: repeat(7, minmax(0,1fr));
-  grid-template-rows: repeat(6, minmax(0,1fr));
-  gap: var(--grid-gap);
-  overflow: hidden;
-}
+  /* Month grid: 6 fixed rows; no transforms (prevents visual overlap) */
+  .calendar-grid {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0,1fr));
+    grid-template-rows: repeat(6, minmax(0,1fr));
+    gap: var(--grid-gap);
+    overflow: hidden;
+    transform: translateZ(0); /* crisp edges */
+  }
 
-/* Day cells: flat (no transform), compact padding, no overlap ever */
-.day {
-  height: 100%;
-  min-height: 0;
-  display: flex;
-  flex-direction: column;
-  padding: var(--cell-pad);
-  border: 1px solid rgba(0,0,0,.08);
-  border-radius: 10px;
-  background: #fff;
-  box-shadow: none;         /* zero “lift” to avoid perceived overlap */
-}
-.day:hover { transform: none !important; box-shadow: none !important; }
-.day.out { opacity: .55; background: #f7f7f9; }
+  /* Day cells */
+  .day {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    min-height: var(--day-min-h);
+    padding: var(--cell-pad);
+    border: 1px solid rgba(0,0,0,.08);
+    border-radius: 10px;
+    background: #fff;
+    overflow: hidden;     /* clip children */
+    contain: paint;       /* avoid bleed */
+    isolation: isolate;
+    box-shadow: none;
+  }
+  .day.out { opacity: .55; background: #f7f7f9; }
 
-.day.has-events {
-  background: linear-gradient(180deg, #f6f0ff, #fcfbff);
-  border-color: #6e38ff;
-}
+  .day.has-events {
+    background: linear-gradient(180deg, #f6f0ff, #fcfbff);
+    border-color: #6e38ff;
+  }
 
-.day .num { font-weight: 800; font-size: .9rem; line-height: 1; }
+  html.dark-mode .day {
+    background: #1f1f1f;
+    border-color: rgba(255,255,255,.06);
+  }
+  html.dark-mode .day.has-events {
+    background: linear-gradient(180deg, #2a2052, #221a44);
+    border-color: #8c66ff;
+  }
 
-/* Events area scrolls inside the cell on hover (not page) */
-.day .events {
-  margin-top: .3rem;
-  display: flex; flex-direction: column; gap: .3rem;
-  min-height: 0;
-  overflow: hidden;
-}
-.day .events:hover { overflow: auto; }
+  .day .num { font-weight: 800; font-size: .9rem; line-height: 1; }
 
-.event-pill {
-  display: block;
-  padding: .25rem .45rem;
-  font-size: .78rem;
-  line-height: 1.2;
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-  border-radius: 999px;
-  border: 1px solid #5a2bd8;
-  background: linear-gradient(180deg, #c48aff, #b47aff);
-  color: #fff; text-decoration: none;
-}
+  /* Events list inside the cell (scrolls if too many) */
+  .day .events {
+    margin-top: .3rem;
+    display: flex;
+    flex-direction: column;
+    gap: .3rem;
+    min-height: 0;
+    overflow: auto; /* allow scroll inside the day when necessary */
+  }
 
-/* Sidebar: scrolls independently if tall */
-.side-card {
-  position: sticky; top: 10px;
-  max-height: calc(100svh - var(--nav-h) - 20px);
-  overflow: auto;
-}
-.side-item + .side-item { margin-top: .6rem; }
-.side-title { margin: 0 0 .5rem 0; }
-.side-when { font-size: .9rem; opacity: .85; }
+  .event-pill {
+    display: block;
+    padding: .25rem .45rem;
+    font-size: .78rem;
+    line-height: 1.2;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    border-radius: 999px;
+    border: 1px solid #5a2bd8;
+    background: linear-gradient(180deg, #c48aff, #b47aff);
+    color: #fff; text-decoration: none;
+  }
+  html.dark-mode .event-pill {
+    background: linear-gradient(180deg, #6b3cff, #5b32e9);
+    border-color: #9a7fff;
+    color: #fff;
+  }
 
-/* Weekend soft tint (still compact) */
-.calendar-grid > :nth-child(7n),
-.calendar-grid > :nth-child(7n-1) {
-  background-image: linear-gradient(180deg, rgba(0,0,0,.02), transparent);
-}
+  /* Weekend tint */
+  .calendar-grid > :nth-child(7n),
+  .calendar-grid > :nth-child(7n-1) {
+    background-image: linear-gradient(180deg, rgba(0,0,0,.02), transparent);
+  }
 
-/* Today marker (if you add .today server-side) */
-.day.today { outline: 2px solid #6e38ff; box-shadow: 0 0 0 3px rgba(110,56,255,.25); }
+  /* Today outline (optional .today class) */
+  .day.today { outline: 2px solid #6e38ff; box-shadow: 0 0 0 3px rgba(110,56,255,.25); }
 
-/* Dark mode */
-body.dark-mode .calendar-card, body.dark-mode .side-card {
-  background: linear-gradient(180deg, rgba(30,30,30,.9), rgba(26,26,26,.9)) !important;
-  border-color: rgba(255,255,255,.06) !important;
-  box-shadow: 0 10px 25px rgba(0,0,0,.35), 0 1px 0 rgba(255,255,255,.05) inset !important;
-}
-body.dark-mode .day {
-  background: #1f1f1f !important;
-  border-color: rgba(255,255,255,.06) !important;
-}
-body.dark-mode .day.has-events {
-  background: linear-gradient(180deg, #2a2052, #221a44) !important;
-  border-color: #8c66ff !important;
-}
-body.dark-mode .event-pill {
-  background: linear-gradient(180deg, #6b3cff, #5b32e9) !important;
-  border-color: #9a7fff !important;
-  color: #fff !important;
-}
+  /* Sidebar with its own scroll */
+  .side-card {
+    position: sticky; top: 10px;
+    max-height: calc(100svh - var(--nav-h) - 20px);
+    overflow: auto;
+  }
+  .side-item + .side-item { margin-top: .6rem; }
+  .side-title { margin: 0 0 .5rem 0; }
+  .side-when { font-size: .9rem; opacity: .85; }
 
-/* Short screens: shrink sidebar or stack */
-@media (max-height: 780px) and (min-width: 981px) {
-  :root { --sidebar-w: 280px; --cell-pad: 6px; --grid-gap: 6px; }
-  .calendar-header h2 { font-size: 1.05rem; }
-}
-@media (max-height: 700px) and (min-width: 981px) {
-  :root { --sidebar-w: 260px; --cell-pad: 5px; --grid-gap: 5px; }
-  .weekday { font-size: .8rem; }
-  .event-pill { font-size: .75rem; padding: .22rem .4rem; }
-}
+  /* Small screens: give cells more height for readability */
+  @media (max-width: 980px){
+    :root { --day-min-h: 150px; }
+  }
 
-/* ===== FINAL FIX: force full calendar to fit cleanly ===== */
-
-/* Make entire calendar area 10% smaller (visually) */
-.calendar-card {
-  transform: scale(0.9);             /* 90% of original size */
-  transform-origin: top center;      /* shrink upward, not sideways */
-}
-
-/* Prevent any clipping on edges after scale */
-.events-page {
-  overflow-y: auto;
-}
-
-/* Absolutely disable hover transforms that cause overlap */
-.day,
-.day:hover {
-  transform: none !important;
-  box-shadow: none !important;
-}
-
-/* Optional: slightly tighten spacing to offset scale */
-.calendar-grid {
-  gap: 0.4rem !important;
-}
-
-/* Hard-stop any visual overlap between rows */
-.calendar-grid { transform: translateZ(0); }   /* avoids sub-pixel jitter */
-.day {
-  position: relative;
-  overflow: hidden;        /* clip everything to the cell */
-  contain: paint;          /* isolate painting (no bleed) */
-  isolation: isolate;      /* create a new stacking context */
-  box-shadow: none !important;  /* no lift that can look like overlap */
-}
-.day:hover { box-shadow: none !important; }    /* keep it flat on hover */
-
-/* If you still see a faint bleed on some GPUs, add a hairline separator: */
-.calendar-grid { row-gap: 10px !important; }   /* a touch more vertical space */
-
-
-/* Keep pills inside the day even when scaled */
-.day .events { overflow: hidden; }         /* no spill outside the cell */
-
-
+  /* Short desktops: tighten spacing (no blur/scaling) */
+  @media (max-height: 780px) and (min-width: 981px) {
+    :root { --sidebar-w: 280px; --cell-pad: 6px; --grid-gap: 6px; }
+    .calendar-header h2 { font-size: 1.05rem; }
+    .event-pill { font-size: .76rem; padding: .22rem .4rem; }
+  }
+  @media (max-height: 700px) and (min-width: 981px) {
+    :root { --sidebar-w: 260px; --cell-pad: 5px; --grid-gap: 5px; }
+    .weekday { font-size: .8rem; }
+    .event-pill { font-size: .74rem; }
+  }
   </style>
 </head>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-
-<script>
-  // Default to dark when nothing saved yet
-  const dm = localStorage.getItem('darkMode');
-  if (dm === 'enabled' || dm === null) {
-    document.documentElement.classList.add('dark-mode');
-    if (dm === null) localStorage.setItem('darkMode','enabled');
-  }
-</script>
 
 <body class="<%= guild %>">
   <%- include('partials/navbar', { user, guild, points, role, online }) %>
@@ -259,7 +225,7 @@ body.dark-mode .event-pill {
         <div class="calendar-nav">
           <a href="/events?y=<%= prevY %>&m=<%= prevM %>">⬅ Prev</a>
         </div>
-        <h2 style="margin:0;"><%= monthLabel %></h2>
+        <h2><%= monthLabel %></h2>
         <div class="calendar-nav">
           <a href="/events?y=<%= nextY %>&m=<%= nextM %>">Next ➡</a>
         </div>
@@ -278,7 +244,7 @@ body.dark-mode .event-pill {
       <div class="calendar-grid">
         <% weeks.forEach(week => { %>
           <% week.forEach(day => { %>
-            <div class="day <%= day.inMonth ? '' : 'out' %> <%= day.events.length ? 'has-events' : '' %>">
+            <div class="day <%= day.inMonth ? '' : 'out' %> <%= day.events.length ? 'has-events' : '' %> <%= day.today ? 'today' : '' %>">
               <div class="num"><%= day.day %></div>
               <div class="events">
                 <% day.events.forEach(ev => { %>
@@ -313,19 +279,13 @@ body.dark-mode .event-pill {
   </main>
 
   <script>
-  function setNavHeightVar() {
-    const nav = document.querySelector('.navbar');
-    if (nav)
-      document.documentElement.style.setProperty('--nav-h', nav.offsetHeight + 'px');
-  }
-  window.addEventListener('load', setNavHeightVar);
-  window.addEventListener('resize', setNavHeightVar);
-</script>
-
-
-
-
-
-
+    // Set --nav-h to your actual navbar height (prevents overlap)
+    function setNavHeightVar() {
+      const nav = document.querySelector('.navbar');
+      if (nav) document.documentElement.style.setProperty('--nav-h', nav.offsetHeight + 'px');
+    }
+    window.addEventListener('load', setNavHeightVar);
+    window.addEventListener('resize', setNavHeightVar);
+  </script>
 </body>
 </html>

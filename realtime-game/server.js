@@ -1,139 +1,81 @@
-const express = require("express");
-const http = require("http");
-const multer = require("multer");
-const path = require("path");
-const session = require("express-session");
-const sharedSession = require("express-socket.io-session");
-const fs = require("fs");
-const passport = require("passport");
-const OIDCStrategy = require("passport-azure-ad").OIDCStrategy;
+/**
+ * Guilds Website — Server
+ * ------------------------------------------------------
+ * Tech: Express + EJS, Passport (Azure AD OIDC), Socket.IO
+ * Storage: flat JSON files (users/challenges/guilds/events/announcements/help)
+ * Notes:
+ *  - Cookies: SameSite=None + secure for Azure AD form_post callback
+ *  - Trust proxy: required behind HTTPS reverse proxy / Docker ingress
+ *  - Do not change route paths casually; front-end expects them
+ */
+
 require("dotenv").config();
 
+// =============== 1) Core Imports & Setup =================
+const path = require("path");
+const fs = require("fs");
+const http = require("http");
+const express = require("express");
+const multer = require("multer");
+const session = require("express-session");
+const sharedSession = require("express-socket.io-session");
+const passport = require("passport");
+const { OIDCStrategy } = require("passport-azure-ad");
 
 const app = express();
-app.set("trust proxy", 1);
+app.set("trust proxy", 1); // required so secure cookies work behind a proxy
+app.set("view engine", "ejs");
+
 const server = http.createServer(app);
 const { Server } = require("socket.io");
 const io = new Server(server);
 
-// --- EJS view engine ---
-app.set("view engine", "ejs");
+// =============== 2) Paths, Files & Small Helpers =========
+const USERS_FILE       = "./users.json";
+const CHALLENGES_FILE  = "./challenges.json";
+const GUILDS_FILE      = "./guilds.json";
+const EVENTS_FILE      = "./events.json";
+const ANNOUNCEMENTS_FILE = "./announcements.json";
+const HELP_FILE        = "./help.json";
 
-// --- Sessions (unchanged style; this was working for you) ---
+function readJsonOrDefault(file, fallback) {
+  try {
+    if (fs.existsSync(file)) return JSON.parse(fs.readFileSync(file, "utf-8"));
+  } catch (_) {}
+  return fallback;
+}
+function writeJson(file, obj) {
+  fs.writeFileSync(file, JSON.stringify(obj, null, 2));
+}
+
+// quick raw helpers (used in admin handlers)
+const readJSON  = (p) => JSON.parse(fs.readFileSync(p, "utf-8"));
+const writeJSON = (p, obj) => fs.writeFileSync(p, JSON.stringify(obj, null, 2));
+
+// =============== 3) Static, Body, Sessions ===============
+app.use(express.static("public", { index: "login.html" }));
+app.use(express.urlencoded({ extended: true })); // form posts
+app.use(express.json());                          // JSON posts
+
+// session cookie: must be SameSite=None for Azure AD form_post
 const sessionMiddleware = session({
   name: "guilds.sid",
   secret: process.env.SESSION_SECRET,
   resave: false,
   saveUninitialized: false,
   cookie: {
-    secure: true,        // you are on HTTPS + app.set("trust proxy", 1)
-    sameSite: "none"     // <-- allow cross-site POST to send the cookie
-    // domain: ".finalgames.org", // optional if you later need subdomain sharing
+    secure: true,     // requires HTTPS + trust proxy
+    sameSite: "none", // allow cross-site POST back from Azure
+    // domain: ".finalgames.org", // if you ever need subdomain sharing
   },
 });
-app.use(express.static("public", { index: "login.html" }));
-app.use(express.urlencoded({ extended: true }));
 app.use(sessionMiddleware);
 io.use(sharedSession(sessionMiddleware, { autoSave: true }));
 
-function requireLogin(req, res, next) {
-  if (!req.session.user) return res.redirect("/auth/microsoft");
-  next();
-}
-
-
-
-
-// // simple login guard
-// function requireLogin(req, res, next) {
-//   if (!req.session.user) return res.redirect("/login.html");
-//   next();
-// }
-
-// --- Passport setup (kept your config) ---
-app.use(passport.initialize());
-app.use(passport.session());
-
-// Ensure every view has these defined so EJS never crashes
-app.use((req, res, next) => {
-  res.locals.user   = req.session.user || null;
-  res.locals.guild  = req.session.guild || "Fire";
-  res.locals.points = req.session.points || 0;
-  res.locals.role   = req.session.role || "user";
-  res.locals.online = 0; // you can set to totalOnline if you prefer
-  next();
-});
-
-const callbackURL = `${process.env.BASE_URL.replace(/\/+$/, "")}/auth/microsoft/callback`;
-
-passport.use(new OIDCStrategy(
-  {
-    // Use your actual tenant instead of "common" (more reliable issuer validation)
-    identityMetadata: "https://login.microsoftonline.com/organizations/v2.0/.well-known/openid-configuration",
-
-    clientID: process.env.AZURE_CLIENT_ID,
-    clientSecret: process.env.AZURE_CLIENT_SECRET,
-
-    // Keep POST callback since your route is POST (responseMode=form_post)
-    responseType: "code",
-    responseMode: "form_post",
-    redirectUrl: callbackURL,
-
-    // Only allow HTTP for localhost dev. With a real domain it must be HTTPS.
-    allowHttpForRedirectUrl: false,
-
-    scope: ["openid", "profile", "email"],
-    validateIssuer: false
-  },
-  (iss, sub, profile, accessToken, refreshToken, done) => done(null, profile)
-));
-
-
-
-
-//Azure AD OIDC Strategy (left as you had it, including validateIssuer dup)
-// passport.use(
-//   new OIDCStrategy(
-//     {
-//       identityMetadata:
-//         "https://login.microsoftonline.com/common/v2.0/.well-known/openid-configuration",
-//       clientID: "5418c944-d78f-485b-bbde-45b77a4110e6",
-//       responseType: "code",
-//       responseMode: "form_post",
-//       redirectUrl: "http://localhost:3000/auth/microsoft/callback",
-//       allowHttpForRedirectUrl: true,
-//       clientSecret: "xeR8Q~zuitUbPsXPG.ZfImBoWyvpKkd5y6S-McyW",
-//       scope: ["profile", "email", "openid"],
-//       validateIssuer: true,
-//       // note: you also had validateIssuer:false later; leaving as-is since this was logging you in
-//       validateIssuer: false,
-//       issuer: null,
-//     },
-//     function (iss, sub, profile, accessToken, refreshToken, done) {
-//       return done(null, profile);
-//     }
-//   )
-// );
-
-passport.serializeUser((user, done) => done(null, user));
-passport.deserializeUser((obj, done) => done(null, obj));
-
-// --- Small safety net so views always have something ---
-let totalOnline = 0;
-app.use((req, res, next) => {
-  res.locals.user   = req.session.user || null;
-  res.locals.guild  = req.session.guild || "Fire";
-  res.locals.points = req.session.points || 0;
-  res.locals.online = totalOnline;
-  next();
-});
-
-
-
-
+// =============== 4) File Uploads (multer) ================
 const storage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, path.join(__dirname, "public/uploads")),
-  filename: (req, file, cb) => {
+  destination: (_req, _file, cb) => cb(null, path.join(__dirname, "public/uploads")),
+  filename: (_req, file, cb) => {
     const ext = path.extname(file.originalname || "");
     cb(null, `${Date.now()}-${Math.random().toString(36).slice(2)}${ext}`);
   },
@@ -141,75 +83,120 @@ const storage = multer.diskStorage({
 const upload = multer({
   storage,
   limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
-  fileFilter: (req, file, cb) => {
+  fileFilter: (_req, file, cb) => {
     const ok = ["image/png", "image/jpeg", "image/gif", "image/webp"].includes(file.mimetype);
     cb(ok ? null : new Error("Only PNG/JPEG/GIF/WEBP allowed"), ok);
   },
 });
 
+// =============== 5) Auth: Passport (Azure AD OIDC) =======
+app.use(passport.initialize());
+app.use(passport.session());
 
-// --- Users / Challenges helpers (files optional) ---
-const USERS_FILE = "./users.json";
-const CHALLENGES_FILE = "./challenges.json";
-const GUILDS_FILE = "./guilds.json";
-function readJsonOrDefault(file, fallback) {
-  try {
-    if (fs.existsSync(file)) return JSON.parse(fs.readFileSync(file, "utf-8"));
-  } catch (_) {}
-  return fallback;
-}
+// callback URL derived from BASE_URL
+const callbackURL = `${process.env.BASE_URL.replace(/\/+$/, "")}/auth/microsoft/callback`;
 
-// --- Events helpers (files optional) ---
-const EVENTS_FILE = "./events.json";
+// Azure AD strategy — organizations (work/school)
+// NOTE: validateIssuer=false to accept multi-tenant org accounts; flip to true with tenant config if you restrict further.
+passport.use(new OIDCStrategy(
+  {
+    identityMetadata: "https://login.microsoftonline.com/organizations/v2.0/.well-known/openid-configuration",
+    clientID: process.env.AZURE_CLIENT_ID,
+    clientSecret: process.env.AZURE_CLIENT_SECRET,
+    responseType: "code",
+    responseMode: "form_post",
+    redirectUrl: callbackURL,
+    allowHttpForRedirectUrl: false,
+    scope: ["openid", "profile", "email"],
+    validateIssuer: false,
+  },
+  (_iss, _sub, profile, _accessToken, _refreshToken, done) => done(null, profile)
+));
 
-function writeJson(file, obj) {
-  fs.writeFileSync(file, JSON.stringify(obj, null, 2));
-}
+passport.serializeUser((user, done) => done(null, user));
+passport.deserializeUser((obj, done) => done(null, obj));
 
+// =============== 6) Locals for Views (safe defaults) =====
+let totalOnline = 0;
+app.use((req, res, next) => {
+  res.locals.user   = req.session.user   || null;
+  res.locals.guild  = req.session.guild  || "Fire";
+  res.locals.points = req.session.points || 0;
+  res.locals.role   = req.session.role   || "user";
+  res.locals.online = totalOnline;
 
-
-const HELP_FILE = "./help.json";
-
-// --- Routes ---
-app.get("/", (req, res) => {
-  res.redirect("/login.html");
+  // avatar helper available to all views
+  const allUsers = readJsonOrDefault(USERS_FILE, {});
+  const emailKey = (req.session.email || "").toLowerCase();
+  const u = allUsers[emailKey] || {};
+  const DEFAULT = "/uploads/default.png";
+  let avatarPath = (typeof u.avatar === "string" && u.avatar.trim()) ? u.avatar.trim() : DEFAULT;
+  if (!avatarPath.startsWith("/") && !avatarPath.startsWith("http")) {
+    avatarPath = `/uploads/${avatarPath.replace(/^\/+/, "")}`;
+  }
+  req.session.avatar = avatarPath;
+  res.locals.avatarUrl = avatarPath;
+  res.locals.isDefaultAvatar = (avatarPath === DEFAULT);
+  next();
 });
 
-// Start Microsoft login
-// app.get("/auth/microsoft", passport.authenticate("azuread-openidconnect"));
+// Optional: helpful request logging (kept as in your code)
+app.use((req, _res, next) => {
+  if (req.user) {
+    console.log("AAD profile snapshot:", {
+      preferred_username: req.user._json?.preferred_username,
+      upn: req.user._json?.upn,
+      emails_json: req.user._json?.emails,
+      emails_obj: req.user.emails
+    });
+  }
+  console.log("session.user =", req.session.user);
+  next();
+});
+
+// =============== 7) Auth Guards ==========================
+function requireLogin(req, res, next) {
+  // used on /profile in your code; goes directly to Microsoft login
+  if (!req.session.user) return res.redirect("/auth/microsoft");
+  next();
+}
+function ensureLoggedIn(req, res, next) {
+  // used for most pages; sends to local login page
+  if (!req.session.user) return res.redirect("/login.html");
+  next();
+}
+function ensureAdmin(req, res, next) {
+  if (!req.session.user) return res.redirect("/login.html");
+  if (req.session.role === "admin" || req.session.role === "manager") return next();
+  return res.status(403).send("Forbidden: admin only");
+}
+
+// =============== 8) Auth Routes ==========================
+app.get("/", (_req, res) => res.redirect("/login.html"));
 
 app.get("/auth/microsoft",
-  passport.authenticate("azuread-openidconnect", {
-    prompt: "select_account"
-  })
+  passport.authenticate("azuread-openidconnect", { prompt: "select_account" })
 );
 
-// Microsoft login callback (kept your original, but add safe defaults)
 app.post(
   "/auth/microsoft/callback",
   passport.authenticate("azuread-openidconnect", { failureRedirect: "/" }),
   (req, res) => {
-    // 1) Normalize keys
+    // Normalize identity + seed session from users.json
     const emailRaw = req.user?._json?.preferred_username || "";
-    const email = String(emailRaw).trim().toLowerCase();   // <- canonical key
+    const email = String(emailRaw).trim().toLowerCase();
     const displayName = req.user?.displayName || email;
 
-    // 2) Load users.json
-    const users = readJsonOrDefault(USERS_FILE, {});       // make sure this helper + const are defined
+    const users = readJsonOrDefault(USERS_FILE, {});
+    const existing = users[email] || {}; // { guild, points, role, avatar? }
 
-    // 3) Look up by email
-    const existing = users[email] || {};                   // { guild, points, role }
-
-    // 4) Set session from users.json (or safe defaults)
-    req.session.user   = displayName;                      // pretty name for UI
-    req.session.email  = email;                            // canonical identity
+    req.session.user   = displayName;
+    req.session.email  = email;
     req.session.guild  = existing.guild  || "Fire";
     req.session.points = existing.points || 0;
-    req.session.role   = existing.role   || "user";        // <- pulls "admin" if present!
+    req.session.role   = existing.role   || "user";
     req.session.avatar = existing.avatar || "/uploads/default.png";
 
-
-    // 5) If first login: create entry
     if (!users[email]) {
       users[email] = {
         guild:  req.session.guild,
@@ -224,76 +211,13 @@ app.post(
   }
 );
 
-
-
-// Session checker (AJAX)
+// Session health check (AJAX)
 app.get("/session-check", (req, res) => {
-  if (req.session.user) res.sendStatus(200);
-  else res.sendStatus(401);
+  if (req.session.user) return res.sendStatus(200);
+  return res.sendStatus(401);
 });
 
-// Protect pages
-function ensureLoggedIn(req, res, next) {
-  if (!req.session.user) return res.redirect("/login.html");
-  next();
-}
-
-function ensureAdmin(req, res, next) {
-  if (!req.session.user) return res.redirect("/login.html");
-  if (req.session.role === "admin" || req.session.role === "manager") return next();
-  return res.status(403).send("Forbidden: admin only");
-}
-
-// body parser (if not already present)
-app.use(express.urlencoded({ extended: true }));
-app.use(express.json());
-
-// small I/O helpers
-const readJSON = (p) => JSON.parse(fs.readFileSync(p, "utf-8"));
-const writeJSON = (p, obj) => fs.writeFileSync(p, JSON.stringify(obj, null, 2));
-
-
-app.use((req, res, next) => {
-  if (req.user) {
-    console.log("AAD profile snapshot:", {
-      preferred_username: req.user._json?.preferred_username,
-      upn: req.user._json?.upn,
-      emails_json: req.user._json?.emails,
-      emails_obj: req.user.emails
-    });
-  }
-  console.log("session.user =", req.session.user);
-  next();
-});
-
-// Make avatar vars available to all EJS views/partials
-app.use((req, res, next) => {
-  const allUsers = readJsonOrDefault(USERS_FILE, {});     // load safely
-  const emailKey = (req.session.email || "").toLowerCase();
-  const u = allUsers[emailKey] || {};
-
-  // Standardize your default path (file should live at public/uploads/default.png)
-  const DEFAULT = "/uploads/default.png";
-
-  // Prefer the stored web path (e.g., "/uploads/abc.png"), else default
-  let avatarPath = (typeof u.avatar === "string" && u.avatar.trim())
-    ? u.avatar.trim()
-    : DEFAULT;
-
-  // Normalize if someone saved bare filenames
-  if (!avatarPath.startsWith("/") && !avatarPath.startsWith("http")) {
-    avatarPath = `/uploads/${avatarPath.replace(/^\/+/, "")}`;
-  }
-
-  // Keep session copy around (handy for socket.io)
-  req.session.avatar = avatarPath;
-  res.locals.avatarUrl = avatarPath;
-  res.locals.isDefaultAvatar = (avatarPath === DEFAULT);
-  next();
-});
-
-
-// --- MAIN INDEX ---
+// =============== 9) Pages: Core ==========================
 app.get("/index", ensureLoggedIn, (req, res) => {
   res.render("index", {
     guild:  req.session.guild || "Fire",
@@ -304,43 +228,33 @@ app.get("/index", ensureLoggedIn, (req, res) => {
   });
 });
 
-// Events pages
-// Events page (month grid)
+// =============== 10) Events (Month Grid + Detail) ========
 app.get("/events", ensureLoggedIn, (req, res) => {
   const now = new Date();
   const y = Number(req.query.y) || now.getFullYear();
   const m = Number(req.query.m) || (now.getMonth() + 1); // 1..12
 
-  // prev / next month
+  // prev/next month (for header nav)
   let prevY = y, prevM = m - 1;
-  if (prevM < 1) { prevM = 12; prevY = y - 1; }
+  if (prevM < 1)  { prevM = 12; prevY = y - 1; }
   let nextY = y, nextM = m + 1;
-  if (nextM > 12) { nextM = 1; nextY = y + 1; }
+  if (nextM > 12) { nextM = 1;  nextY = y + 1; }
 
-  const monthLabel = new Date(y, m - 1, 1).toLocaleString("en-US", {
-    month: "long",
-    year: "numeric",
-  });
+  const monthLabel = new Date(y, m - 1, 1).toLocaleString("en-US", { month: "long", year: "numeric" });
 
-  // Load events (optional file)
-  let events = [];
-  try {
-    if (fs.existsSync("./events.json")) {
-      events = JSON.parse(fs.readFileSync("./events.json", "utf-8"));
-    }
-  } catch {}
+  // Load events list
+  const events = readJsonOrDefault(EVENTS_FILE, []);
 
-  // Index events by YYYY-MM-DD
+  // Helpers to bucket events by local date key
   const toKey = (d) => d.toISOString().slice(0,10);
   const normalizeDateStr = (s) => {
-    // accept "YYYY-MM-DD" or anything Date can parse
     if (!s) return null;
     const d = new Date(s);
     if (Number.isNaN(d.getTime())) return null;
-    // force to local date key
     const ld = new Date(d.getFullYear(), d.getMonth(), d.getDate());
     return toKey(ld);
   };
+
   const eventsByDate = {};
   for (const ev of events) {
     const key = normalizeDateStr(ev.date || ev.start || ev.when);
@@ -348,24 +262,23 @@ app.get("/events", ensureLoggedIn, (req, res) => {
     (eventsByDate[key] ||= []).push(ev);
   }
 
-  // Build calendar grid (weeks -> 7 days each), week starts on Monday
-  const weekStartsOn = 1; // 0=Sun, 1=Mon
+  // 6 x 7 grid starting Monday
+  const weekStartsOn = 1; // Mon
   const firstOfMonth = new Date(y, m - 1, 1);
-  const jsW = firstOfMonth.getDay(); // 0..6 (Sun..Sat)
+  const jsW = firstOfMonth.getDay(); // 0..6 Sun..Sat
   const offset = (jsW - weekStartsOn + 7) % 7;
-
-  // Start date shown in grid
   const gridStart = new Date(y, m - 1, 1 - offset);
 
-  // produce 6 weeks * 7 days (42 cells) to cover all cases
   const weeks = [];
   for (let w = 0; w < 6; w++) {
     const week = [];
     for (let d = 0; d < 7; d++) {
       const cellDate = new Date(gridStart);
       cellDate.setDate(gridStart.getDate() + (w * 7 + d));
+      const inMonth =
+        cellDate.getMonth() === (m - 1) &&
+        cellDate.getFullYear() === y;
 
-      const inMonth = (cellDate.getMonth() === (m - 1)) && (cellDate.getFullYear() === y);
       const key = toKey(new Date(cellDate.getFullYear(), cellDate.getMonth(), cellDate.getDate()));
       week.push({
         y: cellDate.getFullYear(),
@@ -378,12 +291,12 @@ app.get("/events", ensureLoggedIn, (req, res) => {
     weeks.push(week);
   }
 
-  // === Build "upcoming" list (today onward), max 10 ===
+  // Upcoming list (today onward, max 10)
   const today = new Date();
   const todayKey = toKey(new Date(today.getFullYear(), today.getMonth(), today.getDate()));
   const upcoming = events
     .map(ev => {
-      const key = normalizeDateStr(ev.date || ev.start || ev.when); // adjust if your field differs
+      const key = normalizeDateStr(ev.date || ev.start || ev.when);
       return key ? { key, ev } : null;
     })
     .filter(x => x && x.key >= todayKey)
@@ -392,38 +305,26 @@ app.get("/events", ensureLoggedIn, (req, res) => {
     .map(x => x.ev);
 
   res.render("events", {
-    // navbar + common
     user:   req.session.user,
     role:   req.session.role || "user",
     guild:  req.session.guild || "Fire",
     points: req.session.points || 0,
     online: totalOnline,
-
-    // calendar vars expected by events.ejs
     y, m, prevY, prevM, nextY, nextM, monthLabel,
     weeks,
     events,
-    upcoming, // <-- added
+    upcoming,
   });
 });
 
-
+// Single event details
 app.get("/events/:id", ensureLoggedIn, (req, res) => {
-  let events = [];
-  try {
-    events = JSON.parse(fs.readFileSync("./events.json", "utf-8"));
-  } catch (e) {
-    return res.status(500).send("Failed to load events.json");
-  }
-
+  const events = readJsonOrDefault(EVENTS_FILE, []);
   const event = events.find(e => e.id === req.params.id);
   if (!event) return res.status(404).send("Event not found");
 
   res.render("event-details", {
-    // pass the event!
     event,
-
-    // navbar + common
     user:   req.session.user,
     role:   req.session.role || "user",
     guild:  req.session.guild || "Fire",
@@ -432,17 +333,9 @@ app.get("/events/:id", ensureLoggedIn, (req, res) => {
   });
 });
 
-
-
-// --- CENTRAL CHALLENGES LIST ---
+// =============== 11) Challenges ==========================
 app.get("/challenges", ensureLoggedIn, (req, res) => {
-  let challenges = [];
-  try {
-    if (fs.existsSync("./challenges.json")) {
-      challenges = JSON.parse(fs.readFileSync("./challenges.json", "utf-8"));
-    }
-  } catch {}
-
+  const challenges = readJsonOrDefault(CHALLENGES_FILE, []);
   res.render("challenges", {
     user:   req.session.user,
     guild:  req.session.guild || "Fire",
@@ -453,17 +346,14 @@ app.get("/challenges", ensureLoggedIn, (req, res) => {
   });
 });
 
-
-// --- VIEW CHALLENGE THREAD ---
 app.get("/challenges/:id", ensureLoggedIn, (req, res) => {
   const challenges = readJsonOrDefault(CHALLENGES_FILE, []);
   const challenge = challenges.find(c => String(c.id) === String(req.params.id));
   if (!challenge) return res.status(404).send("Challenge not found");
 
-  const users = readJsonOrDefault(USERS_FILE, {});
+  const users  = readJsonOrDefault(USERS_FILE, {});
   const emailKey = (req.session.email || "").toLowerCase();
   const points = (users[emailKey]?.points) ?? (req.session.points || 0);
-
 
   res.render("challenge-thread", {
     challenge,
@@ -474,7 +364,7 @@ app.get("/challenges/:id", ensureLoggedIn, (req, res) => {
   });
 });
 
-// --- POST COMMENT TO CHALLENGE ---
+// Add a comment (optional attachment)
 app.post("/challenges/:id/comment", ensureLoggedIn, upload.single("attachment"), (req, res) => {
   const challenges = readJsonOrDefault(CHALLENGES_FILE, []);
   const idx = challenges.findIndex(c => String(c.id) === String(req.params.id));
@@ -486,8 +376,8 @@ app.post("/challenges/:id/comment", ensureLoggedIn, upload.single("attachment"),
 
   challenges[idx].comments = challenges[idx].comments || [];
   challenges[idx].comments.push({
-    user:   req.session.user,                // display name
-    email:  (req.session.email || ""),       // optional, for moderation
+    user:   req.session.user,
+    email:  (req.session.email || ""),
     text,
     avatar,
     attachment,
@@ -498,15 +388,12 @@ app.post("/challenges/:id/comment", ensureLoggedIn, upload.single("attachment"),
   res.redirect(`/challenges/${req.params.id}`);
 });
 
-
-
-// --- GUILD CHAT ---
+// =============== 12) Guild Chat ==========================
 app.get("/guild-chat", ensureLoggedIn, (req, res) => {
+  // NOTE: your users.json is keyed by email; this line keeps your original behavior.
   const users = readJsonOrDefault(USERS_FILE, {});
   const guild = (users[req.session.user]?.guild) || req.session.guild || "Fire";
-
-  // store back to session for consistency
-  req.session.guild = guild;
+  req.session.guild = guild; // keep session consistent
 
   res.render("guild-chat", {
     user: req.session.user,
@@ -515,7 +402,7 @@ app.get("/guild-chat", ensureLoggedIn, (req, res) => {
   });
 });
 
-// --- LEADERBOARD ---
+// =============== 13) Leaderboard =========================
 app.get("/leaderboard", ensureLoggedIn, (req, res) => {
   const guilds = readJsonOrDefault(GUILDS_FILE, { Fire: 0, Water: 0, Earth: 0 });
   const sortedGuilds = Object.entries(guilds)
@@ -531,19 +418,16 @@ app.get("/leaderboard", ensureLoggedIn, (req, res) => {
   });
 });
 
-
+// =============== 14) Profile =============================
 app.get("/profile", requireLogin, (req, res) => {
-  const email = (req.session.email || "").toLowerCase(); // canonical
+  const email = (req.session.email || "").toLowerCase();
   const allUsers = readJsonOrDefault(USERS_FILE, {});
   const u = allUsers[email] || {};
 
-  // keep session avatar in sync (nice-to-have)
-  if (!req.session.avatar) {
-    req.session.avatar = u.avatar || "/uploads/default.png";
-  }
+  if (!req.session.avatar) req.session.avatar = u.avatar || "/uploads/default.png";
 
   res.render("profile", {
-    user: req.session.user,                  // display name
+    user: req.session.user,
     guild: u.guild || "Fire",
     points: u.points || 0,
     role: u.role || "user",
@@ -568,104 +452,23 @@ app.post("/profile", requireLogin, upload.single("avatar"), (req, res) => {
     u.avatar = null;
     req.session.avatar = "/uploads/default.png";
   }
-
-  // new avatar
+  // upload new avatar
   if (req.file) {
     u.avatar = `/uploads/${req.file.filename}`;
-    req.session.avatar = u.avatar; // keep session in sync
+    req.session.avatar = u.avatar;
   }
 
   writeJson(USERS_FILE, allUsers);
   res.redirect("/profile");
 });
 
-// ----- ADMIN-ONLY HANDLERS -----
-
-// Adjust a single user's points: { username, delta }
-function handlerAdjustUserPoints(req, res) {
-  try {
-    const { username, delta } = req.body;
-    const d = parseInt(delta, 10) || 0;
-    if (!username || !Number.isFinite(d)) return res.status(400).send("Bad request");
-
-    const users = readJSON("./users.json");
-
-    // Resolve by exact email key OR by case-insensitive key match
-    let key = users[username] ? username : null;
-    if (!key) {
-      const uname = String(username).toLowerCase();
-      key = Object.keys(users).find(k => k.toLowerCase() === uname) || null;
-    }
-    if (!key) return res.status(404).send("User not found");
-
-    users[key].points = (users[key].points || 0) + d;
-    writeJSON("./users.json", users);
-    return res.redirect("/admin");
-  } catch (e) {
-    console.error("handlerAdjustUserPoints error:", e);
-    return res.status(500).send("Server error");
-  }
-}
-
-// Set a user's role: { username, role }
-function handlerSetUserRole(req, res) {
-  try {
-    const { username, role } = req.body;
-    const allowed = new Set(["user", "manager", "admin"]);
-    if (!username || !allowed.has(role)) return res.status(400).send("Bad request");
-
-    const users = readJSON("./users.json");
-
-    // Resolve by exact email key OR by case-insensitive key match
-    let key = users[username] ? username : null;
-    if (!key) {
-      const uname = String(username).toLowerCase();
-      key = Object.keys(users).find(k => k.toLowerCase() === uname) || null;
-    }
-    if (!key) return res.status(404).send("User not found");
-
-    users[key].role = role;
-    writeJSON("./users.json", users);
-    return res.redirect("/admin");
-  } catch (e) {
-    console.error("handlerSetUserRole error:", e);
-    return res.status(500).send("Server error");
-  }
-}
-
-// Adjust guild totals: { guild, delta }
-function handlerAdjustGuildTotals(req, res) {
-  try {
-    const { guild, delta } = req.body;
-    const d = parseInt(delta, 10) || 0;
-    if (!guild || !Number.isFinite(d)) return res.status(400).send("Bad request");
-
-    const guilds = readJSON("./guilds.json");
-    if (!(guild in guilds)) return res.status(404).send("Guild not found");
-
-    guilds[guild] = (guilds[guild] || 0) + d;
-    writeJSON("./guilds.json", guilds);
-    return res.redirect("/admin");
-  } catch (e) {
-    console.error("handlerAdjustGuildTotals error:", e);
-    return res.status(500).send("Server error");
-  }
-}
-
-app.get("/announcements.json", (req, res) => {
-  const anns = readJsonOrDefault("./announcements.json", []);
-  res.json(anns);
-});
-
-
-// Admin portal
+// =============== 15) Admin: Pages & Handlers =============
 app.get("/admin", ensureAdmin, (req, res) => {
-  const allUsers = readJsonOrDefault(USERS_FILE, {});       // { username/email: {guild, points, role, ...} }
-  const guildTotals = readJsonOrDefault(GUILDS_FILE, { Fire: 0, Water: 0, Earth: 0 });
-  const challenges = readJsonOrDefault(CHALLENGES_FILE, []);
-  const events      = readJsonOrDefault("./events.json", []);
-    const announcements = readJsonOrDefault("./announcements.json", []);
-
+  const allUsers      = readJsonOrDefault(USERS_FILE, {});
+  const guildTotals   = readJsonOrDefault(GUILDS_FILE, { Fire: 0, Water: 0, Earth: 0 });
+  const challenges    = readJsonOrDefault(CHALLENGES_FILE, []);
+  const events        = readJsonOrDefault(EVENTS_FILE, []);
+  const announcements = readJsonOrDefault(ANNOUNCEMENTS_FILE, []);
 
   res.render("admin", {
     user:   req.session.user,
@@ -681,19 +484,17 @@ app.get("/admin", ensureAdmin, (req, res) => {
   });
 });
 
-// Create Challenge
+/* ---- Challenges (admin) ---- */
 app.post("/admin/challenges/create", ensureAdmin, (req, res) => {
   const { id, title, description } = req.body;
   if (!id || !title) return res.status(400).send("id and title required");
   const challenges = readJsonOrDefault(CHALLENGES_FILE, []);
   if (challenges.some(c => String(c.id) === String(id))) return res.status(400).send("id already exists");
-
   challenges.push({ id, title, description: description || "", comments: [] });
   writeJson(CHALLENGES_FILE, challenges);
   res.redirect("/challenges");
 });
 
-// Delete Challenge
 app.post("/admin/challenges/:id/delete", ensureAdmin, (req, res) => {
   const challenges = readJsonOrDefault(CHALLENGES_FILE, []);
   const filtered = challenges.filter(c => String(c.id) !== String(req.params.id));
@@ -701,38 +502,30 @@ app.post("/admin/challenges/:id/delete", ensureAdmin, (req, res) => {
   res.redirect("/admin");
 });
 
-// Update/Edit Challenge
 app.post("/admin/challenges/:id/update", ensureAdmin, (req, res) => {
   const { title, description } = req.body;
   const challenges = readJsonOrDefault(CHALLENGES_FILE, []);
   const idx = challenges.findIndex(c => String(c.id) === String(req.params.id));
   if (idx === -1) return res.status(404).send("Challenge not found");
-
-  if (title !== undefined) challenges[idx].title = String(title);
+  if (title !== undefined)       challenges[idx].title = String(title);
   if (description !== undefined) challenges[idx].description = String(description);
-
   writeJson(CHALLENGES_FILE, challenges);
   res.redirect("/admin");
 });
 
-// Create Event
+/* ---- Events (admin) ---- */
 app.post("/admin/events/create", ensureAdmin, (req, res) => {
   const { id, title, date, time, location, description } = req.body;
-
-  if (!id || !title || !date) {
-    return res.status(400).send("id, title, and date are required");
-  }
+  if (!id || !title || !date) return res.status(400).send("id, title, and date are required");
 
   const events = readJsonOrDefault(EVENTS_FILE, []);
-  if (events.some(e => String(e.id) === String(id))) {
-    return res.status(400).send("Event id already exists");
-  }
+  if (events.some(e => String(e.id) === String(id))) return res.status(400).send("Event id already exists");
 
   events.push({
     id: String(id),
     title: String(title),
-    date: String(date),             // "YYYY-MM-DD" (your calendar already uses this)
-    time: time ? String(time) : "", // optional "HH:MM"
+    date: String(date),                  // "YYYY-MM-DD"
+    time: time ? String(time) : "",
     location: location ? String(location) : "",
     description: description ? String(description) : "",
   });
@@ -741,64 +534,55 @@ app.post("/admin/events/create", ensureAdmin, (req, res) => {
   res.redirect("/events");
 });
 
-// Delete Event
 app.post("/admin/events/:id/delete", ensureAdmin, (req, res) => {
-  const events = readJsonOrDefault("./events.json", []);
+  const events = readJsonOrDefault(EVENTS_FILE, []);
   const filtered = events.filter(e => String(e.id) !== String(req.params.id));
-  writeJson("./events.json", filtered);
+  writeJson(EVENTS_FILE, filtered);
   res.redirect("/admin");
 });
 
-// Update/Edit Event
 app.post("/admin/events/:id/update", ensureAdmin, (req, res) => {
   const { title, date, time, location, description } = req.body;
-  const events = readJsonOrDefault("./events.json", []);
+  const events = readJsonOrDefault(EVENTS_FILE, []);
   const idx = events.findIndex(e => String(e.id) === String(req.params.id));
   if (idx === -1) return res.status(404).send("Event not found");
 
-  // update only provided fields
   if (title !== undefined)      events[idx].title = String(title);
   if (date !== undefined)       events[idx].date = String(date);
   if (time !== undefined)       events[idx].time = String(time);
   if (location !== undefined)   events[idx].location = String(location);
   if (description !== undefined)events[idx].description = String(description);
 
-  writeJson("./events.json", events);
+  writeJson(EVENTS_FILE, events);
   res.redirect("/admin");
 });
 
-// --- Add/Replace Poster ---
+/* Poster upload/remove */
 app.post("/admin/events/:id/poster", ensureAdmin, upload.single("poster"), (req, res) => {
   if (!req.file) return res.status(400).send("No poster uploaded");
-  const events = readJsonOrDefault("./events.json", []);
+  const events = readJsonOrDefault(EVENTS_FILE, []);
   const idx = events.findIndex(e => String(e.id) === String(req.params.id));
   if (idx === -1) return res.status(404).send("Event not found");
-
-  events[idx].poster = `/uploads/${req.file.filename}`; // web path
-  writeJson("./events.json", events);
+  events[idx].poster = `/uploads/${req.file.filename}`;
+  writeJson(EVENTS_FILE, events);
   res.redirect(`/events/${req.params.id}`);
 });
 
-// --- Remove Poster ---
 app.post("/admin/events/:id/poster/delete", ensureAdmin, (req, res) => {
-  const events = readJsonOrDefault("./events.json", []);
+  const events = readJsonOrDefault(EVENTS_FILE, []);
   const idx = events.findIndex(e => String(e.id) === String(req.params.id));
   if (idx === -1) return res.status(404).send("Event not found");
 
-  // optionally unlink old file (safe: only unlink if it looks like an upload)
   const old = events[idx].poster;
   if (old && old.startsWith("/uploads/")) {
     try { fs.unlinkSync(path.join(__dirname, "public", old)); } catch {}
   }
   events[idx].poster = null;
-  writeJson("./events.json", events);
+  writeJson(EVENTS_FILE, events);
   res.redirect(`/events/${req.params.id}`);
 });
 
-
-
-
-// Adjust user points
+/* ---- Users/Guilds (admin) ---- */
 app.post("/admin/users/points", ensureAdmin, (req, res) => {
   const { username, delta } = req.body;
   const d = Number(delta);
@@ -809,12 +593,10 @@ app.post("/admin/users/points", ensureAdmin, (req, res) => {
   users[username].points = (users[username].points || 0) + d;
   writeJson(USERS_FILE, users);
 
-  // If you adjusted your own points, reflect it in session
   if (req.session.user === username) req.session.points = users[username].points;
   res.redirect("/admin");
 });
 
-// Set user role
 app.post("/admin/users/role", ensureAdmin, (req, res) => {
   const { username, role } = req.body;
   if (!username || !role) return res.status(400).send("username and role required");
@@ -824,12 +606,10 @@ app.post("/admin/users/role", ensureAdmin, (req, res) => {
   users[username].role = role;
   writeJson(USERS_FILE, users);
 
-  // if you changed your own role, reflect it
   if (req.session.user === username) req.session.role = role;
   res.redirect("/admin");
 });
 
-// Adjust guild totals
 app.post("/admin/guilds/points", ensureAdmin, (req, res) => {
   const { guild, delta } = req.body;
   const d = Number(delta);
@@ -839,100 +619,75 @@ app.post("/admin/guilds/points", ensureAdmin, (req, res) => {
   guilds[guild] = (guilds[guild] || 0) + d;
   writeJson(GUILDS_FILE, guilds);
 
-  // 🔥 Broadcast live leaderboard update
+  // live update for leaderboard
   io.emit("guildPointsUpdate", { guild, delta: d });
-
   res.redirect("/admin");
 });
 
-const ANNOUNCEMENTS_FILE = "./announcements.json";
+// =============== 16) Announcements (admin) ===============
+app.get("/announcements.json", (_req, res) => {
+  res.json(readJsonOrDefault(ANNOUNCEMENTS_FILE, []));
+});
 
-// --- ANNOUNCEMENTS ADMIN ---
-
-// Create announcement
 app.post("/admin/announcements/create", ensureAdmin, (req, res) => {
-  // sanitize + safe defaults
   const rawId = (req.body.id || "").trim();
-  const safeId = rawId || `ann-${Date.now()}`;  // fallback unique id if empty
+  const safeId = rawId || `ann-${Date.now()}`;
   const title = (req.body.title || "").trim();
-  const date = req.body.date || "";
-  const tag = req.body.tag || "info";
-  const note = req.body.note || "";
-  const href = req.body.href || "";
-
+  const date  = req.body.date || "";
+  const tag   = req.body.tag || "info";
+  const note  = req.body.note || "";
+  const href  = req.body.href || "";
   if (!title) return res.status(400).send("title required");
 
   const anns = readJsonOrDefault(ANNOUNCEMENTS_FILE, []);
-
-  // prevent duplicate IDs
   if (anns.some(a => String(a.id) === String(safeId))) {
     return res.status(400).send("ID already exists");
   }
-
-  anns.push({
-    id: safeId,
-    title,
-    date,
-    tag,
-    note,
-    href
-  });
-
+  anns.push({ id: safeId, title, date, tag, note, href });
   writeJson(ANNOUNCEMENTS_FILE, anns);
   res.redirect("/admin");
 });
 
-
-// Delete announcement
 app.post("/admin/announcements/:id/delete", ensureAdmin, (req, res) => {
   const id = req.params.id || req.body.id;
   if (!id) return res.status(400).send("Missing announcement id");
-
   const anns = readJsonOrDefault(ANNOUNCEMENTS_FILE, []);
   const filtered = anns.filter(a => String(a.id) !== String(id));
   writeJson(ANNOUNCEMENTS_FILE, filtered);
   res.redirect("/admin");
 });
 
-
-
-// Help Page
+// =============== 17) Help Center =========================
 app.get("/help", (req, res) => {
-  const role = req.session.role || "user";
+  const role  = req.session.role  || "user";
   const email = req.session.email || "";
-
   const all = readJsonOrDefault(HELP_FILE, []);
-  // split open vs resolved
   const helpOpen = all.filter(h => h.status !== "resolved");
   const helpResolved = all.filter(h => h.status === "resolved")
                           .sort((a,b) => (b.resolvedAt||0) - (a.resolvedAt||0));
 
   res.render("help", {
     user: req.session.user,
-    email, // prefill
+    email,
     guild: req.session.guild || "Fire",
     points: req.session.points || 0,
     role,
     online: totalOnline,
     sent: req.query.sent === "1",
-    // admin-only lists (but we still pass—help.ejs hides unless admin)
     helpOpen,
     helpResolved
   });
 });
 
-// POST /help/submit
 app.post("/help/submit", (req, res) => {
   const all = readJsonOrDefault(HELP_FILE, []);
   const id = `help-${Date.now()}-${Math.random().toString(36).slice(2,7)}`;
   const email = (req.body.email || req.session.email || "").trim();
   const message = (req.body.message || "").trim();
-
   if (!message) return res.status(400).send("Message is required");
 
   all.push({
-    id,
-    email,
+    id, email,
     user: req.session.user || null,
     guild: req.session.guild || null,
     message,
@@ -944,22 +699,17 @@ app.post("/help/submit", (req, res) => {
   res.redirect("/help?sent=1");
 });
 
-// POST /admin/help/:id/resolve
 app.post("/admin/help/:id/resolve", ensureAdmin, (req, res) => {
   const all = readJsonOrDefault(HELP_FILE, []);
   const idx = all.findIndex(h => String(h.id) === String(req.params.id));
   if (idx === -1) return res.status(404).send("Help item not found");
-
   all[idx].status = "resolved";
   all[idx].resolvedAt = Date.now();
   writeJson(HELP_FILE, all);
-
   res.redirect("/help");
 });
 
-
-
-// --- Logout ---
+// =============== 18) Logout ==============================
 app.get("/logout", (req, res) => {
   if (typeof req.logout === "function") {
     req.logout(() => {
@@ -970,7 +720,7 @@ app.get("/logout", (req, res) => {
   }
 });
 
-// --- Socket.IO logic ---
+// =============== 19) Socket.IO ===========================
 io.on("connection", (socket) => {
   const username = socket.handshake.session.user;
   if (!username) {
@@ -986,11 +736,10 @@ io.on("connection", (socket) => {
     socket.join(guild);
   });
 
- socket.on("guildMessage", ({ guild, message }) => {
-  const avatar = socket.handshake.session?.avatar || "/uploads/default.png"; // <- use uploads
-  io.to(guild).emit("guildMessage", { user: username, message, avatar });
-});
-
+  socket.on("guildMessage", ({ guild, message }) => {
+    const avatar = socket.handshake.session?.avatar || "/uploads/default.png";
+    io.to(guild).emit("guildMessage", { user: username, message, avatar });
+  });
 
   socket.on("disconnect", () => {
     console.log(`${username} disconnected`);
@@ -999,7 +748,8 @@ io.on("connection", (socket) => {
   });
 });
 
-// --- Start server ---
-server.listen(3000, "0.0.0.0", () => {
-  console.log("Server running on http://localhost:3000");
+// =============== 20) Start Server ========================
+const PORT = process.env.PORT || 3000;
+server.listen(PORT, "0.0.0.0", () => {
+  console.log(`Server running on http://localhost:${PORT}`);
 });

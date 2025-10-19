@@ -1,10 +1,9 @@
-/* Base reset-ish bits */
+/* =================== Base & Variables =================== */
 * { box-sizing: border-box; }
 html { -webkit-text-size-adjust: 100%; }
-meta[name="viewport"] {} /* ensure you have: <meta name="viewport" content="width=device-width, initial-scale=1"> in <head> */
 
 :root{
-  --nav-h: 56px;           /* single source of truth for navbar height */
+  --nav-h: 56px;
   --ink:#0f0f14;
   --muted:#6b6b6b;
   --panel:rgba(255,255,255,.9);
@@ -23,139 +22,111 @@ html.dark-mode{
 }
 
 body{
-  font-family: sans-serif;
   margin: 0;
+  font-family: sans-serif;
   color: var(--ink);
   background: var(--panel);
 }
 
-/* Shared helpers */
+/* Helpers */
 .truncate { max-width: 60vw; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 img, video { max-width: 100%; height: auto; }
 table { width: 100%; border-collapse: collapse; display: block; overflow-x: auto; }
 h1,h2,h3{ line-height:1.2; word-wrap:break-word; }
 p,li{ line-height:1.5; word-wrap:break-word; }
 
-
-body {
-  color: var(--ink);
-  background: var(--panel);
-}
-
-
-/* Guild-based theming */
-.Fire .navbar { background-color: red; }
-.Water .navbar { background-color: blue; }
-.Earth .navbar { background-color: green; }
-.None .navbar { background-color: purple; }
-
-/* Navbar styles */
-/* -------- NAVBAR (single, consistent version) -------- */
+/* =================== Navbar (single source) =================== */
 .navbar{
   position: sticky; top: 0; z-index: 1000;
-  display: flex; align-items: center; justify-content: space-between;
-  gap: .75rem; padding: .75rem 1rem;
-  height: var(--nav-h);
+  display: block;
   background: linear-gradient(90deg, rgba(255,255,255,.05), rgba(255,255,255,.02));
   backdrop-filter: blur(8px);
   border-bottom: 1px solid var(--panel-br);
 }
 
-.navbar-header{ display:flex; align-items:center; gap:.5rem; min-width:0; }
-.navbar-logo{ display:flex; align-items:center; gap:.5rem; font-weight:600; min-width:0; }
+/* Header row: left (logo/stats), center (title), right (burger) */
+.navbar-header{
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  align-items: center;
+  gap: .75rem;
+  padding: .6rem 1rem;
+  min-height: var(--nav-h);
+}
+
+.navbar-logo{ display:flex; align-items:center; gap:.5rem; min-width:0; }
 .navbar-logo .truncate{ max-width: 50vw; }
 
-/* Links row (desktop) */
+/* Center title */
+.navbar-center-title{
+  font-weight:800; letter-spacing:.03em; text-decoration:none;
+  padding:.2rem .6rem; border-radius:10px; white-space:nowrap;
+  color:#fff;
+  transition: color .15s ease, text-shadow .2s ease, background .15s ease;
+}
+.navbar-center-title:hover{
+  color:#dcd2ff; text-shadow:0 0 10px rgba(110,56,255,.7); background: rgba(110,56,255,.12);
+}
+
+/* Right-side burger */
+.navbar-toggle{
+  font-size:1.6rem; line-height:1;
+  background:none; border:0; color:var(--ink); cursor:pointer;
+  margin-left:.5rem;
+}
+
+/* Link row (collapsible) */
 .navbar-links{
-  list-style:none; display:flex; gap:1rem; margin:0; padding:0;
+  display:flex; gap:1rem; list-style:none; margin:0; padding:.4rem 1rem 1rem;
+  border-top:1px solid var(--panel-br);
 }
 .navbar-links a{ color: var(--ink); text-decoration:none; font-weight:500; }
+.navbar-links a:hover{ opacity:.85; text-shadow: 0 0 6px rgba(255,255,255,.35); }
 
-/* Burger button */
-.navbar-toggle{
-  display:none; font-size:1.6rem; line-height:1; background:none; border:0; color:var(--ink); cursor:pointer;
-}
-
-/* Guild theme gradients (optional) */
+/* Guild gradients */
 body.Fire  .navbar{ background: linear-gradient(90deg, #a33 0%, #180303 100%); box-shadow: 0 4px 18px rgba(255,60,60,.25); }
 body.Water .navbar{ background: linear-gradient(90deg, #2e4ca8 0%, #081237 100%); box-shadow: 0 4px 18px rgba(80,130,255,.25); }
 body.Earth .navbar{ background: linear-gradient(90deg, #2e7a38 0%, #032908 100%); box-shadow: 0 4px 18px rgba(60,200,80,.25); }
 
-/* Mobile layout */
-@media (max-width: 768px){
-  .navbar { flex-wrap: wrap; height: auto; }
-  .navbar-toggle{ display:block; margin-left:auto; }
-  .navbar-links{
-    display:none; flex-direction:column; width:100%;
-    padding: .5rem 0 0; margin-top:.5rem; border-top:1px solid var(--panel-br);
-    position: static;  /* no absolute; avoids “jump” */
-    background: transparent;
-  }
-  .navbar-links.show{ display:flex; }
-  .navbar-logo .truncate{ max-width: 58vw; }
-}
-
 /* Avatar */
 .nav-avatar{ width:32px; height:32px; border-radius:50%; object-fit:cover; }
+body.Fire  .avatar--default { filter: hue-rotate(140deg) saturate(1.6) brightness(1.1); }
+body.Water .avatar--default { filter: hue-rotate(10deg)  saturate(1.8) brightness(1.1); }
+body.Earth .avatar--default { filter: hue-rotate(240deg) saturate(1.5) brightness(1.1); }
+body.Fire  .nav-avatar { box-shadow: 0 0 0 2px rgba(255, 0, 64, 0.65); }
+body.Water .nav-avatar { box-shadow: 0 0 0 2px rgba(42,167,255,.65); }
+body.Earth .nav-avatar { box-shadow: 0 0 0 2px rgba(0, 191, 255, 0.65); }
 
-
-/* Main content */
-main {
-  padding: 1rem;
+/* Mobile tweaks: hide center title to avoid overlap; collapse links */
+@media (max-width: 900px){
+  .navbar-center-title { display: none !important; }
+  .truncate { max-width: 28ch; }
 }
+@media (max-width: 768px){
+  .navbar-header { grid-template-columns: 1fr auto; }
+  .navbar-links     { display:none; flex-direction:column; }
+  .navbar-links.show{ display:flex; }
+}
+
+/* =================== Layout / Main =================== */
+main { padding: 1rem; }
 
 form {
-  max-width: 300px;
-  margin: 2rem auto;
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
+  max-width: 300px; margin: 2rem auto;
+  display: flex; flex-direction: column; gap: 0.5rem;
 }
 
-input, button {
-  padding: 0.5rem;
-  font-size: 1rem;
-}
+input, button { padding: 0.5rem; font-size: 1rem; }
 
-#messages {
-  border: 1px solid #ccc;
-  padding: 10px;
-  height: 300px;
-  overflow-y: scroll;
-  margin-bottom: 1rem;
-}
+/* Tables */
+th, td { padding: 10px; border: 1px solid #ccc; text-align: left; }
+th { background: rgba(255,255,255,.1); } /* works in dark & light */
 
-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 1rem;
-}
-
-th, td {
-  padding: 10px;
-  border: 1px solid #ccc;
-  text-align: left;
-}
-
-th {
-  background-color: #eee;
-}
-
-.comment-list { list-style: none; padding: 0; }
-.comment { display: flex; align-items: flex-start; gap: 0.6rem; margin-bottom: 0.8rem; }
-.comment-avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; }
-.comment-body { background: rgba(255,255,255,0.05); padding: 0.4rem 0.8rem; border-radius: 8px; }
-
-.chat-message { display: flex; align-items: flex-start; gap: 0.5rem; margin-bottom: 0.4rem; }
-.chat-avatar img { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; }
-.chat-text { background: rgba(255,255,255,0.1); padding: 0.4rem 0.8rem; border-radius: 8px; max-width: 80%; word-wrap: break-word; }
-
-/* Layout */
+/* =================== Leaderboard Cards =================== */
 .lb-wrap { max-width: 1100px; margin: 2rem auto; padding: 0 1rem; }
 .pillars { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.25rem; align-items: end; }
-@media (max-width: 800px){ .pillars{ grid-template-columns: 1fr; }}
+@media (max-width: 800px){ .pillars{ grid-template-columns: 1fr; } }
 
-/* Cards */
 .pillar-card {
   position: relative; padding: 1rem; border-radius: 14px;
   background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
@@ -163,14 +134,11 @@ th {
   box-shadow: 0 8px 24px rgba(0,0,0,0.25);
   overflow: hidden;
 }
-
-/* The pillar */
 .pillar { position: relative; height: 280px; display:flex; align-items:flex-end; justify-content:center; }
 .pillar .base {
   position:absolute; bottom:6px; width:72%; height:14px;
   background: linear-gradient(#2f2f2f,#202020);
-  border-radius: 4px;
-  box-shadow: inset 0 2px 0 rgba(255,255,255,0.12);
+  border-radius: 4px; box-shadow: inset 0 2px 0 rgba(255,255,255,0.12);
 }
 .pillar .capital {
   position:absolute; bottom: calc(var(--h, 0%) + 18px);
@@ -191,7 +159,6 @@ th {
 }
 .pillar .shaft.rise { height: var(--target-h); }
 
-/* “Crumble” = quick shake */
 @keyframes shake {
   0%,100%{ transform: translateX(0); }
   20%{ transform: translateX(-2px); }
@@ -201,7 +168,6 @@ th {
 }
 .pillar-card.crumble .shaft { animation: shake .6s ease; }
 
-/* Badge & info */
 .badge { position: absolute; top: 12px; right: 12px; }
 .badge img { width: 64px; height: 64px; object-fit: contain; filter: drop-shadow(0 6px 10px rgba(0,0,0,0.45)); }
 
@@ -221,7 +187,7 @@ th {
 .pillar-card.second .rank-medal { background: linear-gradient(#dfe3e8,#aeb6bf); color:#1e2329; }
 .pillar-card.third  .rank-medal { background: linear-gradient(#f0c59a,#b87b43); color:#2a1908; }
 
-/* Guild themes (tweak as you like) */
+/* Guild themes */
 .pillar-card.Fire  .shaft { background: linear-gradient(180deg,#a33,#3a1414); }
 .pillar-card.Water .shaft { background: linear-gradient(180deg,#2e4ca8,#1a2342); }
 .pillar-card.Earth .shaft { background: linear-gradient(180deg,#2e7a38,#17341b); }
@@ -229,129 +195,18 @@ th {
 .pillar-card.Water .guild-name { color: #70a1ff; }
 .pillar-card.Earth .guild-name { color: #7bd388; }
 
-
-/* === GOLD GLOW FOR FIRST PLACE === */
-@keyframes glowPulse {
-  0%, 100% {
-    box-shadow: 0 0 10px 3px rgba(255, 215, 0, 0.4),
-                0 0 20px 6px rgba(255, 215, 0, 0.2);
-  }
-  50% {
-    box-shadow: 0 0 25px 10px rgba(255, 215, 0, 0.8),
-                0 0 40px 15px rgba(255, 215, 0, 0.5);
-  }
+/* Gold glow */
+@keyframes glowPulse{
+  0%,100%{ box-shadow: 0 0 10px 3px rgba(255,215,0,.4), 0 0 20px 6px rgba(255,215,0,.2); }
+  50%   { box-shadow: 0 0 25px 10px rgba(255,215,0,.8), 0 0 40px 15px rgba(255,215,0,.5); }
 }
+.pillar-card.first { animation: glowPulse 2.8s ease-in-out infinite; border-color: rgba(255, 215, 0, 0.4); }
 
-.pillar-card.first {
-  animation: glowPulse 2.8s ease-in-out infinite;
-  border-color: rgba(255, 215, 0, 0.4);
-}
-
-
-/* === THEMED NAVBAR GRADIENTS === */
-.navbar {
-  position: sticky;
-  top: 0;
-  z-index: 1000;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0.75rem 1.5rem;
-  background: linear-gradient(90deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02));
-  backdrop-filter: blur(8px);
-  border-bottom: 1px solid rgba(255,255,255,0.08);
-  transition: background 0.6s ease;
-}
-
-/* Make links + text pop */
-.navbar a {
-  color: white;
-  text-decoration: none;
-  font-weight: 500;
-  transition: opacity 0.2s;
-}
-.navbar a:hover { opacity: 0.8; }
-
-/* Theme gradients per guild */
-body.Fire .navbar {
-  background: linear-gradient(90deg, #a33 0%, #180303 100%);
-  box-shadow: 0 4px 18px rgba(255, 60, 60, 0.25);
-}
-
-body.Water .navbar {
-  background: linear-gradient(90deg, #2e4ca8 0%, #081237 100%);
-  box-shadow: 0 4px 18px rgba(80, 130, 255, 0.25);
-}
-
-body.Earth .navbar {
-  background: linear-gradient(90deg, #2e7a38 0%, #032908 100%);
-  box-shadow: 0 4px 18px rgba(60, 200, 80, 0.25);
-}
-
-/* Optional glow for hover items */
-.navbar-links a:hover {
-  text-shadow: 0 0 6px rgba(255,255,255,0.6);
-}
-
-/* Make burger / mobile clean */
-.navbar-toggle {
-  font-size: 1.8rem;
-  background: none;
-  color: white;
-  border: none;
-  cursor: pointer;
-}
-
-@media (max-width: 800px) {
-  .navbar-links {
-    display: none;
-    flex-direction: column;
-    background: rgba(0,0,0,0.7);
-    position: absolute;
-    top: 60px;
-    right: 0;
-    width: 200px;
-    padding: 1rem;
-    border-radius: 0 0 0 8px;
-  }
-  .navbar-links.show { display: flex; }
-}
-
-.navbar-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.navbar-logo {
-  display: flex;
-  align-items: center;
-  gap: .5rem;
-}
-
-/* Avatar look */
-.nav-avatar {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  object-fit: cover;
-}
-
-
-/* Default avatar guild tints */
-body.Fire  .avatar--default { filter: hue-rotate(140deg) saturate(1.6) brightness(1.1); }
-body.Water .avatar--default { filter: hue-rotate(10deg) saturate(1.8) brightness(1.1); }
-body.Earth .avatar--default { filter: hue-rotate(240deg) saturate(1.5) brightness(1.1); }
-
-body.Fire  .nav-avatar { box-shadow: 0 0 0 2px rgba(255, 0, 64, 0.65); }
-body.Water .nav-avatar { box-shadow: 0 0 0 2px rgba(42,167,255,.65); }
-body.Earth .nav-avatar { box-shadow: 0 0 0 2px rgba(0, 191, 255, 0.65); }
-
-/* ===== Guild Chat – premium bubbles, left/right, visible names ===== */
+/* =================== Chat / Messages =================== */
 #messages{
   border: 1px solid rgba(0,0,0,.12) !important;
   padding: 10px !important;
-  height: 420px !important;              /* a bit taller */
+  height: 420px !important;
   overflow-y: auto !important;
   background: linear-gradient(180deg, rgba(255,255,255,.75), rgba(255,255,255,.65));
   border-radius: 14px;
@@ -363,50 +218,23 @@ html.dark-mode #messages{
   box-shadow: 0 10px 24px rgba(0,0,0,.45) inset;
 }
 
-/* one message row */
-.chat-message{
-  display: grid;
-  grid-template-columns: 34px 1fr;
-  gap: 8px;
-  align-items: start;
-  margin: 8px 0;
-}
+/* chat row (left) */
+.chat-message{ display: grid; grid-template-columns: 34px 1fr; gap: 8px; align-items: start; margin: 8px 0; }
+.chat-message.me{ grid-template-columns: 1fr 34px; }
+.chat-avatar img{ width:32px;height:32px;border-radius:50%;object-fit:cover;background:#f2f2f2; }
 
-/* my messages on the right */
-.chat-message.me{
-  grid-template-columns: 1fr 34px;
-}
-
-/* avatar left/right */
-.chat-avatar img{
-  width:32px;height:32px;border-radius:50%;object-fit:cover;background:#f2f2f2;
-}
-
-/* bubble */
 .chat-text{
-  background: #fff;
-  border: 1px solid rgba(0,0,0,.08);
-  border-radius: 14px;
-  padding: 8px 10px;
-  box-shadow: 0 6px 14px rgba(0,0,0,.06);
-  line-height: 1.5;
-  word-wrap: break-word;
+  background: #fff; border: 1px solid rgba(0,0,0,.08);
+  border-radius: 14px; padding: 8px 10px; box-shadow: 0 6px 14px rgba(0,0,0,.06);
+  line-height: 1.5; word-wrap: break-word;
 }
-html.dark-mode .chat-text{
-  background:#1f1f1f;
-  border-color: rgba(255,255,255,.08);
-  color:#f1f1f1;
-}
+html.dark-mode .chat-text{ background:#1f1f1f; border-color: rgba(255,255,255,.08); color:#f1f1f1; }
 
-/* my bubble color */
 .chat-message.me .chat-text{
-  background: #6e38ff;
-  border-color: #6e38ff;
-  color: #fff;
+  background: #6e38ff; border-color: #6e38ff; color: #fff;
   box-shadow: 0 8px 18px rgba(110,56,255,.35);
 }
 
-/* name + time (always visible) */
 .chat-meta{
   display:flex; gap:8px; align-items:center; margin-bottom: 4px;
   font-size:.85rem; opacity:.85;
@@ -415,18 +243,16 @@ html.dark-mode .chat-text{
 .chat-message.me .chat-meta .name{ opacity: .95; }
 .chat-meta .time{ font-variant-numeric: tabular-nums; opacity:.8; }
 
-/* arrange children for me vs others */
+/* Right-side ordering for "me" */
 .chat-message.me .chat-avatar{ order: 2; }
 .chat-message.me .chat-text{ order: 1; }
 
-/* input area slight polish */
+/* Inputs */
 #msgInput{
   border:1px solid rgba(0,0,0,.12);
   border-radius: 12px; padding:.6rem .8rem;
 }
-html.dark-mode #msgInput{
-  background:#202020; border-color: rgba(255,255,255,.12); color:#fff;
-}
+html.dark-mode #msgInput{ background:#202020; border-color: rgba(255,255,255,.12); color:#fff; }
 #sendBtn{
   border:1px solid #6e38ff33; background:#6e38ff; color:#fff;
   padding:.6rem .85rem; border-radius:12px; cursor:pointer;
@@ -434,30 +260,6 @@ html.dark-mode #msgInput{
 }
 #sendBtn:hover{ filter: brightness(1.04); }
 
-
-/* Natural bubble width + tidy wrapping */
-.chat-message{ display:flex; gap:8px; align-items:flex-start; margin:8px 0; }
-.chat-text{
-  display:inline-block;
-  max-width: min(75%, 680px);
-  background:#fff;
-  border:1px solid rgba(0,0,0,.08);
-  border-radius:14px;
-  padding:8px 10px;
-  box-shadow:0 6px 14px rgba(0,0,0,.06);
-  line-height:1.5;
-  white-space:pre-wrap;      /* respect newlines */
-  word-break:break-word;     /* long links/words wrap */
-}
-body.dark-mode .chat-text{
-  background:#1f1f1f; border-color:rgba(255,255,255,.1); color:#f1f1f1;
-}
-
-.chat-message.me{ justify-content:flex-end; }
-.chat-message.me .chat-text{
-  background:#6e38ff; border-color:#6e38ff; color:#fff;
-  box-shadow:0 8px 18px rgba(110,56,255,.35);
-}
-
-
-
+/* =================== Mobile-only helpers =================== */
+.mobile-only { display: none; }
+@media (max-width: 900px){ .mobile-only { display: list-item; } }
