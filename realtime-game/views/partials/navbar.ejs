@@ -22,6 +22,12 @@
       <% } else { %>
         MyApp
       <% } %>
+
+       <button id="musicToggle" class="music-btn" aria-label="Toggle background music" aria-pressed="false" title="Music">
+      🔈
+        </button>
+       <audio id="bgm" src="/audio/GuildsTheme.wav" loop preload="auto"></audio>
+
     </div>
 
     <!-- Center title link (doesn't affect burger) -->
@@ -110,4 +116,59 @@
       });
     });
   </script>
+
+  <script>
+  // existing socket + burger code stays...
+
+  (function () {
+    const audio = document.getElementById('bgm');
+    const btn   = document.getElementById('musicToggle');
+    if (!audio || !btn) return;
+
+    const saved = localStorage.getItem('bgm') || 'off';
+    let isOn = (saved === 'on');
+
+    function updateUI() {
+      btn.textContent = isOn ? '🔊' : '🔈';
+      btn.setAttribute('aria-pressed', isOn);
+    }
+    function tryPlay() {
+      audio.volume = 0.35;
+      const p = audio.play();
+      if (p && p.catch) p.catch(() => { /* autoplay might be blocked until a click */ });
+    }
+    function setOn(v) {
+      isOn = v;
+      localStorage.setItem('bgm', v ? 'on' : 'off');
+      updateUI();
+      if (isOn) tryPlay(); else audio.pause();
+    }
+
+    btn.addEventListener('click', () => setOn(!isOn));
+    updateUI();
+
+    // If previously ON, start on first user interaction to satisfy autoplay rules
+    if (isOn) {
+      const kick = () => { tryPlay(); window.removeEventListener('pointerdown', kick); };
+      window.addEventListener('pointerdown', kick, { once: true });
+    }
+  })();
+</script>
+
+<style>
+  /* optional tiny style so it looks neat */
+  .music-btn {
+    margin-left: .5rem;
+    font-size: 1rem;
+    line-height: 1;
+    border: 1px solid var(--panel-br, rgba(0,0,0,.08));
+    background: var(--pill, #f7f7f7);
+    color: inherit;
+    padding: .25rem .5rem;
+    border-radius: 8px;
+    cursor: pointer;
+  }
+  body.dark-mode .music-btn { background: rgba(255,255,255,.08); }
+</style>
+
 </nav>
