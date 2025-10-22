@@ -438,8 +438,10 @@
   },
   "a.goi@digipen.edu": {
     "guild": "Fire",
-    "points": 0,
-    "role": "user"
+    "points": 10,
+    "role": "user",
+    "bio": "they/them",
+    "avatar": "/uploads/1760953094926-ahm5ig558v.jpg"
   },
   "sofiia.zhyhlii@digipen.edu": {
     "guild": "Fire",
@@ -1016,5 +1018,4 @@
     "points": 0,
     "role": "user"
   }
-  
 }
