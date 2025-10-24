@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- put this at the very top of <head> -->
+<script>
+// Default to dark when nothing saved yet
+const dm = localStorage.getItem('darkMode');
+if (dm === 'enabled' || dm === null) {
+  document.documentElement.classList.add('dark-mode');
+  if (dm === null) localStorage.setItem('darkMode','enabled');
+}
+</script>
+
+<style>
+  /* rely on your global CSS variables */
+  body { color: var(--ink); }
+
+  .arcade-wrap {
+    display: grid;
+    grid-template-columns: 1fr 340px;
+    gap: 1rem;
+    align-items: start;
+  }
+
+  .panel {
+    background: var(--panel);                 /* readable bg */
+    color: var(--ink);                        /* readable text */
+    border: 1px solid var(--panel-br);
+    border-radius: 12px;
+    padding: 1rem;
+  }
+
+  #gameCanvas {
+    width: 100%;
+    max-width: 640px;
+    aspect-ratio: 4/3;
+    background: #0b0b0f;
+    border-radius: 12px;
+    display: block;
+    margin: 0 auto;
+  }
+
+  .controls { display: flex; gap: .5rem; justify-content: center; margin-top: .5rem; flex-wrap: wrap; }
+  .controls button{
+    padding:.5rem 1rem; border-radius:999px; border:1px solid var(--panel-br);
+    background: var(--pill); color: var(--ink); cursor:pointer;
+  }
+  .controls button:disabled { opacity:.55; cursor:not-allowed; }
+
+  .badge {
+    display:inline-block; padding:.15rem .6rem; border-radius:999px; font-size:.85rem;
+    background: var(--pill); color: var(--ink); border:1px solid var(--panel-br);
+  }
+
+  table { width:100%; border-collapse:collapse; }
+  th,td { padding:.5rem; border-bottom:1px solid var(--panel-br); color: var(--ink); }
+  thead th { opacity:.85; font-weight:600; }
+
+  .hint { opacity:.8; font-size:.9rem; }
+
+  /* small screens */
+  @media (max-width: 900px){
+    .arcade-wrap { grid-template-columns: 1fr; }
+  }
+
+  #gameCanvas { image-rendering: crisp-edges; }
+
+</style>
+
+
+  <meta charset="utf-8"/>
+  <title>Arcade Challenge – Dodge Rain</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <link rel="stylesheet" href="/styles.css"/>
+  <link rel="stylesheet" href="/css/navbar.css"/>
+  <style>
+    .arcade-wrap{display:grid;grid-template-columns:1fr 340px;gap:1rem;align-items:start}
+    .panel{background:var(--panel,rgba(36, 36, 36, 0.9));border:1px solid var(--panel-br,rgba(0,0,0,.08));border-radius:12px;padding:1rem}
+    #gameCanvas{width:100%;max-width:640px;aspect-ratio:4/3;background:#111;border-radius:12px;display:block;margin:0 auto}
+    .controls{display:flex;gap:.5rem;justify-content:center;margin-top:.5rem}
+    .controls button{padding:.5rem 1rem;border-radius:999px;border:1px solid #444;background:#222;color:#fff;cursor:pointer}
+    .controls button:disabled{opacity:.5;cursor:not-allowed}
+    table{width:100%;border-collapse:collapse}
+    th,td{padding:.5rem;border-bottom:1px solid rgba(255,255,255,.12)}
+    .badge{display:inline-block;padding:.15rem .5rem;border-radius:999px;font-size:.8rem;background:#6e38ff;color:white}
+    .hint{opacity:.75;font-size:.9rem}
+  </style>
+  <script src="/socket.io/socket.io.js"></script>
+</head>
+<body class="<%= guild || '' %>">
+  <%- include('partials/navbar', { user, guild }) %>
+
+  <main class="arcade-wrap">
+    <section class="panel">
+      <h2>🎮 Felix Dodge</h2>
+      <canvas id="gameCanvas" width="640" height="480"></canvas>
+      <div class="controls">
+        <button id="startBtn">Start</button>
+        <button id="retryBtn" disabled>Retry</button>
+        <span id="scoreNow" class="badge">Score: 0</span>
+        <span id="bestMine" class="badge">Your Best: <span id="bestMineVal"><%= bestMine || 0 %></span></span>
+      </div>
+
+      <div class="hint" style="margin-top:.5rem; line-height:1.4">
+        <strong>Controls</strong><br>
+        • Move: <kbd>A</kbd>/<kbd>D</kbd> or <kbd>◀</kbd>/<kbd>▶</kbd><br>
+        • Dash: <kbd>Space</kbd> : short burst + brief invulnerability<br>
+        • Coins: +35 points · Blue orb: temporary shield<br>
+        • Score grows over time; avoid blocks. Your best score is published on the top 10!
+        </div>
+
+    </section>
+
+    <aside class="panel">
+      <h3>🏆 ALL TIME TOP 10</h3>
+      <table id="lb" style="width:100%;border-collapse:collapse">
+  <thead>
+    <tr>
+      <th style="text-align:left;padding:.5rem;border-bottom:1px solid var(--panel-br)">#</th>
+      <th style="text-align:left;padding:.5rem;border-bottom:1px solid var(--panel-br)">Player</th>
+      <th style="text-align:right;padding:.5rem;border-bottom:1px solid var(--panel-br)">Score</th>
+      <th style="text-align:left;padding:.5rem;border-bottom:1px solid var(--panel-br)">Guild</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% leaderboard.forEach((row, i) => { %>
+      <tr>
+        <td style="padding:.5rem"><%= i+1 %></td>
+        <td style="padding:.5rem"><%= row.user %></td>
+        <td style="padding:.5rem;text-align:right"><%= row.score %></td>
+        <td style="padding:.5rem"><%= row.guild %></td>
+      </tr>
+    <% }) %>
+  </tbody>
+</table>
+
+
+      <h3 style="margin-top:1rem;">🏅 Guild Bonus (Live)</h3>
+      <p class="hint">1st 15pts, 2nd 10pts, 3rd 5pts applied to guild totals.</p>
+      <ul id="bonusList">
+        <% bonus.forEach(b => { %>
+          <li><strong><%= b.place %></strong>: <%= b.user %> (<%= b.guild %>) → +<%= b.points %> to <%= b.guild %></li>
+        <% }) %>
+      </ul>
+    </aside>
+  </main>
+
+  <script src="/js/arcade-dodge.js"></script>
+  <script>
+  const socket = io();
+  socket.on("arcade:leaderboard:update", ({ leaderboard, bonus }) => {
+    const tbody = document.querySelector("#lb tbody");
+    tbody.innerHTML = leaderboard.map((r, i) =>
+      `<tr>
+         <td style="padding:.5rem">${i+1}</td>
+         <td style="padding:.5rem">${r.user}</td>
+         <td style="padding:.5rem;text-align:right">${r.score}</td>
+         <td style="padding:.5rem">${r.guild}</td>
+       </tr>`
+    ).join("");
+
+    const bl = document.getElementById("bonusList");
+    bl.innerHTML = bonus.map(b => `<li><strong>${b.place}</strong>: ${b.user} (${b.guild}) → +${b.points} to ${b.guild}</li>`).join("");
+  });
+</script>
+
+</body>
+</html>

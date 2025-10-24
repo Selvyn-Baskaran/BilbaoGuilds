@@ -52,6 +52,68 @@ function writeJson(file, obj) {
 const readJSON  = (p) => JSON.parse(fs.readFileSync(p, "utf-8"));
 const writeJSON = (p, obj) => fs.writeFileSync(p, JSON.stringify(obj, null, 2));
 
+const fsp = fs.promises;
+
+// loads users.json (object keyed by email/username)
+async function loadUsers() {
+  const p = path.join(__dirname, "users.json");
+  const txt = await fsp.readFile(p, "utf8");
+  return JSON.parse(txt);
+}
+async function saveUsers(obj) {
+  const p = path.join(__dirname, "users.json");
+  const tmp = p + ".tmp";
+  await fsp.writeFile(tmp, JSON.stringify(obj, null, 2), "utf8");
+  await fsp.rename(tmp, p);
+}
+
+// compute leaderboard (top 10 by `arcadeHighScore`)
+function computeArcadeLeaderboard(usersObj) {
+  const rows = Object.entries(usersObj).map(([email, u]) => {
+    const display =
+      u.name || u.displayName || u.user || (email.includes("@") ? email.split("@")[0] : email);
+
+    return {
+      user: display,                           // 👈 display name for UI
+      email,                                   // keep email if you need it internally
+      score: u.arcadeHighScore || 0,
+      guild: u.guild || "Unknown"
+    };
+  }).filter(r => r.score > 0);
+
+  rows.sort((a,b) => b.score - a.score);
+  return rows.slice(0, 10);
+}
+
+
+// derive live guild bonus from the top 3
+function computeGuildBonus(leaderboard) {
+  const places = [15, 10, 5];
+  const bonusRows = [];
+  for (let i=0; i<3 && i<leaderboard.length; i++) {
+    const r = leaderboard[i];
+    bonusRows.push({ place: ["1st","2nd","3rd"][i], user: r.user, guild: r.guild, points: places[i] });
+  }
+  // aggregate by guild if you need total per guild:
+  const byGuild = bonusRows.reduce((acc, b) => {
+    acc[b.guild] = (acc[b.guild] || 0) + b.points;
+    return acc;
+  }, {});
+  return { bonusRows, byGuild };
+}
+
+function computeGuildTotalsWithArcadeBonus(users, baseGuildTotals) {
+  const leaderboard = computeArcadeLeaderboard(users);
+  const { byGuild } = computeGuildBonus(leaderboard);
+
+  const result = { ...baseGuildTotals };
+  for (const [g, pts] of Object.entries(byGuild)) {
+    result[g] = (result[g] || 0) + pts;
+  }
+  return result;
+}
+
+
 // =============== 3) Static, Body, Sessions ===============
 app.use(express.static("public", { index: "login.html" }));
 app.use(express.urlencoded({ extended: true })); // form posts
@@ -334,6 +396,34 @@ app.get("/events/:id", ensureLoggedIn, (req, res) => {
 });
 
 // =============== 11) Challenges ==========================
+
+// static files (can stay here or above)
+app.use("/js", express.static(path.join(__dirname, "public/js")));
+
+// 1) Arcade page FIRST
+app.get("/challenges/arcade", ensureLoggedIn, async (req, res) => {
+  const emailKey = (req.session.email || "").toLowerCase();
+  const username = req.session.user;
+
+  const usersObj = await loadUsers();
+
+  const leaderboard = computeArcadeLeaderboard(usersObj);
+  const { bonusRows } = computeGuildBonus(leaderboard);
+
+  const bestMine = usersObj[emailKey]?.arcadeHighScore || 0;
+  const guild = usersObj[emailKey]?.guild || (req.session.guild || "Fire");
+
+  res.render("arcade", {
+    user: username,
+    guild,
+    bestMine,
+    leaderboard,
+    bonus: bonusRows,
+    online: totalOnline
+  });
+});
+
+// 2) Challenges list
 app.get("/challenges", ensureLoggedIn, (req, res) => {
   const challenges = readJsonOrDefault(CHALLENGES_FILE, []);
   res.render("challenges", {
@@ -346,6 +436,7 @@ app.get("/challenges", ensureLoggedIn, (req, res) => {
   });
 });
 
+// 3) Generic challenge by id (NO redirect needed now)
 app.get("/challenges/:id", ensureLoggedIn, (req, res) => {
   const challenges = readJsonOrDefault(CHALLENGES_FILE, []);
   const challenge = challenges.find(c => String(c.id) === String(req.params.id));
@@ -364,29 +455,56 @@ app.get("/challenges/:id", ensureLoggedIn, (req, res) => {
   });
 });
 
-// Add a comment (optional attachment)
-app.post("/challenges/:id/comment", ensureLoggedIn, upload.single("attachment"), (req, res) => {
-  const challenges = readJsonOrDefault(CHALLENGES_FILE, []);
-  const idx = challenges.findIndex(c => String(c.id) === String(req.params.id));
-  if (idx === -1) return res.status(404).send("Not found");
+// Score API stays as-is
+app.post("/api/arcade/score", express.json(), async (req, res) => {
+  const emailKey = (req.session.email || "").toLowerCase();
+  const displayName = req.session.user;                  // pretty name for UI
+  const userGuild = req.session.guild || "Unknown";
+  if (!emailKey) return res.status(401).json({ ok:false, error:"not logged in" });
 
-  const avatar = req.session.avatar || "/uploads/default.png";
-  const text = String(req.body.text || "").slice(0, 1000);
-  const attachment = req.file ? `/uploads/${req.file.filename}` : null;
+  const score = Math.max(0, Math.floor(+req.body?.score || 0));
+  if (!Number.isFinite(score)) return res.status(400).json({ ok:false, error:"bad score" });
 
-  challenges[idx].comments = challenges[idx].comments || [];
-  challenges[idx].comments.push({
-    user:   req.session.user,
-    email:  (req.session.email || ""),
-    text,
-    avatar,
-    attachment,
-    ts: Date.now()
-  });
+  const usersObj = await loadUsers();
+  const u = usersObj[emailKey] || (usersObj[emailKey] = { guild: userGuild, points: 0 });
 
-  writeJson(CHALLENGES_FILE, challenges);
-  res.redirect(`/challenges/${req.params.id}`);
+  // ensure useful defaults
+  if (displayName && !u.name) u.name = displayName;
+  if (!Number.isFinite(u.points)) u.points = 0;
+
+  const prevBest = Math.max(0, Math.floor(+u.arcadeHighScore || 0));
+  const newBest  = Math.max(prevBest, score);
+
+  // credit only the difference between new best and what we've already awarded
+  const alreadyAwarded = Math.max(0, Math.floor(+u.arcadeAwarded || 0));
+  const delta = Math.max(0, newBest - alreadyAwarded);
+
+  if (delta > 0) {
+    u.points = Math.max(0, Math.floor(+u.points || 0)) + delta;  // add once
+    u.arcadeAwarded = newBest;                                   // mark as fully awarded
+  }
+
+  u.arcadeHighScore = newBest;
+
+  await saveUsers(usersObj);
+
+  // push live leaderboard/bonus update
+  const leaderboard = computeArcadeLeaderboard(usersObj);
+  const { bonusRows } = computeGuildBonus(leaderboard);
+  io.emit("arcade:leaderboard:update", { leaderboard, bonus: bonusRows });
+
+  res.json({ ok:true, best: u.arcadeHighScore, points: u.points });
 });
+
+
+
+const isProd = process.env.NODE_ENV === "production";
+app.use("/img", express.static(path.join(__dirname, "public/img"), {
+  maxAge: isProd ? "1d" : 0,
+  setHeaders(res) { if (!isProd) res.setHeader("Cache-Control","no-store"); }
+}));
+
+
 
 // =============== 12) Guild Chat ==========================
 app.get("/guild-chat", ensureLoggedIn, (req, res) => {
@@ -403,20 +521,40 @@ app.get("/guild-chat", ensureLoggedIn, (req, res) => {
 });
 
 // =============== 13) Leaderboard =========================
-app.get("/leaderboard", ensureLoggedIn, (req, res) => {
+// =============== 13) Leaderboard =========================
+app.get("/leaderboard", ensureLoggedIn, async (req, res) => {
+  // read base guild totals
   const guilds = readJsonOrDefault(GUILDS_FILE, { Fire: 0, Water: 0, Earth: 0 });
-  const sortedGuilds = Object.entries(guilds)
+
+  // read users (choose ONE of the two ways below)
+
+  // A) sync helper:
+  // const usersObj = readJsonOrDefault(USERS_FILE, {});
+
+  // B) if you already defined async loadUsers():
+  const usersObj = await loadUsers();
+
+  // apply arcade bonus (+15/+10/+5 to guilds of the top 3 players)
+  const guildsWithBonus = computeGuildTotalsWithArcadeBonus(usersObj, guilds);
+
+  // sort for display
+  const sortedGuilds = Object.entries(guildsWithBonus)
     .sort((a, b) => b[1] - a[1])
     .map(([name, points]) => ({ name, points }));
+
   const maxPoints = Math.max(1, ...sortedGuilds.map(g => g.points));
 
   res.render("leaderboard", {
     sortedGuilds, maxPoints,
     user: req.session.user,
     guild: req.session.guild || "Fire",
+    sortedGuilds,
+    user:   req.session.user,
+    guild:  req.session.guild || "Fire",
     online: totalOnline,
   });
 });
+
 
 // =============== 14) Profile =============================
 app.get("/profile", requireLogin, (req, res) => {

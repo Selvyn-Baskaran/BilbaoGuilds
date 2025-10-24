@@ -4,7 +4,9 @@
     "points": 0,
     "role": "admin",
     "bio": "yo",
-    "avatar": "/uploads/1760092765264-v4cleoz753r.jpg"
+    "avatar": "/uploads/1760092765264-v4cleoz753r.jpg",
+    "arcadeHighScore": 1566,
+    "name": "Akaansh Ajit"
   },
   "akaansh.ajit@gmail.com": {
     "guild": "Fire",
@@ -179,7 +181,9 @@
   "iker.quintana@digipen.edu": {
     "guild": "Earth",
     "points": 0,
-    "role": "user"
+    "role": "user",
+    "name": "Iker Quintana",
+    "arcadeHighScore": 816
   },
   "nespejo@digipen.edu": {
     "guild": "Earth",
@@ -476,7 +480,11 @@
   "alejandro.v@digipen.edu": {
     "guild": "Fire",
     "points": 0,
-    "role": "user"
+    "role": "user",
+    "name": "Alejandro Vicente",
+    "arcadeHighScore": 580,
+    "bio": "",
+    "avatar": "/uploads/1761149410824-nc8ync755j.jpg"
   },
   "david.puertas@digipen.edu": {
     "guild": "Fire",
@@ -601,7 +609,9 @@
   "v.alidibirova@digipen.edu": {
     "guild": "Fire",
     "points": 0,
-    "role": "user"
+    "role": "user",
+    "name": "Vanessa Jim?nez",
+    "arcadeHighScore": 745
   },
   "v.alonso@digipen.edu": {
     "guild": "Fire",

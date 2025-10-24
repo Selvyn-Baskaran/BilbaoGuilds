@@ -1,21 +1,9 @@
 [
   {
-    "id": "tiramisiuuuuuu",
-    "title": "TIRAMISIUUU",
-    "description": "get me some of dat tira mi SIUUUUUU",
-    "comments": [
-      {
-        "user": "Akaansh Ajit",
-        "text": "SIUUU"
-      },
-      {
-        "user": "I?aki Omaechevarr?a",
-        "email": "i.omaechevarra@digipen.edu",
-        "text": "YIPEEEE (helping on testing))",
-        "avatar": "/uploads/default.png",
-        "attachment": null,
-        "ts": 1760960297158
-      }
-    ]
+  "id": "arcade",
+  "title": "Arcade - Felix Dodge",
+  "description": "Survive falling blocks. Your highest score counts to your points! Top 1/2/3 give +15/+10/+5 to their guild (live).",
+  "comments": []
   }
+
 ]
